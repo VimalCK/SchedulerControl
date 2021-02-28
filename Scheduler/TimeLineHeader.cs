@@ -23,7 +23,6 @@ namespace Scheduler
                 var timeLineValue = (int)control.TimeLineZoom;
 
                 this.VerticalLines = timeLineValue * noOfDays;
-                this.HorizontalLines = 2;
                 this.HorizontalGap = this.ActualHeight;
                 this.VerticalGap = this.ActualWidth / this.VerticalLines;
 
@@ -33,9 +32,10 @@ namespace Scheduler
                 {
                     for (int j = 0; j < timeLineValue; j++)
                     {
-                        var formattedTime = new FormattedText($"{TimeSpan.FromHours(j).ToString(@"hh\:mm")}", cultureInfo, FlowDirection.LeftToRight, typeface, 10D, Brushes.Gray, pixelPerDip);
+                        var formattedTime = new FormattedText($"{TimeSpan.FromHours(j).ToString(@"hh\:mm")}", cultureInfo, 
+                            FlowDirection.LeftToRight, typeface, 10D, Brushes.Gray, pixelPerDip);
                         drawingContext.DrawText(formattedTime, renderPoint);
-                        renderPoint.X = renderPoint.X + this.VerticalGap;
+                        renderPoint.X += this.VerticalGap;
                     }
                 }
             }

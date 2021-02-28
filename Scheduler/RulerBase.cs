@@ -45,7 +45,7 @@ namespace Scheduler
                 FrameworkPropertyMetadataOptions.AffectsRender));
 
         public static readonly DependencyProperty HorizontalLinesProperty =
-            DependencyProperty.Register("HorizontalLines", typeof(int), typeof(RulerBase), new FrameworkPropertyMetadata(default(int),
+            DependencyProperty.Register("HorizontalLines", typeof(int), typeof(RulerBase), new FrameworkPropertyMetadata(2,
                 FrameworkPropertyMetadataOptions.AffectsRender));
 
         public static readonly DependencyProperty VerticalLinesProperty =
@@ -56,9 +56,9 @@ namespace Scheduler
             DependencyProperty.Register("RulerColor", typeof(Brush), typeof(RulerBase), new FrameworkPropertyMetadata(Brushes.LightGray,
                 FrameworkPropertyMetadataOptions.AffectsRender));
 
-
         protected override void OnRender(DrawingContext drawingContext)
         {
+
             base.OnRender(drawingContext);
 
             var pen = new Pen(this.RulerColor, .5);

@@ -7,7 +7,7 @@ using System.Windows.Media;
 
 namespace Scheduler
 {
-    internal sealed class DateHeader : FrameworkElement
+    internal sealed class DateHeader : RulerBase
     {
         public DateHeader()
         {
@@ -16,36 +16,25 @@ namespace Scheduler
 
         protected override void OnRender(DrawingContext drawingContext)
         {
-            base.OnRender(drawingContext);
             if (this.TemplatedParent is ScheduleControl control && control.ActualWidth != 0)
             {
-                var pen = new Pen(control.TimeLineColor ?? Brushes.LightGray, .5);
-                var startPoint = new Point(0, 0);
-                var endPoint = new Point(0, this.ActualHeight);
-                var noOfDays = (control.EndDate.Day - control.StartDate.Day) + 1;
                 var pixelPerDip = VisualTreeHelper.GetDpi(this).PixelsPerDip;
-                var rulerGap = this.ActualWidth / 2;
-                pen.Freeze();
+                var point = new Point(5, this.ActualHeight / 3);
 
-                for (int interval = 0; interval <= noOfDays; interval++)
+                this.VerticalLines = (control.EndDate - control.StartDate).Days + 1;
+                this.VerticalGap = this.ActualWidth / this.VerticalLines;
+                this.HorizontalGap = this.ActualHeight;
+
+                for (int i = 0; i < this.VerticalLines; i++)
                 {
-                    endPoint.X = startPoint.X = interval * rulerGap;
+                    var formattedTime = new FormattedText($"{DateTime.Now.AddDays(i).Date.ToString("d")}", new CultureInfo("en-US"),
+                        FlowDirection.LeftToRight, new Typeface("Arial"), 10D, Brushes.Gray, pixelPerDip);
 
-                    var formattedTime = new FormattedText($"{DateTime.Now.AddDays(interval).ToString()}", new CultureInfo("en-US"), FlowDirection.LeftToRight, new Typeface("Arial"), 10D, Brushes.Gray, pixelPerDip);
-
-                    drawingContext.DrawText(formattedTime, startPoint);
-                    drawingContext.DrawLine(pen, startPoint, endPoint);
+                    point.X += this.VerticalGap * i;
+                    drawingContext.DrawText(formattedTime, point);
                 }
 
-                //var horizontalRulerHeight = this.RulerMinimumHeight <= 0 ? this.ActualHeight : this.RulerMinimumHeight;
-                //var noOfRows = this.ActualHeight / horizontalRulerHeight;
-                //startPoint = new Point(0, 0);
-                //endPoint = new Point(control.ActualWidth * noOfDays, 0);
-                //for (rulerGap = 0; rulerGap <= noOfRows; rulerGap++)
-                //{
-                //    startPoint.Y = endPoint.Y = rulerGap * horizontalRulerHeight;
-                //    drawingContext.DrawLine(pen, startPoint, endPoint);
-                //}
+                base.OnRender(drawingContext);
             }
         }
     }

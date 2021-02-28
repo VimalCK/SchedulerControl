@@ -31,7 +31,7 @@
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
 
-                            <!--<local:DateHeader x:Name="PART_DateHeader" />-->
+                            <local:DateHeader x:Name="PART_DateHeader" />
 
                             <local:TimeLineHeader x:Name="PART_TimeLineHeader"
                                                   Grid.Row="1" />
