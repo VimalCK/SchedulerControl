@@ -63,7 +63,7 @@ namespace Scheduler
 
             var pen = new Pen(this.RulerColor, .5);
             var startPoint = new Point(0, 0);
-            var endPoint = new Point(0, this.HorizontalGap);
+            var endPoint = new Point(0, this.ActualHeight);
             var pixelPerDip = VisualTreeHelper.GetDpi(this).PixelsPerDip;
 
             pen.Freeze();
