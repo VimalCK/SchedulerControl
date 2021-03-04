@@ -58,7 +58,6 @@ namespace Scheduler
 
         protected override void OnRender(DrawingContext drawingContext)
         {
-
             base.OnRender(drawingContext);
 
             var pen = new Pen(this.RulerColor, .5);

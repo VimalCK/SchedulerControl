@@ -18,7 +18,7 @@ namespace Scheduler
             if (this.TemplatedParent is ScheduleControl control && control.ActualWidth != 0)
             {
                 var noOfDays = (control.EndDate - control.StartDate).Days + 1;
-                var renderPoint = new Point(5, this.ActualHeight / 3);
+                var renderPoint = new Point(0, this.ActualHeight / 3);
                 var pixelPerDip = VisualTreeHelper.GetDpi(this).PixelsPerDip;
                 var timeLineValue = (int)control.TimeLineZoom;
 
@@ -32,7 +32,7 @@ namespace Scheduler
                 {
                     for (int j = 0; j < timeLineValue; j++)
                     {
-                        var formattedTime = new FormattedText($"{TimeSpan.FromHours(j).ToString(@"hh\:mm")}", cultureInfo, 
+                        var formattedTime = new FormattedText($" {TimeSpan.FromHours(j).ToString(@"hh\:mm")}", cultureInfo,
                             FlowDirection.LeftToRight, typeface, 10D, Brushes.Gray, pixelPerDip);
                         drawingContext.DrawText(formattedTime, renderPoint);
                         renderPoint.X += this.VerticalGap;

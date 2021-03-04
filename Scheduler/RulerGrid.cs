@@ -21,7 +21,7 @@ namespace Scheduler
 
                 this.VerticalLines = timeLineValue * noOfDays;
                 this.HorizontalLines = 10;
-                this.HorizontalGap = this.ActualHeight/ this.HorizontalLines;
+                this.HorizontalGap = this.ActualHeight / this.HorizontalLines;
                 this.VerticalGap = this.ActualWidth / this.VerticalLines;
 
                 base.OnRender(drawingContext);
