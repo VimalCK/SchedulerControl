@@ -11,6 +11,7 @@ namespace Scheduler
         private int scheduleViewRange;
         private int currentHeaderIndex;
         private FrameworkElement currentHeader;
+        private TranslateTransform transform;
         public DateHeader()
         {
             this.DefaultStyleKey = typeof(DateHeader);
@@ -68,6 +69,7 @@ namespace Scheduler
                     BorderThickness = new Thickness(1),
                     Background = Brushes.White,
                     BorderBrush = Brushes.LightGray,
+                    RenderTransform = new TranslateTransform(0, 0)
                 };
 
                 Panel.SetZIndex(label, i);
@@ -79,18 +81,36 @@ namespace Scheduler
 
         private void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            currentHeader = (FrameworkElement)this.Children[currentHeaderIndex];
-            var change = currentHeader.RenderTransform.Value.OffsetX + e.HorizontalChange;
-            currentHeader.RenderTransform = new TranslateTransform(change, 0);
+            if (currentHeader is null)
+            {
+                SetTransformElementValues();
+            }
 
-            if (change >= headerWidth)
+            var change = transform.X + e.HorizontalChange;
+            switch (change)
             {
-                currentHeaderIndex++;
+                case double c when c > headerWidth:
+                    currentHeaderIndex++;
+                    transform.X = headerWidth;
+                    SetTransformElementValues();
+                    transform.X = change - headerWidth;
+                    break;
+                case double c when c < 0:
+                    currentHeaderIndex--;
+                    transform.X = 0;
+                    SetTransformElementValues();
+                    transform.X += change;
+                    break;
+                default:
+                    transform.X = change;
+                    break;
             }
-            else if (change <= 0)
-            {
-                currentHeaderIndex--;
-            }
+        }
+
+        private void SetTransformElementValues()
+        {
+            currentHeader = (FrameworkElement)this.Children[currentHeaderIndex];
+            transform = (TranslateTransform)currentHeader.RenderTransform;
         }
 
         private void CalculateScheduleViewDateRange() => this.scheduleViewRange = (templatedParent.EndDate - templatedParent.StartDate).Days + 1;

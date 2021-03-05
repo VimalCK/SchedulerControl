@@ -26,7 +26,7 @@ namespace Scheduler
               "StartDate", typeof(DateTime), typeof(ScheduleControl), new PropertyMetadata(DateTime.Now));
 
         public static readonly DependencyProperty EndDateProperty = DependencyProperty.Register(
-            "EndDate", typeof(DateTime), typeof(ScheduleControl), new PropertyMetadata(DateTime.Now.AddDays(3)));
+            "EndDate", typeof(DateTime), typeof(ScheduleControl), new PropertyMetadata(DateTime.Now.AddDays(2)));
 
         public static readonly DependencyProperty TimeLineZoomProperty = DependencyProperty.Register(
             "TimeLineZoom", typeof(TimeLineZoom), typeof(ScheduleControl), new PropertyMetadata(TimeLineZoom.TwentyFour));
