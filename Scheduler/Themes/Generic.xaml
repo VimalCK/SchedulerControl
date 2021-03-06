@@ -34,6 +34,8 @@
     <Style TargetType="{x:Type local:TimeRulerPanel}">
         <Setter Property="UseLayoutRounding"
                 Value="True" />
+        <Setter Property="IsHitTestVisible"
+                Value="False" />
     </Style>
 
     <Style TargetType="{x:Type local:ScheduleControl}">

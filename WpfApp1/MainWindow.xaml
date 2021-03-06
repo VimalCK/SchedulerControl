@@ -13,7 +13,7 @@
         <control:ScheduleControl>
             <control:ScheduleControl.TimeLineProviders>
                 <control:TimeRuler Color="Red" />
-                <control:TimeRuler Color="Yellow"
+                <control:TimeRuler Color="Orange"
                                    Time="02:30" />
             </control:ScheduleControl.TimeLineProviders>
         </control:ScheduleControl>

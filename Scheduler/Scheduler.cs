@@ -9,8 +9,6 @@ namespace Scheduler
     [TemplatePart(Name = "PART_SchedulerCanvas", Type = typeof(Canvas))]
     internal sealed class Scheduler : ItemsControl
     {
-        private Canvas canvas;
-
         public Scheduler() => this.DefaultStyleKey = typeof(Scheduler);
     }
 }
