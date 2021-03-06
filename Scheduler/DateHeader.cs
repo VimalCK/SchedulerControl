@@ -6,10 +6,10 @@ namespace Scheduler
 {
     internal sealed class DateHeader : StackPanel
     {
-        private ScheduleControl templatedParent;
         private double headerWidth;
         private int scheduleViewRange;
         private int currentHeaderIndex;
+        private ScheduleControl templatedParent;
         private FrameworkElement currentHeader;
         private TranslateTransform transform;
         public DateHeader()
@@ -20,10 +20,7 @@ namespace Scheduler
             AddHandlers();
         }
 
-        ~DateHeader()
-        {
-            RemoveHandlers();
-        }
+        ~DateHeader()=>RemoveHandlers();
 
         internal void SetBorderColor(Brush brush)
         {
@@ -72,6 +69,7 @@ namespace Scheduler
             }
 
             var change = transform.X + e.HorizontalChange;
+
             switch (change)
             {
                 case double c when c > headerWidth:
@@ -126,6 +124,7 @@ namespace Scheduler
             }
 
             headerWidth = e.NewSize.Width;
+
             foreach (FrameworkElement element in this.Children)
             {
                 element.Width = headerWidth;

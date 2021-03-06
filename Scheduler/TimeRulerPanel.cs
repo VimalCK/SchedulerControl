@@ -66,14 +66,6 @@ namespace Scheduler
 
         }
 
-        private bool RenderRequired()
-        {
-            if (this.parent.StartDate > DateTime.Now)
-            {
-                return false;
-            }
-
-            return true;
-        }
+        private bool RenderRequired() => this.parent.StartDate <= DateTime.Now;
     }
 }

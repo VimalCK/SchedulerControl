@@ -26,9 +26,6 @@ namespace Scheduler
         public static readonly DependencyProperty ColorProperty =
             DependencyProperty.Register("Color", typeof(Brush), typeof(TimeRuler), new PropertyMetadata(Brushes.Red));
 
-        protected override Freezable CreateInstanceCore()
-        {
-            return new TimeRuler();
-        }
+        protected override Freezable CreateInstanceCore() =>return new TimeRuler();
     }
 }

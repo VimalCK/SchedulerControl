@@ -59,10 +59,8 @@ namespace Scheduler
 
             return items;
         }
-        public static void SetTimeLineProviders(DependencyObject d, FreezableCollection<TimeRuler> value)
-        {
+        public static void SetTimeLineProviders(DependencyObject d, FreezableCollection<TimeRuler> value) =>
             d.SetValue(TimeLineProvidersProperty, value);
-        }
 
         public TimeLineZoom TimeLineZoom
         {
@@ -86,10 +84,7 @@ namespace Scheduler
             set { SetValue(TimeLineColorProperty, value); }
         }
 
-        public ScheduleControl()
-        {
-            this.DefaultStyleKey = typeof(ScheduleControl);
-        }
+        public ScheduleControl() => this.DefaultStyleKey = typeof(ScheduleControl);
 
         private static void OnTimeLineColorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -100,14 +95,12 @@ namespace Scheduler
             }
         }
 
-        ~ScheduleControl()
-        {
-            UnHandleEvents();
-        }
+        ~ScheduleControl() => UnHandleEvents();
 
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
+
             this.parentGrid = this.GetTemplateChild("PART_ParentGrid") as Grid;
             this.rulerGrid = this.GetTemplateChild("PART_RulerGrid") as RulerGrid;
             this.scrollViewer = this.GetTemplateChild("PART_ScrollViewer") as ScrollViewer;
@@ -129,10 +122,8 @@ namespace Scheduler
             this.Loaded -= ScheduleControl_Loaded;
         }
 
-        private void ScheduleControl_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
+        private void ScheduleControl_SizeChanged(object sender, SizeChangedEventArgs e) =>
             this.parentGrid.Width = this.ActualWidth * ((this.EndDate - this.StartDate).Days + 1);
-        }
 
         private void ScheduleControl_Loaded(object sender, RoutedEventArgs e) =>
             InitiateTimeRulerRendering(GetTimeLineProviders(sender as DependencyObject));

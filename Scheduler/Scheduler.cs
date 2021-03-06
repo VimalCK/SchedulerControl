@@ -10,9 +10,7 @@ namespace Scheduler
     internal sealed class Scheduler : ItemsControl
     {
         private Canvas canvas;
-        public Scheduler()
-        {
-            this.DefaultStyleKey = typeof(Scheduler);
-        }
+
+        public Scheduler() => this.DefaultStyleKey = typeof(Scheduler);
     }
 }

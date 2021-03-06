@@ -34,6 +34,7 @@ namespace Scheduler
                     {
                         var formattedTime = new FormattedText($" {TimeSpan.FromHours(j).ToString(@"hh\:mm")}", cultureInfo,
                             FlowDirection.LeftToRight, typeface, 10D, Brushes.Gray, pixelPerDip);
+
                         drawingContext.DrawText(formattedTime, renderPoint);
                         renderPoint.X += this.VerticalGap;
                     }
