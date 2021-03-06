@@ -6,8 +6,16 @@
         xmlns:local="clr-namespace:WpfApp1"
         xmlns:control="clr-namespace:Scheduler;assembly=Scheduler"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow"
+        Height="450"
+        Width="800">
     <Grid>
-        <control:ScheduleControl/>
+        <control:ScheduleControl>
+            <control:ScheduleControl.TimeLineProviders>
+                <control:TimeRuler Color="Red" />
+                <control:TimeRuler Color="Yellow"
+                                   Time="02:30" />
+            </control:ScheduleControl.TimeLineProviders>
+        </control:ScheduleControl>
     </Grid>
 </Window>
