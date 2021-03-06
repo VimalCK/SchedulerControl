@@ -38,20 +38,6 @@ namespace Scheduler
             }
         }
 
-        private void DateHeader_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            if (this.Children.Count == 0)
-            {
-                return;
-            }
-
-            this.MeasureHeadersDesiredWidth();
-            foreach (FrameworkElement element in this.Children)
-            {
-                element.Width = headerWidth;
-            }
-        }
-
         private void DateHeader_Loaded(object sender, RoutedEventArgs e)
         {
             this.CoerceTemplatedParent();
@@ -77,7 +63,6 @@ namespace Scheduler
             }
         }
 
-        private void MeasureHeadersDesiredWidth() => headerWidth = this.ActualWidth / scheduleViewRange;
 
         private void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
@@ -113,26 +98,38 @@ namespace Scheduler
             transform = (TranslateTransform)currentHeader.RenderTransform;
         }
 
-        private void CalculateScheduleViewDateRange() => this.scheduleViewRange = (templatedParent.EndDate - templatedParent.StartDate).Days + 1;
-
         private void AddHandlers(bool handleOnlyTemplatedParentEvents = false)
         {
             if (!handleOnlyTemplatedParentEvents)
             {
                 this.Loaded += DateHeader_Loaded;
-                this.SizeChanged += DateHeader_SizeChanged;
             }
             else
             {
                 this.templatedParent.scrollViewer.ScrollChanged += ScrollViewer_ScrollChanged;
+                this.templatedParent.SizeChanged += TemplatedParent_SizeChanged;
             }
         }
 
         private void RemoveHandlers()
         {
             this.Loaded -= DateHeader_Loaded;
-            this.SizeChanged -= DateHeader_SizeChanged;
+            this.templatedParent.SizeChanged -= TemplatedParent_SizeChanged;
             this.templatedParent.scrollViewer.ScrollChanged -= ScrollViewer_ScrollChanged;
+        }
+
+        private void TemplatedParent_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (this.Children.Count == 0)
+            {
+                return;
+            }
+
+            headerWidth = e.NewSize.Width;
+            foreach (FrameworkElement element in this.Children)
+            {
+                element.Width = headerWidth;
+            }
         }
 
         private void CoerceTemplatedParent()
@@ -143,5 +140,10 @@ namespace Scheduler
                 AddHandlers(true);
             }
         }
+
+        private void MeasureHeadersDesiredWidth() => headerWidth = this.ActualWidth / scheduleViewRange;
+
+        private void CalculateScheduleViewDateRange() => this.scheduleViewRange = (templatedParent.EndDate - templatedParent.StartDate).Days + 1;
+
     }
 }
