@@ -3,7 +3,7 @@
                     xmlns:local="clr-namespace:Scheduler">
 
     <Style TargetType="{x:Type local:Scheduler}">
-        <Setter Property="SnapsToDevicePixels"
+        <Setter Property="UseLayoutRounding"
                 Value="True" />
         <Setter Property="Background"
                 Value="Transparent" />
@@ -14,6 +14,21 @@
                 </ItemsPanelTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type local:DateHeader}">
+        <Setter Property="UseLayoutRounding"
+                Value="True" />
+    </Style>
+
+    <Style TargetType="{x:Type local:TimeLineHeader}">
+        <Setter Property="UseLayoutRounding"
+                Value="True" />
+    </Style>
+
+    <Style TargetType="{x:Type local:RulerGrid}">
+        <Setter Property="UseLayoutRounding"
+                Value="True" />
     </Style>
 
     <Style TargetType="{x:Type local:ScheduleControl}">
@@ -49,17 +64,4 @@
             </Setter.Value>
         </Setter>
     </Style>
-
-    <!--<Style TargetType="{x:Type local:CustomControl1}">
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type local:CustomControl1}">
-                    <Border Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}">
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>-->
 </ResourceDictionary>
