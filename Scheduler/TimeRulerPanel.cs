@@ -39,7 +39,7 @@ namespace Scheduler
             {
                 var noOfDays = (parent.EndDate - parent.StartDate).Days + 1;
                 var verticalGap = this.ActualWidth / ((int)parent.TimeLineZoom * noOfDays);
-                var currentPosition = verticalGap * DateTime.Now.TimeOfDay.Hours;
+                var currentPosition = verticalGap * (((DateTime.Now - parent.StartDate).Days * 24) + DateTime.Now.TimeOfDay.Hours);
                 var minuteGap = verticalGap / 60;
 
                 currentPosition += DateTime.Now.TimeOfDay.Minutes * minuteGap;

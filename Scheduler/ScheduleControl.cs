@@ -28,7 +28,7 @@ namespace Scheduler
             new FrameworkPropertyMetadata(Brushes.LightGray, FrameworkPropertyMetadataOptions.AffectsRender, OnTimeLineColorChanged));
 
         public static readonly DependencyProperty StartDateProperty = DependencyProperty.Register(
-              "StartDate", typeof(DateTime), typeof(ScheduleControl), new PropertyMetadata(DateTime.Now));
+              "StartDate", typeof(DateTime), typeof(ScheduleControl), new PropertyMetadata(DateTime.Now .AddDays(-1)));
 
         public static readonly DependencyProperty EndDateProperty = DependencyProperty.Register(
             "EndDate", typeof(DateTime), typeof(ScheduleControl), new PropertyMetadata(DateTime.Now.AddDays(2)));
