@@ -20,7 +20,7 @@ namespace Scheduler
                 var timeLineValue = (int)control.TimeLineZoom;
 
                 this.VerticalLines = timeLineValue * noOfDays;
-                this.HorizontalLines = 10;
+                this.HorizontalLines = (int)this.ActualHeight / 30;
                 this.HorizontalGap = this.ActualHeight / this.HorizontalLines;
                 this.VerticalGap = this.ActualWidth / this.VerticalLines;
 
