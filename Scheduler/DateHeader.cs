@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System;
+using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
@@ -6,8 +8,6 @@ namespace Scheduler
 {
     internal sealed class DateHeader : StackPanel
     {
-        private double headerWidth;
-        private int scheduleViewRange;
         private int currentHeaderIndex;
         private ScheduleControl templatedParent;
         private FrameworkElement currentHeader;
@@ -20,7 +20,7 @@ namespace Scheduler
             AddHandlers();
         }
 
-        ~DateHeader()=>RemoveHandlers();
+        ~DateHeader() => RemoveHandlers();
 
         internal void SetBorderColor(Brush brush)
         {
@@ -38,20 +38,18 @@ namespace Scheduler
         private void DateHeader_Loaded(object sender, RoutedEventArgs e)
         {
             this.CoerceTemplatedParent();
-            this.CalculateScheduleViewDateRange();
-            this.MeasureHeadersDesiredWidth();
 
-            for (int i = 0; i < scheduleViewRange; i++)
+            for (int i = 1; i <= this.templatedParent.ViewRange; i++)
             {
                 var label = new Label()
                 {
                     Content = $" {templatedParent.StartDate.AddDays(i).ToString("dd-MM-yyyy")}",
                     VerticalAlignment = VerticalAlignment.Center,
                     FontSize = 10,
-                    Width = headerWidth,
-                    BorderThickness = new Thickness(1),
-                    Background = Brushes.White,
-                    BorderBrush = Brushes.LightGray,
+                    Width = this.ActualWidth,
+                    BorderBrush = this.templatedParent.TimeLineColor,
+                    BorderThickness = new Thickness(1, 1, i == this.templatedParent.ViewRange ? 1 : 0, 1),
+                    Background = i % 2 == 0 ? Brushes.LightBlue : Brushes.LightGoldenrodYellow,
                     RenderTransform = new TranslateTransform(0, 0)
                 };
 
@@ -63,31 +61,31 @@ namespace Scheduler
 
         private void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            if (currentHeader is null)
-            {
-                SetTransformElementValues();
-            }
+            //if (currentHeader is null)
+            //{
+            //    SetTransformElementValues();
+            //}
 
-            var change = transform.X + e.HorizontalChange;
+            //var change = Math.Round(transform.X + e.HorizontalChange, 2);
 
-            switch (change)
-            {
-                case double c when c > headerWidth:
-                    currentHeaderIndex++;
-                    transform.X = headerWidth;
-                    SetTransformElementValues();
-                    transform.X = change - headerWidth;
-                    break;
-                case double c when c < 0:
-                    currentHeaderIndex--;
-                    transform.X = 0;
-                    SetTransformElementValues();
-                    transform.X += change;
-                    break;
-                default:
-                    transform.X = change;
-                    break;
-            }
+            //switch (change)
+            //{
+            //    case double c when c > headerWidth:
+            //        if (currentHeaderIndex != this.Children.Count - 1) currentHeaderIndex++;
+            //        transform.X = headerWidth;
+            //        SetTransformElementValues();
+            //        transform.X = Math.Floor(change - headerWidth);
+            //        break;
+            //    case double c when c < 0:
+            //        if (currentHeaderIndex != 0) currentHeaderIndex--;
+            //        transform.X = 0;
+            //        SetTransformElementValues();
+            //        transform.X = Math.Round(transform.X + change, 2);
+            //        break;
+            //    default:
+            //        transform.X = change;
+            //        break;
+            //}
         }
 
         private void SetTransformElementValues()
@@ -105,29 +103,25 @@ namespace Scheduler
             else
             {
                 this.templatedParent.scrollViewer.ScrollChanged += ScrollViewer_ScrollChanged;
-                this.templatedParent.SizeChanged += TemplatedParent_SizeChanged;
             }
         }
 
         private void RemoveHandlers()
         {
             this.Loaded -= DateHeader_Loaded;
-            this.templatedParent.SizeChanged -= TemplatedParent_SizeChanged;
             this.templatedParent.scrollViewer.ScrollChanged -= ScrollViewer_ScrollChanged;
         }
 
-        private void TemplatedParent_SizeChanged(object sender, SizeChangedEventArgs e)
+        internal void ReArrangeHeader()
         {
             if (this.Children.Count == 0)
             {
                 return;
             }
 
-            headerWidth = e.NewSize.Width;
-
             foreach (FrameworkElement element in this.Children)
             {
-                element.Width = headerWidth;
+                element.Width = this.ActualWidth;
             }
         }
 
@@ -139,10 +133,5 @@ namespace Scheduler
                 AddHandlers(true);
             }
         }
-
-        private void MeasureHeadersDesiredWidth() => headerWidth = this.ActualWidth / scheduleViewRange;
-
-        private void CalculateScheduleViewDateRange() => this.scheduleViewRange = (templatedParent.EndDate - templatedParent.StartDate).Days + 1;
-
     }
 }

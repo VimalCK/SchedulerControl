@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Globalization;
 using System.Windows;
-using System.Windows.Documents;
 using System.Windows.Media;
 
 namespace Scheduler
@@ -17,18 +16,17 @@ namespace Scheduler
         {
             if (this.TemplatedParent is ScheduleControl control && control.ActualWidth != 0)
             {
-                var noOfDays = (control.EndDate - control.StartDate).Days + 1;
                 var renderPoint = new Point(0, this.ActualHeight / 3);
                 var pixelPerDip = VisualTreeHelper.GetDpi(this).PixelsPerDip;
                 var timeLineValue = (int)control.TimeLineZoom;
 
-                this.VerticalLines = timeLineValue * noOfDays;
+                this.VerticalLines = timeLineValue * control.ViewRange;
                 this.HorizontalGap = this.ActualHeight;
                 this.VerticalGap = this.ActualWidth / this.VerticalLines;
 
                 base.OnRender(drawingContext);
 
-                for (int i = 1; i <= noOfDays; i++)
+                for (int i = 1; i <= control.ViewRange; i++)
                 {
                     for (int j = 0; j < timeLineValue; j++)
                     {

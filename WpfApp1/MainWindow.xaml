@@ -7,10 +7,12 @@
         xmlns:control="clr-namespace:Scheduler;assembly=Scheduler"
         mc:Ignorable="d"
         Title="MainWindow"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         Height="450"
         Width="800">
     <Grid>
-        <control:ScheduleControl>
+        <control:ScheduleControl StartDate="{Binding Source={x:Static sys:DateTime.Now}}"
+                                 EndDate="{Binding EndDate}">
             <control:ScheduleControl.TimeLineProviders>
                 <control:TimeRuler Color="Red" />
                 <control:TimeRuler Color="Orange"

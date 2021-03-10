@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Media;
 
 namespace Scheduler
@@ -10,14 +7,14 @@ namespace Scheduler
     {
         public Brush Color
         {
-            get { return (Brush)GetValue(ColorProperty); }
-            set { SetValue(ColorProperty, value); }
+            get => (Brush)GetValue(ColorProperty);
+            set => SetValue(ColorProperty, value);
         }
 
         public string Time
         {
-            get { return (string)GetValue(TimeProperty); }
-            set { SetValue(TimeProperty, value); }
+            get => (string)GetValue(TimeProperty);
+            set => SetValue(TimeProperty, value);
         }
 
         public static readonly DependencyProperty TimeProperty =

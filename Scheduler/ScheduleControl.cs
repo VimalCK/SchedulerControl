@@ -13,12 +13,14 @@ namespace Scheduler
     [TemplatePart(Name = "PART_ScrollViewer", Type = typeof(ScrollViewer))]
     [TemplatePart(Name = "PART_DateHeader", Type = typeof(DateHeader))]
     [TemplatePart(Name = "PART_TimeRulerPanel", Type = typeof(TimeRulerPanel))]
+    [TemplatePart(Name = "PART_TimeLineHeader", Type = typeof(TimeLineHeader))]
     public class ScheduleControl : Control
     {
         private Grid parentGrid;
         private RulerGrid rulerGrid;
         private DateHeader dateHeader;
         private TimeRulerPanel timerulerPanel;
+        private TimeLineHeader timeLineHeader;
 
         internal ScrollViewer scrollViewer;
 
@@ -28,17 +30,31 @@ namespace Scheduler
             new FrameworkPropertyMetadata(Brushes.LightGray, FrameworkPropertyMetadataOptions.AffectsRender, OnTimeLineColorChanged));
 
         public static readonly DependencyProperty StartDateProperty = DependencyProperty.Register(
-              "StartDate", typeof(DateTime), typeof(ScheduleControl), new PropertyMetadata(DateTime.Now.AddDays(-1)));
+              "StartDate", typeof(DateTime), typeof(ScheduleControl), new PropertyMetadata(OnScheduleDateChanged));
 
         public static readonly DependencyProperty EndDateProperty = DependencyProperty.Register(
-            "EndDate", typeof(DateTime), typeof(ScheduleControl), new PropertyMetadata(DateTime.Now.AddDays(2)));
+               "EndDate", typeof(DateTime), typeof(ScheduleControl), new PropertyMetadata(OnScheduleDateChanged));
 
         public static readonly DependencyProperty TimeLineZoomProperty = DependencyProperty.Register(
-            "TimeLineZoom", typeof(TimeLineZoom), typeof(ScheduleControl), new PropertyMetadata(TimeLineZoom.TwentyFour));
+            "TimeLineZoom", typeof(TimeLineZoom), typeof(ScheduleControl), new PropertyMetadata(TimeLineZoom.FortyEight, OnTimeLineZoomChanged));
 
         public static readonly DependencyProperty TimeLineProvidersProperty =
-            DependencyProperty.Register("ShadowTimeLineProviders", typeof(FreezableCollection<TimeRuler>), typeof(ScheduleControl),
-                new PropertyMetadata(OnTimeLineProvidersChanged));
+             DependencyProperty.Register("ShadowTimeLineProviders", typeof(FreezableCollection<TimeRuler>), typeof(ScheduleControl),
+                 new PropertyMetadata(OnTimeLineProvidersChanged));
+
+        private static void OnTimeLineZoomChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var control = (ScheduleControl)d;
+            control.rulerGrid?.InvalidateVisual();
+            control.timeLineHeader?.InvalidateVisual();
+        }
+        private static void OnScheduleDateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var control = (ScheduleControl)d;
+            control.rulerGrid?.InvalidateVisual();
+            control.timeLineHeader?.InvalidateVisual();
+            control.dateHeader?.ReArrangeHeader();
+        }
 
         private static void OnTimeLineProvidersChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -64,35 +80,36 @@ namespace Scheduler
 
         public TimeLineZoom TimeLineZoom
         {
-            get { return (TimeLineZoom)GetValue(TimeLineZoomProperty); }
-            set { SetValue(TimeLineZoomProperty, value); }
+            get => (TimeLineZoom)GetValue(TimeLineZoomProperty);
+            set => SetValue(TimeLineZoomProperty, value);
         }
         public DateTime EndDate
         {
-            get { return (DateTime)GetValue(EndDateProperty); }
-            set { SetValue(EndDateProperty, value); }
+            get => (DateTime)GetValue(EndDateProperty);
+            set => SetValue(EndDateProperty, value);
         }
 
         public DateTime StartDate
         {
-            get { return (DateTime)GetValue(StartDateProperty); }
-            set { SetValue(StartDateProperty, value); }
+            get => (DateTime)GetValue(StartDateProperty);
+            set => SetValue(StartDateProperty, value);
         }
         public Brush TimeLineColor
         {
-            get { return (Brush)GetValue(TimeLineColorProperty); }
-            set { SetValue(TimeLineColorProperty, value); }
+            get => (Brush)GetValue(TimeLineColorProperty);
+            set => SetValue(TimeLineColorProperty, value);
         }
+
+        internal int ViewRange => (this.EndDate - this.StartDate).Days + 1;
 
         public ScheduleControl() => this.DefaultStyleKey = typeof(ScheduleControl);
 
         private static void OnTimeLineColorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is ScheduleControl control)
-            {
-                control.rulerGrid.RulerColor = control.TimeLineColor;
-                control.dateHeader.SetBorderColor(control.TimeLineColor);
-            }
+            var control = (ScheduleControl)d;
+            control.rulerGrid?.InvalidateVisual();
+            control.timeLineHeader?.InvalidateVisual();
+            control.dateHeader?.SetBorderColor(control.TimeLineColor);
         }
 
         ~ScheduleControl() => UnHandleEvents();
@@ -106,6 +123,7 @@ namespace Scheduler
             this.scrollViewer = this.GetTemplateChild("PART_ScrollViewer") as ScrollViewer;
             this.dateHeader = this.GetTemplateChild("PART_DateHeader") as DateHeader;
             this.timerulerPanel = this.GetTemplateChild("PART_TimeRulerPanel") as TimeRulerPanel;
+            this.timeLineHeader = this.GetTemplateChild("PART_TimeLineHeader") as TimeLineHeader;
 
             HandleEvents();
         }
@@ -122,8 +140,12 @@ namespace Scheduler
             this.Loaded -= ScheduleControl_Loaded;
         }
 
-        private void ScheduleControl_SizeChanged(object sender, SizeChangedEventArgs e) =>
-            this.parentGrid.Width = this.ActualWidth * ((this.EndDate - this.StartDate).Days + 1);
+        private void ScheduleControl_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            this.rulerGrid?.InvalidateVisual();
+            this.timeLineHeader?.InvalidateVisual();
+            this.dateHeader?.ReArrangeHeader();
+        }
 
         private void ScheduleControl_Loaded(object sender, RoutedEventArgs e) =>
             InitiateTimeRulerRendering(GetTimeLineProviders(sender as DependencyObject));

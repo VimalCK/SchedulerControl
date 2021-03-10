@@ -18,11 +18,16 @@ namespace WpfApp1
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
+    /// 
+
     public partial class MainWindow : Window
     {
+        public DateTime EndDate { get; set; }
         public MainWindow()
         {
             InitializeComponent();
+            this.EndDate = DateTime.Now.AddDays(4);
+            this.DataContext = this;
         }
     }
 }
