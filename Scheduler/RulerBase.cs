@@ -38,19 +38,24 @@ namespace Scheduler
 
 
         public static readonly DependencyProperty HorizontalGapProperty =
-            DependencyProperty.Register("HorizontalGap", typeof(double), typeof(RulerBase), new FrameworkPropertyMetadata(default(double)));
+            DependencyProperty.Register("HorizontalGap", typeof(double), typeof(RulerBase),
+                new FrameworkPropertyMetadata(default(double)));
 
         public static readonly DependencyProperty VerticalGapProperty =
-            DependencyProperty.Register("VerticalGap", typeof(double), typeof(RulerBase), new FrameworkPropertyMetadata(default(double)));
+            DependencyProperty.Register("VerticalGap", typeof(double), typeof(RulerBase),
+                new FrameworkPropertyMetadata(default(double)));
 
         public static readonly DependencyProperty HorizontalLinesProperty =
-            DependencyProperty.Register("HorizontalLines", typeof(int), typeof(RulerBase), new FrameworkPropertyMetadata(2));
+            DependencyProperty.Register("HorizontalLines", typeof(int), typeof(RulerBase),
+                new FrameworkPropertyMetadata(default(int)));
 
         public static readonly DependencyProperty VerticalLinesProperty =
-            DependencyProperty.Register("VerticalLines", typeof(int), typeof(RulerBase), new FrameworkPropertyMetadata(default(int)));
+            DependencyProperty.Register("VerticalLines", typeof(int), typeof(RulerBase),
+                new FrameworkPropertyMetadata(default(int)));
 
         public static readonly DependencyProperty RulerColorProperty =
-            DependencyProperty.Register("RulerColor", typeof(Brush), typeof(RulerBase), new FrameworkPropertyMetadata(Brushes.LightGray));
+            DependencyProperty.Register("RulerColor", typeof(Brush), typeof(RulerBase),
+                new FrameworkPropertyMetadata(Brushes.LightGray));
 
         protected override void OnRender(DrawingContext drawingContext)
         {

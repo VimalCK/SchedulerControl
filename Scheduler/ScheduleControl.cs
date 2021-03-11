@@ -36,7 +36,7 @@ namespace Scheduler
                "EndDate", typeof(DateTime), typeof(ScheduleControl), new PropertyMetadata(OnScheduleDateChanged));
 
         public static readonly DependencyProperty TimeLineZoomProperty = DependencyProperty.Register(
-            "TimeLineZoom", typeof(TimeLineZoom), typeof(ScheduleControl), new PropertyMetadata(TimeLineZoom.FortyEight, OnTimeLineZoomChanged));
+            "TimeLineZoom", typeof(TimeLineZoom), typeof(ScheduleControl), new PropertyMetadata(TimeLineZoom.Twelve, OnTimeLineZoomChanged));
 
         public static readonly DependencyProperty TimeLineProvidersProperty =
              DependencyProperty.Register("ShadowTimeLineProviders", typeof(FreezableCollection<TimeRuler>), typeof(ScheduleControl),

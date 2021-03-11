@@ -20,21 +20,25 @@ namespace Scheduler
                 var pixelPerDip = VisualTreeHelper.GetDpi(this).PixelsPerDip;
                 var timeLineValue = (int)control.TimeLineZoom;
 
-                this.VerticalLines = timeLineValue * control.ViewRange;
+                this.VerticalLines = 24 * control.ViewRange;
+                this.HorizontalLines = 2;
                 this.HorizontalGap = this.ActualHeight;
-                this.VerticalGap = this.ActualWidth / this.VerticalLines;
+                this.VerticalGap = (this.ActualWidth / control.ViewRange) / timeLineValue;
 
-                base.OnRender(drawingContext);
-
-                for (int i = 1; i <= control.ViewRange; i++)
+                if (this.VerticalLines > 0)
                 {
-                    for (int j = 0; j < timeLineValue; j++)
+                    int headerText = 0;
+
+                    base.OnRender(drawingContext);
+
+                    for (int i = 0; i < this.VerticalLines; i++)
                     {
-                        var formattedTime = new FormattedText($" {TimeSpan.FromHours(j).ToString(@"hh\:mm")}", cultureInfo,
-                            FlowDirection.LeftToRight, typeface, 10D, Brushes.Gray, pixelPerDip);
+                        var formattedTime = new FormattedText($" {TimeSpan.FromHours(headerText).ToString(@"hh\:mm")}", cultureInfo,
+                                FlowDirection.LeftToRight, typeface, 10D, Brushes.Gray, pixelPerDip);
 
                         drawingContext.DrawText(formattedTime, renderPoint);
                         renderPoint.X += this.VerticalGap;
+                        headerText = headerText >= 23 ? 0 : headerText + 1;
                     }
                 }
             }
