@@ -61,25 +61,25 @@ namespace Scheduler
         {
             base.OnRender(drawingContext);
 
-            var pen = new Pen(this.RulerColor, .5);
+            var pen = new Pen(RulerColor, .5);
             var startPoint = new Point(0, 0);
-            var endPoint = new Point(0, this.ActualHeight);
+            var endPoint = new Point(0, ActualHeight);
             var pixelPerDip = VisualTreeHelper.GetDpi(this).PixelsPerDip;
 
             pen.Freeze();
 
-            for (int i = 0; i <= this.VerticalLines; i++)
+            for (int i = 0; i <= VerticalLines; i++)
             {
-                endPoint.X = startPoint.X = i * this.VerticalGap;
+                endPoint.X = startPoint.X = i * VerticalGap;
                 drawingContext.DrawLine(pen, startPoint, endPoint);
             }
 
             startPoint = new Point(0, 0);
-            endPoint = new Point(this.ActualWidth, 0);
+            endPoint = new Point(ActualWidth, 0);
 
-            for (int i = 0; i < this.HorizontalLines; i++)
+            for (int i = 0; i < HorizontalLines; i++)
             {
-                startPoint.Y = endPoint.Y = i * this.HorizontalGap;
+                startPoint.Y = endPoint.Y = i * HorizontalGap;
                 drawingContext.DrawLine(pen, startPoint, endPoint);
             }
         }
