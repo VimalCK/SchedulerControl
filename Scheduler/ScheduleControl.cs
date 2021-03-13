@@ -185,21 +185,22 @@ namespace Scheduler
             this.viewPortArea.Width = this.scrollViewer.ActualWidth - this.verticalScrollBar.ActualWidth;
             this.viewPortArea.Height = this.scrollViewer.ActualHeight - this.horizontalScrollBar.ActualHeight;
 
-            this.ReCalculateParentGridWidth();
+            this.ReCalculateChildControlWidthToReRender();
         }
 
         private void ScheduleControl_Loaded(object sender, RoutedEventArgs e)
         {
-            this.ReCalculateParentGridWidth();
-            //this.parentGrid.Width = this.parentGrid.ActualWidth * this.ViewRange;
+            this.ReCalculateChildControlWidthToReRender();
+            this.parentGrid.Width = this.parentGrid.ActualWidth * this.ViewRange;
             //InitiateTimeRulerRendering(GetTimeLineProviders(sender as DependencyObject));
         }
 
-        private void ReCalculateParentGridWidth()
+        private void ReCalculateChildControlWidthToReRender()
         {
             if (this.ViewRange > 0)
             {
                 this.parentGrid.Width = this.ViewPortArea.Width * this.ViewRange;
+                //this.dateHeader.Width   = this.parentGrid.ActualWidth;
             }
         }
 

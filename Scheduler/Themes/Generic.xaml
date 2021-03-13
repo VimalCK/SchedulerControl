@@ -19,6 +19,8 @@
     <Style TargetType="{x:Type local:DateHeader}">
         <Setter Property="UseLayoutRounding"
                 Value="True" />
+        <Setter Property="SnapsToDevicePixels"
+                Value="True" />
     </Style>
 
     <Style TargetType="{x:Type local:TimeLineHeader}">
