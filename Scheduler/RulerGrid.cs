@@ -17,6 +17,7 @@ namespace Scheduler
                     HorizontalGap = control.IsExtendedMode ? 60 : 30;
                     HorizontalLines = (int)Math.Round(ActualHeight / HorizontalGap);
                     VerticalGap = (ActualWidth / control.ViewRange) / (int)control.TimeLineZoom;
+                    RulerColor = control.TimeLineColor;
                     base.OnRender(drawingContext);
                 }
             }

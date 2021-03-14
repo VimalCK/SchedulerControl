@@ -11,13 +11,28 @@
         Height="450"
         Width="800">
     <Grid>
-        <control:ScheduleControl StartDate="{Binding Source={x:Static sys:DateTime.Now}}"
-                                 EndDate="{Binding EndDate}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <control:ScheduleControl x:Name="sc"
+                                 StartDate="{Binding ElementName=sdt, Path=SelectedDate}"
+                                 EndDate="{Binding ElementName=edt, Path=SelectedDate}">
             <control:ScheduleControl.TimeLineProviders>
                 <control:TimeRuler Color="Red" />
                 <control:TimeRuler Color="Orange"
                                    Time="02:30" />
             </control:ScheduleControl.TimeLineProviders>
         </control:ScheduleControl>
+
+        <WrapPanel Orientation="Horizontal"
+                   Grid.Row="1">
+            <Button Height="30"
+                    Content="Timeline Color"
+                    Click="Button_Click" />
+            <DatePicker x:Name="sdt" />
+            <DatePicker x:Name="edt" />
+        </WrapPanel>
     </Grid>
 </Window>

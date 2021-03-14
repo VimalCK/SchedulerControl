@@ -17,29 +17,30 @@ namespace Scheduler
 
         protected override void OnRender(DrawingContext drawingContext)
         {
-            if (this.TemplatedParent is ScheduleControl control && control.ActualWidth != 0)
+            if (TemplatedParent is ScheduleControl control && control.ActualWidth != 0)
             {
-                this.VerticalLines = 24 * control.ViewRange;
+                VerticalLines = 24 * control.ViewRange;
 
-                if (this.VerticalLines > 0)
+                if (VerticalLines > 0)
                 {
-                    var renderPoint = new Point(0, this.ActualHeight / 3);
+                    var renderPoint = new Point(0, ActualHeight / 3);
                     var pixelPerDip = VisualTreeHelper.GetDpi(this).PixelsPerDip;
                     var headerText = 0;
 
-                    this.HorizontalLines = 2;
-                    this.HorizontalGap = this.ActualHeight;
-                    this.VerticalGap = (this.ActualWidth / control.ViewRange) / (int)control.TimeLineZoom;
+                    HorizontalLines = 2;
+                    HorizontalGap = ActualHeight;
+                    RulerColor = control.TimeLineColor;
+                    VerticalGap = (ActualWidth / control.ViewRange) / (int)control.TimeLineZoom;
 
                     base.OnRender(drawingContext);
 
-                    for (int i = 0; i < this.VerticalLines; i++)
+                    for (int i = 0; i < VerticalLines; i++)
                     {
                         var formattedTime = new FormattedText($" {TimeSpan.FromHours(headerText).ToString(@"hh\:mm")}", cultureInfo,
                                 FlowDirection.LeftToRight, typeface, 10D, Brushes.Gray, pixelPerDip);
 
                         drawingContext.DrawText(formattedTime, renderPoint);
-                        renderPoint.X += this.VerticalGap;
+                        renderPoint.X += VerticalGap;
                         headerText = headerText >= 23 ? 0 : headerText + 1;
                     }
                 }

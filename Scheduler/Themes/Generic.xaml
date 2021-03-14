@@ -52,7 +52,7 @@
                                               MinWidth="150" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-
+                        
                         <ScrollViewer x:Name="PART_ScrollViewer"
                                       HorizontalScrollBarVisibility="Auto"
                                       VerticalScrollBarVisibility="Auto"

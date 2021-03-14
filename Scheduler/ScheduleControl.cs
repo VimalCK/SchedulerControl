@@ -31,7 +31,7 @@ namespace Scheduler
 
         public static readonly DependencyProperty TimeLineColorProperty = DependencyProperty.Register(
             "TimeLineColor", typeof(Brush), typeof(ScheduleControl),
-            new FrameworkPropertyMetadata(Brushes.LightGray, FrameworkPropertyMetadataOptions.AffectsRender, OnTimeLineColorChanged));
+            new FrameworkPropertyMetadata(Brushes.LightGray, OnTimeLineColorChanged));
 
         public static readonly DependencyProperty StartDateProperty = DependencyProperty.Register(
               "StartDate", typeof(DateTime), typeof(ScheduleControl), new PropertyMetadata(OnScheduleDateChanged));
@@ -58,12 +58,13 @@ namespace Scheduler
         private static void OnTimeLineZoomChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
-            //control.rulerGrid?.InvalidateVisual();
-            //control.timeLineHeader?.InvalidateVisual();
+            control.rulerGrid?.InvalidateVisual();
+            control.timeLineHeader?.InvalidateVisual();
         }
         private static void OnScheduleDateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
+            control.ReCalculateChildControlWidthToReRender();
             control.dateHeader?.ReArrangeHeaders();
         }
 
@@ -127,9 +128,8 @@ namespace Scheduler
         private static void OnTimeLineColorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
-            //control.rulerGrid?.InvalidateVisual();
-            //control.timeLineHeader?.InvalidateVisual();
-            //control.dateHeader?.SetBorderColor(control.TimeLineColor);
+            control.rulerGrid?.InvalidateVisual();
+            control.timeLineHeader?.InvalidateVisual();
         }
 
         ~ScheduleControl() => UnHandleEvents();

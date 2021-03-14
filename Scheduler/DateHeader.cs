@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Media;
 
 namespace Scheduler
@@ -27,68 +28,62 @@ namespace Scheduler
 
         internal void ReArrangeHeaders()
         {
-            if (parent.ViewRange > 0)
-            {
-                var existingCount = Children.Count;
-                var requiredLabels = parent.ViewRange - existingCount;
-                if (requiredLabels > 0)
-                {
-                    requiredLabels += existingCount;
-                    for (int index = 0; index < requiredLabels; index++)
-                    {
-                        Label label;
-                        if (index < existingCount)
-                        {
-                            label = (Label)Children[index];
-                        }
-                        else
-                        {
-                            ColumnDefinitions.Add(new ColumnDefinition
-                            {
-                                Width = new GridLength(1, GridUnitType.Star)
-                            });
-
-                            label = new Label()
-                            {
-                                BorderThickness = new Thickness(1),
-                                VerticalAlignment = VerticalAlignment.Center,
-                                FontSize = 10,
-                                Background = Brushes.White,
-                                BorderBrush = parent.TimeLineColor,
-                                RenderTransform = new TranslateTransform(0, 0)
-                            };
-
-                            Children.Add(label);
-                        }
-
-                        label.Content = $" {parent.StartDate.AddDays(index).ToString("dd-MM-yyyy")}";
-                        Grid.SetColumn(label, index);
-                        Panel.SetZIndex(label, index);
-                    }
-                }
-                else if (requiredLabels < 0)
-                {
-                    Children.RemoveRange(parent.ViewRange, Math.Abs(requiredLabels));
-                    ColumnDefinitions.RemoveRange(parent.ViewRange, Math.Abs(requiredLabels));
-                    for (int index = 0; index < existingCount; index++)
-                    {
-                        var label = (Label)Children[index];
-                        label.Content = $" {parent.StartDate.AddDays(index).ToString("dd-MM-yyyy")}";
-                    }
-                }
-            }
-        }
-
-        internal void SetBorderColor(Brush brush)
-        {
-            if (brush is null)
+            var range = parent.ViewRange;
+            if (range <= 0)
             {
                 return;
             }
 
-            foreach (Label label in Children)
+            var existingCount = Children.Count;
+            var requiredItems = range - existingCount;
+            if (requiredItems > 0)
             {
-                label.BorderBrush = brush;
+                for (int index = 0; index < range; index++)
+                {
+                    Label label;
+                    if (index < existingCount)
+                    {
+                        label = (Label)Children[index];
+                    }
+                    else
+                    {
+                        ColumnDefinitions.Add(new ColumnDefinition
+                        {
+                            Width = new GridLength(1, GridUnitType.Star)
+                        });
+
+                        label = new Label()
+                        {
+                            BorderThickness = new Thickness(1),
+                            VerticalAlignment = VerticalAlignment.Center,
+                            FontSize = 10,
+                            Background = Brushes.White,
+                            RenderTransform = new TranslateTransform(0, 0)
+                        };
+
+                        Children.Add(label);
+                        Grid.SetColumn(label, index);
+                        Panel.SetZIndex(label, index);
+                        label.SetBinding(Label.BorderBrushProperty, new Binding
+                        {
+                            Path = new PropertyPath("TimeLineColor"),
+                            RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, typeof(ScheduleControl), 1)
+                        });
+                    }
+
+                    label.Content = $" {parent.StartDate.AddDays(index).ToString("dd-MM-yyyy")}";
+                }
+            }
+            else if (requiredItems < 0)
+            {
+                requiredItems = Math.Abs(requiredItems);
+                Children.RemoveRange(parent.ViewRange, requiredItems);
+                ColumnDefinitions.RemoveRange(parent.ViewRange, requiredItems);
+                for (int index = 0; index < Children.Count; index++)
+                {
+                    var label = (Label)Children[index];
+                    label.Content = $" {parent.StartDate.AddDays(index).ToString("dd-MM-yyyy")}";
+                }
             }
         }
 
