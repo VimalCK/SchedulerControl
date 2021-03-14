@@ -33,6 +33,10 @@
                     Click="Button_Click" />
             <DatePicker x:Name="sdt" />
             <DatePicker x:Name="edt" />
+            <Button Content="Extended Mode"
+                    Click="Button_Click_1" />
+            <Button Content="TimeLine Zoom"
+                    Click="Button_Click_2" />
         </WrapPanel>
     </Grid>
 </Window>

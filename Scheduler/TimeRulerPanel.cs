@@ -10,11 +10,13 @@ namespace Scheduler
     {
         private DispatcherTimer timer;
         private ScheduleControl parent;
-        internal ObservableCollection<TimeRuler> TimeRulers { get; set; } = new ObservableCollection<TimeRuler>();
+        //internal ObservableCollection<TimeRuler> TimeRulers { get; set; } = new ObservableCollection<TimeRuler>();
 
         public TimeRulerPanel()
         {
-            timer = new DispatcherTimer(new TimeSpan(0, 0, 0), DispatcherPriority.Normal, OnDispatcherCallbck, Dispatcher.CurrentDispatcher);
+            timer = new DispatcherTimer(new TimeSpan(0, 0, 0), DispatcherPriority.Normal,
+                OnDispatcherCallbck, Dispatcher.CurrentDispatcher);
+
             timer.Interval = new TimeSpan(0, 1, 0);
             timer.Start();
         }
@@ -24,26 +26,24 @@ namespace Scheduler
             timer = null;
         }
 
-        private void OnDispatcherCallbck(object sender, EventArgs e) => this.InvalidateVisual();
-
+        protected override void OnInitialized(EventArgs e)
+        {
+            base.OnInitialized(e);
+            parent = (ScheduleControl)TemplatedParent;
+        }
         protected override void OnRender(DrawingContext drawingContext)
         {
             base.OnRender(drawingContext);
 
-            if (this.parent == null)
-            {
-                this.parent = (ScheduleControl)this.TemplatedParent;
-            }
-
             if (RenderRequired())
             {
-                var verticalGap = this.ActualWidth / ((int)parent.TimeLineZoom * this.parent.ViewRange);
+                var verticalGap = ActualWidth / ((int)parent.TimeLineZoom * parent.ViewRange);
                 var currentPosition = verticalGap * (((DateTime.Now - parent.StartDate).Days * 24) + DateTime.Now.TimeOfDay.Hours);
                 var minuteGap = verticalGap / 60;
 
                 currentPosition += DateTime.Now.TimeOfDay.Minutes * minuteGap;
 
-                foreach (var ruler in this.TimeRulers)
+                foreach (var ruler in ScheduleControl.GetTimeLineProviders(parent))
                 {
                     if (!string.IsNullOrEmpty(ruler.Time))
                     {
@@ -59,12 +59,14 @@ namespace Scheduler
 
                     var pen = new Pen(ruler.Color, 2);
 
-                    drawingContext.DrawLine(pen, new Point(currentPosition, 0), new Point(currentPosition, this.ActualHeight));
+                    drawingContext.DrawLine(pen, new Point(currentPosition, 0), new Point(currentPosition, ActualHeight));
                 }
             }
 
         }
 
-        private bool RenderRequired() => this.parent.StartDate <= DateTime.Now;
+        private void OnDispatcherCallbck(object sender, EventArgs e) => InvalidateVisual();
+
+        private bool RenderRequired() => parent.StartDate != DateTime.MinValue && parent.StartDate <= DateTime.Now;
     }
 }

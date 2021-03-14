@@ -52,7 +52,7 @@
                                               MinWidth="150" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        
+
                         <ScrollViewer x:Name="PART_ScrollViewer"
                                       HorizontalScrollBarVisibility="Auto"
                                       VerticalScrollBarVisibility="Auto"
@@ -73,10 +73,10 @@
                                                  Grid.Row="2" />
 
                                 <!-- <local:Scheduler x:Name="PART_Scheduler"
-                                                 Grid.Row="2" />
+                                                 Grid.Row="2" />-->
 
                                 <local:TimeRulerPanel x:Name="PART_TimeRulerPanel"
-                                                      Grid.Row="2" />-->
+                                                      Grid.Row="2" />
                             </Grid>
                         </ScrollViewer>
                     </Grid>

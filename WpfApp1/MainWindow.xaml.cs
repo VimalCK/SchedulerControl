@@ -22,11 +22,11 @@ namespace WpfApp1
 
     public partial class MainWindow : Window
     {
-        public DateTime EndDate { get; set; }
         public MainWindow()
         {
             InitializeComponent();
-            this.EndDate = DateTime.Now.AddDays(4);
+            //sdt.SelectedDate = DateTime.Now.Date;
+            //edt.SelectedDate = DateTime.Now.Date.AddDays(2);
             this.DataContext = this;
         }
 
@@ -48,25 +48,30 @@ namespace WpfApp1
             {
                 sc.TimeLineColor = Brushes.LightGray;
             }
-            //switch (sc.TimeLineZoom)
-            //{
-            //    case Scheduler.TimeLineZoom.Twelve:
-            //        sc.TimeLineZoom = Scheduler.TimeLineZoom.TwentyFour;
-            //        break;
-            //    case Scheduler.TimeLineZoom.TwentyFour:
-            //        sc.TimeLineZoom = Scheduler.TimeLineZoom.FortyEight;
-            //        break;
-            //    case Scheduler.TimeLineZoom.FortyEight:
-            //        sc.TimeLineZoom = Scheduler.TimeLineZoom.Twelve;
-            //        break;
-            //    default:
-            //        break;
-            //}
+
         }
 
-        private void DatePicker_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        private void Button_Click_1(object sender, RoutedEventArgs e)
         {
+            sc.IsExtendedMode = !sc.IsExtendedMode;
+        }
 
+        private void Button_Click_2(object sender, RoutedEventArgs e)
+        {
+            switch (sc.TimeLineZoom)
+            {
+                case Scheduler.TimeLineZoom.Twelve:
+                    sc.TimeLineZoom = Scheduler.TimeLineZoom.TwentyFour;
+                    break;
+                case Scheduler.TimeLineZoom.TwentyFour:
+                    sc.TimeLineZoom = Scheduler.TimeLineZoom.FortyEight;
+                    break;
+                case Scheduler.TimeLineZoom.FortyEight:
+                    sc.TimeLineZoom = Scheduler.TimeLineZoom.Twelve;
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }

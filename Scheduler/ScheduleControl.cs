@@ -13,7 +13,7 @@ namespace Scheduler
     [TemplatePart(Name = "PART_RulerGrid", Type = typeof(RulerGrid))]
     [TemplatePart(Name = "PART_ScrollViewer", Type = typeof(ScrollViewer))]
     [TemplatePart(Name = "PART_DateHeader", Type = typeof(DateHeader))]
-    //[TemplatePart(Name = "PART_TimeRulerPanel", Type = typeof(TimeRulerPanel))]
+    [TemplatePart(Name = "PART_TimeRulerPanel", Type = typeof(TimeRulerPanel))]
     [TemplatePart(Name = "PART_TimeLineHeader", Type = typeof(TimeLineHeader))]
     public class ScheduleControl : Control
     {
@@ -23,7 +23,7 @@ namespace Scheduler
         private Grid parentGrid;
         private RulerGrid rulerGrid;
         private DateHeader dateHeader;
-        //private TimeRulerPanel timerulerPanel;
+        private TimeRulerPanel timerulerPanel;
         private TimeLineHeader timeLineHeader;
 
         internal ScrollViewer scrollViewer;
@@ -52,7 +52,8 @@ namespace Scheduler
 
         private static void OnIsExtendedModeChanges(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-
+            var control = (ScheduleControl)d;
+            control.rulerGrid?.InvalidateVisual();
         }
 
         private static void OnTimeLineZoomChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -70,10 +71,7 @@ namespace Scheduler
 
         private static void OnTimeLineProvidersChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            //if (d is ScheduleControl control && control.timerulerPanel != null)
-            //{
-            //    control.InitiateTimeRulerRendering(e.NewValue as IEnumerable<TimeRuler>);
-            //}
+            var control = (ScheduleControl)d;
         }
 
         public static FreezableCollection<TimeRuler> GetTimeLineProviders(DependencyObject d)
@@ -121,9 +119,9 @@ namespace Scheduler
 
         public Size ViewPortArea => viewPortArea;
 
-        internal int ViewRange => (this.EndDate - this.StartDate).Days + 1;
+        internal int ViewRange => (EndDate - StartDate).Days + 1;
 
-        public ScheduleControl() => this.DefaultStyleKey = typeof(ScheduleControl);
+        public ScheduleControl() => DefaultStyleKey = typeof(ScheduleControl);
 
         private static void OnTimeLineColorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -138,26 +136,26 @@ namespace Scheduler
         {
             base.OnApplyTemplate();
 
-            this.parentGrid = this.GetTemplateChild("PART_ParentGrid") as Grid;
-            this.rulerGrid = this.GetTemplateChild("PART_RulerGrid") as RulerGrid;
-            this.scrollViewer = this.GetTemplateChild("PART_ScrollViewer") as ScrollViewer;
-            this.dateHeader = this.GetTemplateChild("PART_DateHeader") as DateHeader;
-            //this.timerulerPanel = this.GetTemplateChild("PART_TimeRulerPanel") as TimeRulerPanel;
-            this.timeLineHeader = this.GetTemplateChild("PART_TimeLineHeader") as TimeLineHeader;
+            parentGrid = GetTemplateChild("PART_ParentGrid") as Grid;
+            rulerGrid = GetTemplateChild("PART_RulerGrid") as RulerGrid;
+            scrollViewer = GetTemplateChild("PART_ScrollViewer") as ScrollViewer;
+            dateHeader = GetTemplateChild("PART_DateHeader") as DateHeader;
+            timerulerPanel = GetTemplateChild("PART_TimeRulerPanel") as TimeRulerPanel;
+            timeLineHeader = GetTemplateChild("PART_TimeLineHeader") as TimeLineHeader;
 
             HandleEvents();
         }
 
         private void HandleEvents()
         {
-            this.SizeChanged += ScheduleControl_SizeChanged;
-            this.Loaded += ScheduleControl_Loaded;
+            SizeChanged += ScheduleControl_SizeChanged;
+            Loaded += ScheduleControl_Loaded;
         }
 
         private void UnHandleEvents()
         {
-            this.SizeChanged -= ScheduleControl_SizeChanged;
-            this.Loaded -= ScheduleControl_Loaded;
+            SizeChanged -= ScheduleControl_SizeChanged;
+            Loaded -= ScheduleControl_Loaded;
         }
 
         private void ScheduleControl_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -165,7 +163,7 @@ namespace Scheduler
             if (horizontalScrollBar == null || verticalScrollBar == null)
             {
                 List<ScrollBar> scrollBars = new List<ScrollBar>();
-                Helper.GetChildOfType<ScrollBar>(this.scrollViewer, ref scrollBars);
+                Helper.GetChildOfType<ScrollBar>(scrollViewer, ref scrollBars);
                 foreach (var scrollBar in scrollBars)
                 {
                     if (scrollBar.Orientation == Orientation.Horizontal)
@@ -180,27 +178,23 @@ namespace Scheduler
 
             }
 
-            this.viewPortArea.Width = this.scrollViewer.ActualWidth - this.verticalScrollBar.ActualWidth;
-            this.viewPortArea.Height = this.scrollViewer.ActualHeight - this.horizontalScrollBar.ActualHeight;
+            viewPortArea.Width = scrollViewer.ActualWidth - verticalScrollBar.ActualWidth;
+            viewPortArea.Height = scrollViewer.ActualHeight - horizontalScrollBar.ActualHeight;
 
-            this.ReCalculateChildControlWidthToReRender();
+            ReCalculateChildControlWidthToReRender();
         }
 
         private void ScheduleControl_Loaded(object sender, RoutedEventArgs e)
         {
-            this.ReCalculateChildControlWidthToReRender();
-            //InitiateTimeRulerRendering(GetTimeLineProviders(sender as DependencyObject));
+            ReCalculateChildControlWidthToReRender();
         }
 
         private void ReCalculateChildControlWidthToReRender()
         {
-            if (this.ViewRange > 0)
+            if (ViewRange > 0)
             {
-                this.parentGrid.Width = this.ViewPortArea.Width * this.ViewRange;
+                parentGrid.Width = ViewPortArea.Width * ViewRange;
             }
         }
-
-        //private void InitiateTimeRulerRendering(IEnumerable<TimeRuler> timeRulers) =>
-        //this.timerulerPanel.TimeRulers = new ObservableCollection<TimeRuler>(timeRulers);
     }
 }
