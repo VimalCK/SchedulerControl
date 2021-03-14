@@ -64,9 +64,7 @@ namespace Scheduler
         private static void OnScheduleDateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
-            //control.rulerGrid?.InvalidateVisual();
-            //control.timeLineHeader?.InvalidateVisual();
-            //control.dateHeader?.ReArrangeHeader();
+            control.dateHeader?.ReArrangeHeaders();
         }
 
         private static void OnTimeLineProvidersChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -191,7 +189,6 @@ namespace Scheduler
         private void ScheduleControl_Loaded(object sender, RoutedEventArgs e)
         {
             this.ReCalculateChildControlWidthToReRender();
-            this.parentGrid.Width = this.parentGrid.ActualWidth * this.ViewRange;
             //InitiateTimeRulerRendering(GetTimeLineProviders(sender as DependencyObject));
         }
 
@@ -200,7 +197,6 @@ namespace Scheduler
             if (this.ViewRange > 0)
             {
                 this.parentGrid.Width = this.ViewPortArea.Width * this.ViewRange;
-                //this.dateHeader.Width   = this.parentGrid.ActualWidth;
             }
         }
 

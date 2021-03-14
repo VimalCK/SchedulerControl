@@ -1,29 +1,31 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace Scheduler
 {
-    internal sealed class DateHeader : StackPanel
+    internal sealed class DateHeader : Grid
     {
         private int currentHeaderIndex;
         private ScheduleControl parent;
-        private FrameworkElement currentHeader;
         private TranslateTransform transform;
 
         public DateHeader()
         {
             DefaultStyleKey = typeof(DateHeader);
-            Orientation = Orientation.Horizontal;
             Loaded += DateHeader_Loaded;
-            var dp = DependencyPropertyDescriptor.FromProperty(DateHeader.ActualWidthProperty, typeof(DateHeader));
-            dp.AddValueChanged(this, Test);
         }
 
-        private void Test(object sender, EventArgs e)
+        ~DateHeader() => RemoveHandlers();
+
+        protected override void OnInitialized(EventArgs e)
+        {
+            base.OnInitialized(e);
+            parent = (ScheduleControl)TemplatedParent;
+        }
+
+        internal void ReArrangeHeaders()
         {
             if (parent.ViewRange > 0)
             {
@@ -41,13 +43,18 @@ namespace Scheduler
                         }
                         else
                         {
+                            ColumnDefinitions.Add(new ColumnDefinition
+                            {
+                                Width = new GridLength(1, GridUnitType.Star)
+                            });
+
                             label = new Label()
                             {
                                 BorderThickness = new Thickness(1),
                                 VerticalAlignment = VerticalAlignment.Center,
                                 FontSize = 10,
-                                BorderBrush = Brushes.Black,
-                                Background = index % 2 == 0 ? Brushes.LightGreen : Brushes.LightYellow,
+                                Background = Brushes.White,
+                                BorderBrush = parent.TimeLineColor,
                                 RenderTransform = new TranslateTransform(0, 0)
                             };
 
@@ -55,36 +62,21 @@ namespace Scheduler
                         }
 
                         label.Content = $" {parent.StartDate.AddDays(index).ToString("dd-MM-yyyy")}";
-                        //label.Width = parent.ViewPortArea.Width;
+                        Grid.SetColumn(label, index);
                         Panel.SetZIndex(label, index);
                     }
                 }
                 else if (requiredLabels < 0)
                 {
-                    Children.RemoveRange(0, Math.Abs(requiredLabels));
+                    Children.RemoveRange(parent.ViewRange, Math.Abs(requiredLabels));
+                    ColumnDefinitions.RemoveRange(parent.ViewRange, Math.Abs(requiredLabels));
                     for (int index = 0; index < existingCount; index++)
                     {
                         var label = (Label)Children[index];
                         label.Content = $" {parent.StartDate.AddDays(index).ToString("dd-MM-yyyy")}";
-                        label.Width = parent.ViewPortArea.Width;
-                    }
-                }
-                else
-                {
-                    foreach (FrameworkElement item in Children)
-                    {
-                        //item.Width = parent.ViewPortArea.Width;
                     }
                 }
             }
-        }
-
-        ~DateHeader() => RemoveHandlers();
-
-        protected override void OnInitialized(EventArgs e)
-        {
-            base.OnInitialized(e);
-            parent = (ScheduleControl)TemplatedParent;
         }
 
         internal void SetBorderColor(Brush brush)
@@ -98,11 +90,6 @@ namespace Scheduler
             {
                 label.BorderBrush = brush;
             }
-        }
-
-        private void DateHeaderActualWidthChanged(object sender, EventArgs e)
-        {
-
         }
 
         private void DateHeader_Loaded(object sender, RoutedEventArgs e)
@@ -143,16 +130,13 @@ namespace Scheduler
                 return false;
             }
 
-            currentHeader = (FrameworkElement)Children[currentHeaderIndex];
-            transform = (TranslateTransform)currentHeader.RenderTransform;
+            transform = (TranslateTransform)Children[currentHeaderIndex].RenderTransform;
             return true;
         }
 
         private void RemoveHandlers()
         {
             parent.scrollViewer.ScrollChanged -= ScrollViewer_ScrollChanged;
-            DependencyPropertyDescriptor.FromProperty(DateHeader.ActualWidthProperty,
-                typeof(DateHeader)).RemoveValueChanged(this, DateHeaderActualWidthChanged);
         }
     }
 }
