@@ -37,6 +37,10 @@
                     Click="Button_Click_1" />
             <Button Content="TimeLine Zoom"
                     Click="Button_Click_2" />
+            <Button Content="Add TimeLine"
+                    Click="Button_Click_3" />
+            <Button Content="Remove TimeLine"
+                    Click="Button_Click_4" />
         </WrapPanel>
     </Grid>
 </Window>

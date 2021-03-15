@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Scheduler;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,8 +26,6 @@ namespace WpfApp1
         public MainWindow()
         {
             InitializeComponent();
-            //sdt.SelectedDate = DateTime.Now.Date;
-            //edt.SelectedDate = DateTime.Now.Date.AddDays(2);
             this.DataContext = this;
         }
 
@@ -72,6 +71,16 @@ namespace WpfApp1
                 default:
                     break;
             }
+        }
+
+        private void Button_Click_3(object sender, RoutedEventArgs e)
+        {
+            sc.TimeLineProviders.Add(new TimeRuler { Color = Brushes.Blue, Time = "-01:00" });
+        }
+
+        private void Button_Click_4(object sender, RoutedEventArgs e)
+        {
+            sc.TimeLineProviders.RemoveAt(sc.TimeLineProviders.Count - 1);
         }
     }
 }

@@ -43,7 +43,7 @@ namespace Scheduler
 
                 currentPosition += DateTime.Now.TimeOfDay.Minutes * minuteGap;
 
-                foreach (var ruler in ScheduleControl.GetTimeLineProviders(parent))
+                foreach (var ruler in parent.TimeLineProviders)
                 {
                     if (!string.IsNullOrEmpty(ruler.Time))
                     {
