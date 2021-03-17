@@ -88,39 +88,11 @@ namespace Scheduler
             set => SetValue(TimeLineProvidersProperty, value);
         }
 
-        public Size ViewPortArea
-        {
-            get
-            {
-                viewPortArea.Width = scrollViewer.ActualWidth - verticalScrollBar.ActualWidth;
-                viewPortArea.Height = scrollViewer.ActualHeight - horizontalScrollBar.ActualHeight;
-                return viewPortArea;
-            }
-        }
+        public Size ViewPortArea => viewPortArea;
 
-        public Size RequiredArea
-        {
-            get
-            {
-                requiredArea.Width = viewPortArea.Width;
-                requiredArea.Height = viewPortArea.Height;
-                switch (TimeLineZoom)
-                {
-                    case TimeLineZoom.Twelve:
-                        requiredArea.Width *= 2;
-                        break;
-                    case TimeLineZoom.FortyEight:
-                        requiredArea.Width /= 2;
-                        break;
-                    default:
-                        break;
-                }
+        public Size RequiredArea => requiredArea;
 
-                return requiredArea;
-            }
-        }
-
-        internal int ViewRange => (EndDate - StartDate).Days + 1;
+        internal int ViewRange => (EndDate.Date - StartDate.Date).Days + 1;
 
         public ScheduleControl()
         {
@@ -137,12 +109,12 @@ namespace Scheduler
         private static void OnTimeLineZoomChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
-            control.ReCalculateChildControlWidthToReRender();
+            control.InvalidateChildControlsToReRender();
         }
         private static void OnScheduleDateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
-            control.ReCalculateChildControlWidthToReRender();
+            control.InvalidateChildControlsToReRender();
         }
 
         private static void OnTimeLineProvidersChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -206,20 +178,40 @@ namespace Scheduler
 
             }
 
-            ReCalculateChildControlWidthToReRender();
+            InvalidateChildControlsToReRender();
         }
 
         private void ScheduleControl_Loaded(object sender, RoutedEventArgs e)
         {
-            ReCalculateChildControlWidthToReRender();
+            InvalidateChildControlsToReRender();
         }
 
-        private void ReCalculateChildControlWidthToReRender()
+        private void InvalidateChildControlsToReRender()
         {
-
-
+            InvalidateViewPortArea();
             parentGrid.Width = RequiredArea.Width * ViewRange;
             dateHeader.ReArrangeHeaders();
+        }
+
+        private void InvalidateViewPortArea()
+        {
+            viewPortArea.Width = scrollViewer.ActualWidth - verticalScrollBar.ActualWidth;
+            viewPortArea.Height = scrollViewer.ActualHeight - horizontalScrollBar.ActualHeight;
+
+            switch (TimeLineZoom)
+            {
+                case TimeLineZoom.Twelve:
+                    requiredArea.Width = viewPortArea.Width * 2;
+                    break;
+                case TimeLineZoom.TwentyFour:
+                    requiredArea.Width = viewPortArea.Width * 1;
+                    break;
+                case TimeLineZoom.FortyEight:
+                    requiredArea.Width = viewPortArea.Width / 2;
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }

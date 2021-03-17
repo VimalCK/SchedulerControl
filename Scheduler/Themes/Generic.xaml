@@ -5,7 +5,7 @@
     <Style x:Key="ParentGridStyle"
            TargetType="Grid">
         <Setter Property="VerticalAlignment"
-                Value="Top" />
+                Value="Stretch" />
         <Setter Property="HorizontalAlignment"
                 Value="Left" />
     </Style>
