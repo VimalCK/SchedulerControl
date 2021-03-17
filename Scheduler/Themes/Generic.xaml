@@ -2,6 +2,14 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:Scheduler">
 
+    <Style x:Key="ParentGridStyle"
+           TargetType="Grid">
+        <Setter Property="VerticalAlignment"
+                Value="Top" />
+        <Setter Property="HorizontalAlignment"
+                Value="Left" />
+    </Style>
+
     <Style TargetType="{x:Type local:Scheduler}">
         <Setter Property="UseLayoutRounding"
                 Value="True" />
@@ -57,7 +65,8 @@
                                       HorizontalScrollBarVisibility="Auto"
                                       VerticalScrollBarVisibility="Auto"
                                       Grid.Column="1">
-                            <Grid x:Name="PART_ParentGrid">
+                            <Grid x:Name="PART_ParentGrid"
+                                  Style="{StaticResource ParentGridStyle}">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="25" />
                                     <RowDefinition Height="25" />

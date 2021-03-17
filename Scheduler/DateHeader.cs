@@ -98,13 +98,12 @@ namespace Scheduler
             if (TrySettingTransformElementValues())
             {
                 var change = transform.X + e.HorizontalChange;
-
                 switch (change)
                 {
-                    case double c when c > parent.ViewPortArea.Width:
-                        transform.X = parent.ViewPortArea.Width;
+                    case double c when c > parent.RequiredArea.Width:
+                        transform.X = parent.RequiredArea.Width;
                         TrySettingTransformElementValues(++currentHeaderIndex);
-                        transform.X = change - parent.ViewPortArea.Width;
+                        transform.X = change - parent.RequiredArea.Width;
                         break;
                     case double c when c < 0:
                         transform.X = 0;

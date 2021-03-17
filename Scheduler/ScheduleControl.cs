@@ -20,6 +20,7 @@ namespace Scheduler
         private ScrollBar horizontalScrollBar;
         private ScrollBar verticalScrollBar;
         private Size viewPortArea;
+        private Size requiredArea;
         private Grid parentGrid;
         private RulerGrid rulerGrid;
         private DateHeader dateHeader;
@@ -87,7 +88,37 @@ namespace Scheduler
             set => SetValue(TimeLineProvidersProperty, value);
         }
 
-        public Size ViewPortArea => viewPortArea;
+        public Size ViewPortArea
+        {
+            get
+            {
+                viewPortArea.Width = scrollViewer.ActualWidth - verticalScrollBar.ActualWidth;
+                viewPortArea.Height = scrollViewer.ActualHeight - horizontalScrollBar.ActualHeight;
+                return viewPortArea;
+            }
+        }
+
+        public Size RequiredArea
+        {
+            get
+            {
+                requiredArea.Width = viewPortArea.Width;
+                requiredArea.Height = viewPortArea.Height;
+                switch (TimeLineZoom)
+                {
+                    case TimeLineZoom.Twelve:
+                        requiredArea.Width *= 2;
+                        break;
+                    case TimeLineZoom.FortyEight:
+                        requiredArea.Width /= 2;
+                        break;
+                    default:
+                        break;
+                }
+
+                return requiredArea;
+            }
+        }
 
         internal int ViewRange => (EndDate - StartDate).Days + 1;
 
@@ -175,39 +206,20 @@ namespace Scheduler
 
             }
 
-            viewPortArea.Width = scrollViewer.ActualWidth - verticalScrollBar.ActualWidth;
-            viewPortArea.Height = scrollViewer.ActualHeight - horizontalScrollBar.ActualHeight;
-
             ReCalculateChildControlWidthToReRender();
         }
 
         private void ScheduleControl_Loaded(object sender, RoutedEventArgs e)
         {
             ReCalculateChildControlWidthToReRender();
-
         }
 
         private void ReCalculateChildControlWidthToReRender()
         {
-            if (ViewRange > 0)
-            {
-                switch (TimeLineZoom)
-                {
-                    case TimeLineZoom.Twelve:
-                        parentGrid.Width = (ViewPortArea.Width * 2) * ViewRange;
-                        break;
-                    case TimeLineZoom.TwentyFour:
-                        parentGrid.Width = ViewPortArea.Width * ViewRange;
-                        break;
-                    case TimeLineZoom.FortyEight:
-                        parentGrid.Width = (ViewPortArea.Width / 2) * ViewRange;
-                        break;
-                    default:
-                        break;
-                }
 
-                dateHeader.ReArrangeHeaders();
-            }
+
+            parentGrid.Width = RequiredArea.Width * ViewRange;
+            dateHeader.ReArrangeHeaders();
         }
     }
 }
