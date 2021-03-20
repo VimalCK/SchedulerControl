@@ -189,7 +189,16 @@ namespace Scheduler
         private void InvalidateChildControlsToReRender()
         {
             InvalidateViewPortArea();
-            parentGrid.Width = RequiredArea.Width * ViewRange;
+            if (parentGrid.Width == RequiredArea.Width * ViewRange)
+            {
+                timeLineHeader.InvalidateVisual();
+                rulerGrid.InvalidateVisual();
+            }
+            else
+            {
+                parentGrid.Width = RequiredArea.Width * ViewRange;
+            }
+
             dateHeader.ReArrangeHeaders();
         }
 
@@ -204,9 +213,15 @@ namespace Scheduler
                     requiredArea.Width = viewPortArea.Width * 2;
                     break;
                 case TimeLineZoom.TwentyFour:
-                    requiredArea.Width = viewPortArea.Width * 1;
+                    requiredArea.Width = viewPortArea.Width;
                     break;
                 case TimeLineZoom.FortyEight:
+                    if (ViewRange.Equals(1))
+                    {
+                        TimeLineZoom = TimeLineZoom.TwentyFour;
+                        break;
+                    }
+
                     requiredArea.Width = viewPortArea.Width / 2;
                     break;
                 default:
