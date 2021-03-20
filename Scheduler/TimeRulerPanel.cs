@@ -10,7 +10,6 @@ namespace Scheduler
     {
         private DispatcherTimer timer;
         private ScheduleControl parent;
-        //internal ObservableCollection<TimeRuler> TimeRulers { get; set; } = new ObservableCollection<TimeRuler>();
 
         public TimeRulerPanel()
         {
@@ -37,29 +36,27 @@ namespace Scheduler
 
             if (RenderRequired())
             {
-                var verticalGap = ActualWidth / ((int)parent.TimeLineZoom * parent.ViewRange);
+                var verticalGap = parent.ViewPortArea.Width / (int)parent.TimeLineZoom;
                 var currentPosition = verticalGap * (((DateTime.Now - parent.StartDate).Days * 24) + DateTime.Now.TimeOfDay.Hours);
                 var minuteGap = verticalGap / 60;
 
                 currentPosition += DateTime.Now.TimeOfDay.Minutes * minuteGap;
-
                 foreach (var ruler in parent.TimeLineProviders)
                 {
+                    double position = currentPosition;
                     if (!string.IsNullOrEmpty(ruler.Time))
                     {
                         var time = ruler.Time.Split(':');
-
                         if (time.Length == 0)
                         {
                             throw new Exception();
                         }
 
-                        currentPosition += (verticalGap * int.Parse(time[0])) + (int.Parse(time[1]) * minuteGap);
+                        position += (verticalGap * int.Parse(time[0])) + (int.Parse(time[1]) * minuteGap);
                     }
 
                     var pen = new Pen(ruler.Color, 2);
-
-                    drawingContext.DrawLine(pen, new Point(currentPosition, 0), new Point(currentPosition, ActualHeight));
+                    drawingContext.DrawLine(pen, new Point(position, 0), new Point(position, ActualHeight));
                 }
             }
 
