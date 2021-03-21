@@ -1,6 +1,7 @@
 ﻿using Scheduler;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -81,6 +82,17 @@ namespace WpfApp1
         private void Button_Click_4(object sender, RoutedEventArgs e)
         {
             sc.TimeLineProviders.RemoveAt(sc.TimeLineProviders.Count - 1);
+        }
+
+        private void Button_Click_5(object sender, RoutedEventArgs e)
+        {
+            var items = new List<IAppointment>();
+            for (int i = 0; i < 10; i++)
+            {
+               sc.AppointmentSource.Add(new Appointment());
+            }
+
+            sc.AppointmentSource = new ObservableCollection<IAppointment>(items);
         }
     }
 }

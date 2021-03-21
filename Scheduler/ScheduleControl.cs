@@ -15,6 +15,7 @@ namespace Scheduler
     [TemplatePart(Name = "PART_DateHeader", Type = typeof(DateHeader))]
     [TemplatePart(Name = "PART_TimeRulerPanel", Type = typeof(TimeRulerPanel))]
     [TemplatePart(Name = "PART_TimeLineHeader", Type = typeof(TimeLineHeader))]
+    [TemplatePart(Name = "PART_Canvas", Type = typeof(AppointmentRenderingCanvas))]
     public class ScheduleControl : Control
     {
         private ScrollBar horizontalScrollBar;
@@ -26,13 +27,13 @@ namespace Scheduler
         private DateHeader dateHeader;
         private TimeRulerPanel timerulerPanel;
         private TimeLineHeader timeLineHeader;
+        private AppointmentRenderingCanvas canvas;
 
         internal ScrollViewer scrollViewer;
 
 
         public static readonly DependencyProperty TimeLineColorProperty = DependencyProperty.Register(
-            "TimeLineColor", typeof(Brush), typeof(ScheduleControl),
-            new FrameworkPropertyMetadata(Brushes.LightGray, OnTimeLineColorChanged));
+            "TimeLineColor", typeof(Brush), typeof(ScheduleControl), new FrameworkPropertyMetadata(Brushes.LightGray, OnTimeLineColorChanged));
 
         public static readonly DependencyProperty StartDateProperty = DependencyProperty.Register(
               "StartDate", typeof(DateTime), typeof(ScheduleControl), new PropertyMetadata(DateTime.Now, OnScheduleDateChanged));
@@ -43,14 +44,21 @@ namespace Scheduler
         public static readonly DependencyProperty TimeLineZoomProperty = DependencyProperty.Register(
             "TimeLineZoom", typeof(TimeLineZoom), typeof(ScheduleControl), new PropertyMetadata(TimeLineZoom.TwentyFour, OnTimeLineZoomChanged));
 
-        public static readonly DependencyProperty IsExtendedModeProperty =
-            DependencyProperty.Register("IsExtendedMode", typeof(bool), typeof(ScheduleControl),
-                new PropertyMetadata(default(bool), OnIsExtendedModeChanges));
+        public static readonly DependencyProperty IsExtendedModeProperty = DependencyProperty.Register(
+            "IsExtendedMode", typeof(bool), typeof(ScheduleControl), new PropertyMetadata(default(bool), OnIsExtendedModeChanges));
 
-        public static readonly DependencyProperty TimeLineProvidersProperty =
-            DependencyProperty.Register("TimeLineProviders", typeof(FreezableCollection<TimeRuler>),
-                typeof(ScheduleControl), new PropertyMetadata(OnTimeLineProvidersChanged));
+        public static readonly DependencyProperty TimeLineProvidersProperty = DependencyProperty.Register(
+            "TimeLineProviders", typeof(FreezableCollection<TimeRuler>), typeof(ScheduleControl), new PropertyMetadata(OnTimeLineProvidersChanged));
 
+        public static readonly DependencyProperty AppointmentSourceProperty = DependencyProperty.Register(
+            "AppointmentSource", typeof(ObservableCollection<IAppointment>), typeof(ScheduleControl),
+            new PropertyMetadata(new ObservableCollection<IAppointment>(), OnAppointmentSourceChanged));
+
+        public ObservableCollection<IAppointment> AppointmentSource
+        {
+            get => (ObservableCollection<IAppointment>)GetValue(AppointmentSourceProperty);
+            set => SetValue(AppointmentSourceProperty, value);
+        }
 
         public bool IsExtendedMode
         {
@@ -130,6 +138,18 @@ namespace Scheduler
             control.timeLineHeader?.InvalidateVisual();
         }
 
+        private static void OnAppointmentSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is ScheduleControl control)
+            {
+            }
+        }
+
+        private static void AppointmentSource_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+
+        }
+
         ~ScheduleControl() => UnHandleEvents();
 
         public override void OnApplyTemplate()
@@ -142,6 +162,7 @@ namespace Scheduler
             dateHeader = GetTemplateChild("PART_DateHeader") as DateHeader;
             timerulerPanel = GetTemplateChild("PART_TimeRulerPanel") as TimeRulerPanel;
             timeLineHeader = GetTemplateChild("PART_TimeLineHeader") as TimeLineHeader;
+            canvas = GetTemplateChild("PART_Canvas") as AppointmentRenderingCanvas;
 
             HandleEvents();
         }
@@ -150,12 +171,14 @@ namespace Scheduler
         {
             SizeChanged += ScheduleControl_SizeChanged;
             Loaded += ScheduleControl_Loaded;
+            AppointmentSource.CollectionChanged += AppointmentSource_CollectionChanged;
         }
 
         private void UnHandleEvents()
         {
             SizeChanged -= ScheduleControl_SizeChanged;
             Loaded -= ScheduleControl_Loaded;
+            AppointmentSource.CollectionChanged -= AppointmentSource_CollectionChanged;
         }
 
         private void ScheduleControl_SizeChanged(object sender, SizeChangedEventArgs e)

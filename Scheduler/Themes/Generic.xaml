@@ -10,20 +10,6 @@
                 Value="Left" />
     </Style>
 
-    <Style TargetType="{x:Type local:Scheduler}">
-        <Setter Property="UseLayoutRounding"
-                Value="True" />
-        <Setter Property="Background"
-                Value="Transparent" />
-        <Setter Property="ItemsPanel">
-            <Setter.Value>
-                <ItemsPanelTemplate>
-                    <Canvas x:Name="PART_SchedulerCanvas" />
-                </ItemsPanelTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
     <Style TargetType="{x:Type local:DateHeader}">
         <Setter Property="UseLayoutRounding"
                 Value="True" />
@@ -81,8 +67,8 @@
                                 <local:RulerGrid x:Name="PART_RulerGrid"
                                                  Grid.Row="2" />
 
-                                <!-- <local:Scheduler x:Name="PART_Scheduler"
-                                                 Grid.Row="2" />-->
+                                <local:AppointmentRenderingCanvas x:Name="PART_Canvas"
+                                                                  Grid.Row="2" />
 
                                 <local:TimeRulerPanel x:Name="PART_TimeRulerPanel"
                                                       Grid.Row="2" />

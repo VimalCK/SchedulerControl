@@ -41,6 +41,8 @@
                     Click="Button_Click_3" />
             <Button Content="Remove TimeLine"
                     Click="Button_Click_4" />
+            <Button Content="Add Appointments"
+                    Click="Button_Click_5" />
         </WrapPanel>
     </Grid>
 </Window>
