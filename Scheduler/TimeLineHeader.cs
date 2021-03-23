@@ -23,6 +23,7 @@ namespace Scheduler
 
                 if (VerticalLines > 0)
                 {
+                    var clippingPoint = new Point();
                     var renderPoint = new Point(0, ActualHeight / 3);
                     var pixelPerDip = VisualTreeHelper.GetDpi(this).PixelsPerDip;
                     var headerText = 0;
@@ -39,8 +40,15 @@ namespace Scheduler
                         var formattedTime = new FormattedText($" {TimeSpan.FromHours(headerText).ToString(@"hh\:mm")}", cultureInfo,
                                 FlowDirection.LeftToRight, typeface, 10D, Brushes.Gray, pixelPerDip);
 
+                        drawingContext.PushClip(new RectangleGeometry(new Rect(clippingPoint, new Size
+                        {
+                            Width = VerticalGap - 3,
+                            Height = ActualHeight
+                        })));
+
                         drawingContext.DrawText(formattedTime, renderPoint);
-                        renderPoint.X += VerticalGap;
+                        drawingContext.Pop();
+                        clippingPoint.X = renderPoint.X += VerticalGap;
                         headerText = headerText >= 23 ? 0 : headerText + 1;
                     }
                 }
