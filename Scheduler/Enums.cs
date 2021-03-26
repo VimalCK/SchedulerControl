@@ -10,4 +10,10 @@ namespace Scheduler
         TwentyFour = 24,
         FortyEight = 48
     }
+
+    public enum ExtendedMode
+    {
+        Normal = 30,
+        Zoom = 60
+    }
 }

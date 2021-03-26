@@ -82,6 +82,7 @@
                                                  Grid.Row="2" />
 
                                 <local:Scheduler x:Name="PART_Scheduler"
+                                                 ItemsSource="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=AppointmentSource}"
                                                  Grid.Row="2" />
 
                                 <local:TimeRulerPanel x:Name="PART_TimeRulerPanel"

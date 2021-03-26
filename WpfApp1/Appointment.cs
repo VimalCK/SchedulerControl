@@ -10,7 +10,12 @@ namespace WpfApp1
         private DateTime startDate;
         private DateTime endDate;
         private string description;
-
+        private string group;
+        public string Group
+        {
+            get => group;
+            set => group = value;
+        }
         public DateTime StartDate
         {
             get => startDate;

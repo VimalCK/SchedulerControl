@@ -102,6 +102,8 @@ namespace Scheduler
 
         internal int ViewRange => (EndDate.Date - StartDate.Date).Days + 1;
 
+        internal int ExtendedModeSize => IsExtendedMode ? (int)ExtendedMode.Zoom : (int)ExtendedMode.Normal;
+
         public ScheduleControl()
         {
             DefaultStyleKey = typeof(ScheduleControl);
@@ -142,6 +144,7 @@ namespace Scheduler
         {
             if (d is ScheduleControl control)
             {
+                control.AppointmentSource.CollectionChanged += AppointmentSource_CollectionChanged;
             }
         }
 
@@ -171,7 +174,6 @@ namespace Scheduler
         {
             SizeChanged += ScheduleControl_SizeChanged;
             Loaded += ScheduleControl_Loaded;
-            AppointmentSource.CollectionChanged += AppointmentSource_CollectionChanged;
         }
 
         private void UnHandleEvents()

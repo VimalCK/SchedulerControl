@@ -89,10 +89,18 @@ namespace WpfApp1
             var items = new List<IAppointment>();
             for (int i = 0; i < 10; i++)
             {
-               sc.AppointmentSource.Add(new Appointment());
+                items.Add(new Appointment());
             }
 
             sc.AppointmentSource = new ObservableCollection<IAppointment>(items);
+        }
+
+        private void Button_Click_6(object sender, RoutedEventArgs e)
+        {
+            for (int i = 0; i < 20; i++)
+            {
+                sc.AppointmentSource.Add(new Appointment());
+            }
         }
     }
 }

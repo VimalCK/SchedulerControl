@@ -11,9 +11,7 @@ namespace Scheduler
     {
         public AppointmentItem()
         {
-            Width = 100;
-            Height = 30;
-            Background = Brushes.Red;
+            DefaultStyleKey = typeof(AppointmentItem);
         }
     }
 }

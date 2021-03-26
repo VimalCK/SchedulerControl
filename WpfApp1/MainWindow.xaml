@@ -12,7 +12,7 @@
         Width="800">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
+            <RowDefinition Height="2*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
@@ -41,8 +41,10 @@
                     Click="Button_Click_3" />
             <Button Content="Remove TimeLine"
                     Click="Button_Click_4" />
-            <Button Content="Add Appointments"
+            <Button Content="Load Appointments"
                     Click="Button_Click_5" />
+            <Button Content="Add Appointment"
+                    Click="Button_Click_6" />
         </WrapPanel>
     </Grid>
 </Window>
