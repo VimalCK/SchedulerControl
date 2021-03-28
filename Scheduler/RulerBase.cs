@@ -70,8 +70,8 @@ namespace Scheduler
 
             for (int i = 0; i <= VerticalLines; i++)
             {
-                endPoint.X = startPoint.X = i * VerticalGap;
                 drawingContext.DrawLine(pen, startPoint, endPoint);
+                endPoint.X = startPoint.X = i * VerticalGap;
             }
 
             startPoint = new Point(0, 0);

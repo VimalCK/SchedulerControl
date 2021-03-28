@@ -15,7 +15,7 @@ namespace Scheduler
     [TemplatePart(Name = "PART_DateHeader", Type = typeof(DateHeader))]
     [TemplatePart(Name = "PART_TimeRulerPanel", Type = typeof(TimeRulerPanel))]
     [TemplatePart(Name = "PART_TimeLineHeader", Type = typeof(TimeLineHeader))]
-    [TemplatePart(Name = "PART_Canvas", Type = typeof(AppointmentRenderingCanvas))]
+    //[TemplatePart(Name = "PART_Canvas", Type = typeof(AppointmentRenderingCanvas))]
     public class ScheduleControl : Control
     {
         private ScrollBar horizontalScrollBar;
@@ -27,7 +27,7 @@ namespace Scheduler
         private DateHeader dateHeader;
         private TimeRulerPanel timerulerPanel;
         private TimeLineHeader timeLineHeader;
-        private AppointmentRenderingCanvas canvas;
+        //private AppointmentRenderingCanvas canvas;
 
         internal ScrollViewer scrollViewer;
 
@@ -53,6 +53,16 @@ namespace Scheduler
         public static readonly DependencyProperty AppointmentSourceProperty = DependencyProperty.Register(
             "AppointmentSource", typeof(ObservableCollection<IAppointment>), typeof(ScheduleControl),
             new PropertyMetadata(new ObservableCollection<IAppointment>(), OnAppointmentSourceChanged));
+
+        public static readonly DependencyProperty GroupHeaderProperty = DependencyProperty.Register(
+            "GroupHeader", typeof(string), typeof(ScheduleControl), new PropertyMetadata(string.Empty));
+
+
+        public string GroupHeader
+        {
+            get => (string)GetValue(GroupHeaderProperty);
+            set => SetValue(GroupHeaderProperty, value);
+        }
 
         public ObservableCollection<IAppointment> AppointmentSource
         {
@@ -165,7 +175,7 @@ namespace Scheduler
             dateHeader = GetTemplateChild("PART_DateHeader") as DateHeader;
             timerulerPanel = GetTemplateChild("PART_TimeRulerPanel") as TimeRulerPanel;
             timeLineHeader = GetTemplateChild("PART_TimeLineHeader") as TimeLineHeader;
-            canvas = GetTemplateChild("PART_Canvas") as AppointmentRenderingCanvas;
+            //canvas = GetTemplateChild("PART_Canvas") as AppointmentRenderingCanvas;
 
             HandleEvents();
         }

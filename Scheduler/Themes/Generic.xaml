@@ -10,6 +10,12 @@
                 Value="Left" />
     </Style>
 
+    <Style x:Key="HeaderPanelStyle"
+           TargetType="StackPanel">
+        <Setter Property="Width"
+                Value="150" />
+    </Style>
+
     <Style TargetType="{x:Type local:DateHeader}">
         <Setter Property="UseLayoutRounding"
                 Value="True" />
@@ -56,21 +62,29 @@
                 <ControlTemplate TargetType="{x:Type local:ScheduleControl}">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"
-                                              MinWidth="150" />
-                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition />
                         </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="25" />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel x:Name="PART_HeaderPanel"
+                                    Grid.Row="1"
+                                    Style="{StaticResource HeaderPanelStyle}" />
 
                         <ScrollViewer x:Name="PART_ScrollViewer"
                                       HorizontalScrollBarVisibility="Auto"
                                       VerticalScrollBarVisibility="Auto"
-                                      Grid.Column="1">
+                                      Grid.Column="1"
+                                      Grid.RowSpan="2">
                             <Grid x:Name="PART_ParentGrid"
                                   Style="{StaticResource ParentGridStyle}">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="25" />
                                     <RowDefinition Height="25" />
-                                    <RowDefinition Height="*" />
+                                    <RowDefinition />
                                 </Grid.RowDefinitions>
 
                                 <local:DateHeader x:Name="PART_DateHeader" />

@@ -54,7 +54,7 @@ namespace Scheduler
 
                         label = new Label()
                         {
-                            BorderThickness = new Thickness(1),
+                            BorderThickness = new Thickness(.5, .5, .5, 0),
                             VerticalAlignment = VerticalAlignment.Center,
                             FontSize = 10,
                             Background = Brushes.White,
