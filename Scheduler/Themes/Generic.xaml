@@ -10,12 +10,6 @@
                 Value="Left" />
     </Style>
 
-    <Style x:Key="HeaderPanelStyle"
-           TargetType="StackPanel">
-        <Setter Property="Width"
-                Value="150" />
-    </Style>
-
     <Style TargetType="{x:Type local:DateHeader}">
         <Setter Property="UseLayoutRounding"
                 Value="True" />
@@ -45,6 +39,8 @@
                 Value="True" />
         <Setter Property="Background"
                 Value="Transparent" />
+        <Setter Property="BorderThickness"
+                Value="0" />
         <Setter Property="ItemsPanel">
             <Setter.Value>
                 <ItemsPanelTemplate>
@@ -65,20 +61,18 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="25" />
-                            <RowDefinition />
-                        </Grid.RowDefinitions>
 
-                        <StackPanel x:Name="PART_HeaderPanel"
-                                    Grid.Row="1"
-                                    Style="{StaticResource HeaderPanelStyle}" />
+                        <Grid>
+                            <Border BorderThickness=".5"
+                                    BorderBrush="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=TimeLineColor}">
+
+                            </Border>
+                        </Grid>
 
                         <ScrollViewer x:Name="PART_ScrollViewer"
                                       HorizontalScrollBarVisibility="Auto"
                                       VerticalScrollBarVisibility="Auto"
-                                      Grid.Column="1"
-                                      Grid.RowSpan="2">
+                                      Grid.Column="1">
                             <Grid x:Name="PART_ParentGrid"
                                   Style="{StaticResource ParentGridStyle}">
                                 <Grid.RowDefinitions>
@@ -88,19 +82,15 @@
                                 </Grid.RowDefinitions>
 
                                 <local:DateHeader x:Name="PART_DateHeader" />
-
                                 <local:TimeLineHeader x:Name="PART_TimeLineHeader"
                                                       Grid.Row="1" />
 
-                                <local:RulerGrid x:Name="PART_RulerGrid"
-                                                 Grid.Row="2" />
-
-                                <local:Scheduler x:Name="PART_Scheduler"
-                                                 ItemsSource="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=AppointmentSource}"
-                                                 Grid.Row="2" />
-
-                                <local:TimeRulerPanel x:Name="PART_TimeRulerPanel"
-                                                      Grid.Row="2" />
+                                <Grid Grid.Row="2">
+                                    <local:RulerGrid x:Name="PART_RulerGrid" />
+                                    <local:Scheduler x:Name="PART_Scheduler"
+                                                     ItemsSource="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=AppointmentSource}" />
+                                    <local:TimeRulerPanel x:Name="PART_TimeRulerPanel" />
+                                </Grid>
                             </Grid>
                         </ScrollViewer>
                     </Grid>

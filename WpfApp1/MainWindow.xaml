@@ -18,7 +18,8 @@
 
         <control:ScheduleControl x:Name="sc"
                                  StartDate="{Binding ElementName=sdt, Path=SelectedDate}"
-                                 EndDate="{Binding ElementName=edt, Path=SelectedDate}">
+                                 EndDate="{Binding ElementName=edt, Path=SelectedDate}"
+                                 GroupHeader="Group">
             <control:ScheduleControl.TimeLineProviders>
                 <control:TimeRuler Color="Red" />
                 <control:TimeRuler Color="Orange"

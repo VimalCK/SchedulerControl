@@ -9,7 +9,7 @@ namespace Scheduler
     internal sealed class DateHeader : Grid
     {
         private int currentHeaderIndex;
-        private ScheduleControl parent;
+        private ScheduleControl templatedParent;
         private TranslateTransform transform;
 
         public DateHeader()
@@ -23,17 +23,18 @@ namespace Scheduler
         protected override void OnInitialized(EventArgs e)
         {
             base.OnInitialized(e);
-            parent = (ScheduleControl)TemplatedParent;
+            templatedParent = (ScheduleControl)TemplatedParent;
         }
 
         internal void ReArrangeHeaders()
         {
-            var range = parent.ViewRange;
+            var range = templatedParent.ViewRange;
             if (range <= 0)
             {
                 return;
             }
 
+            var height = (Parent as Grid).RowDefinitions[0].ActualHeight;
             var existingCount = Children.Count;
             var requiredItems = range - existingCount;
             if (requiredItems > 0)
@@ -58,6 +59,7 @@ namespace Scheduler
                             VerticalAlignment = VerticalAlignment.Center,
                             FontSize = 10,
                             Background = Brushes.White,
+                            Height = height,
                             RenderTransform = new TranslateTransform(0, 0)
                         };
 
@@ -71,18 +73,18 @@ namespace Scheduler
                         });
                     }
 
-                    label.Content = $" {parent.StartDate.AddDays(index).ToString("dd-MM-yyyy")}";
+                    label.Content = $" {templatedParent.StartDate.AddDays(index).ToString("dd-MM-yyyy")}";
                 }
             }
             else if (requiredItems < 0)
             {
                 requiredItems = Math.Abs(requiredItems);
-                Children.RemoveRange(parent.ViewRange, requiredItems);
-                ColumnDefinitions.RemoveRange(parent.ViewRange, requiredItems);
+                Children.RemoveRange(templatedParent.ViewRange, requiredItems);
+                ColumnDefinitions.RemoveRange(templatedParent.ViewRange, requiredItems);
                 for (int index = 0; index < Children.Count; index++)
                 {
                     var label = (Label)Children[index];
-                    label.Content = $" {parent.StartDate.AddDays(index).ToString("dd-MM-yyyy")}";
+                    label.Content = $" {templatedParent.StartDate.AddDays(index).ToString("dd-MM-yyyy")}";
                 }
             }
         }
@@ -90,7 +92,7 @@ namespace Scheduler
         private void DateHeader_Loaded(object sender, RoutedEventArgs e)
         {
             Loaded -= DateHeader_Loaded;
-            parent.scrollViewer.ScrollChanged += ScrollViewer_ScrollChanged;
+            templatedParent.scrollViewer.ScrollChanged += ScrollViewer_ScrollChanged;
         }
 
         private void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
@@ -100,10 +102,10 @@ namespace Scheduler
                 var change = transform.X + e.HorizontalChange;
                 switch (change)
                 {
-                    case double c when c > parent.RequiredArea.Width:
-                        transform.X = parent.RequiredArea.Width;
+                    case double c when c > templatedParent.RequiredArea.Width:
+                        transform.X = templatedParent.RequiredArea.Width;
                         TrySettingTransformElementValues(++currentHeaderIndex);
-                        transform.X = change - parent.RequiredArea.Width;
+                        transform.X = change - templatedParent.RequiredArea.Width;
                         break;
                     case double c when c < 0:
                         transform.X = 0;
@@ -130,7 +132,7 @@ namespace Scheduler
 
         private void RemoveHandlers()
         {
-            parent.scrollViewer.ScrollChanged -= ScrollViewer_ScrollChanged;
+            templatedParent.scrollViewer.ScrollChanged -= ScrollViewer_ScrollChanged;
         }
     }
 }
