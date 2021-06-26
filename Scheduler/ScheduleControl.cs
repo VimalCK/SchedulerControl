@@ -55,7 +55,7 @@ namespace Scheduler
         public static readonly DependencyProperty GroupHeaderProperty = DependencyProperty.Register(
             "GroupHeader", typeof(string), typeof(ScheduleControl), new PropertyMetadata(OnGroupHeaderChanged));
 
-       
+
         public string GroupHeader
         {
             get => (string)GetValue(GroupHeaderProperty);
@@ -150,7 +150,7 @@ namespace Scheduler
 
         private static void OnGroupHeaderChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            
+
         }
 
         private static void OnAppointmentSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -225,6 +225,11 @@ namespace Scheduler
 
         private void InvalidateChildControlsToReRender()
         {
+            if (!IsLoaded)
+            {
+                return;
+            }
+
             InvalidateViewPortArea();
             if (parentGrid.Width == RequiredArea.Width * ViewRange)
             {

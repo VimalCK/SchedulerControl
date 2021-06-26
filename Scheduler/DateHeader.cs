@@ -10,7 +10,6 @@ namespace Scheduler
     {
         private int currentHeaderIndex;
         private ScheduleControl templatedParent;
-        private TranslateTransform transform;
 
         public DateHeader()
         {
@@ -28,38 +27,34 @@ namespace Scheduler
 
         internal void ReArrangeHeaders()
         {
-            var range = templatedParent.ViewRange;
-            if (range <= 0)
+            int range = templatedParent.ViewRange;
+            if (range.Equals(0))
             {
                 return;
             }
 
-            var height = (Parent as Grid).RowDefinitions[0].ActualHeight;
-            var existingCount = Children.Count;
-            var requiredItems = range - existingCount;
-            if (requiredItems > 0)
+            int existingCount = Children.Count;
+            int requiredItems = range - existingCount;
+            if (requiredItems >= 0)
             {
+                Label label;
                 for (int index = 0; index < range; index++)
                 {
-                    Label label;
                     if (index < existingCount)
                     {
                         label = (Label)Children[index];
                     }
                     else
                     {
-                        ColumnDefinitions.Add(new ColumnDefinition
-                        {
-                            Width = new GridLength(1, GridUnitType.Star)
-                        });
+                        ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
                         label = new Label()
                         {
                             BorderThickness = new Thickness(.5, .5, .5, 0),
-                            VerticalAlignment = VerticalAlignment.Center,
+                            VerticalAlignment = VerticalAlignment.Stretch,
+                            VerticalContentAlignment = VerticalAlignment.Center,
                             FontSize = 10,
                             Background = Brushes.White,
-                            Height = height,
                             RenderTransform = new TranslateTransform(0, 0)
                         };
 
@@ -73,7 +68,8 @@ namespace Scheduler
                         });
                     }
 
-                    label.Content = $" {templatedParent.StartDate.AddDays(index).ToString("dd-MM-yyyy")}";
+                    label.Content = $" {templatedParent.StartDate.AddDays(index):dd-MM-yyyy}";
+                    label.Background = index % 2 == 0 ? Brushes.Green : Brushes.Red;
                 }
             }
             else if (requiredItems < 0)
@@ -84,7 +80,7 @@ namespace Scheduler
                 for (int index = 0; index < Children.Count; index++)
                 {
                     var label = (Label)Children[index];
-                    label.Content = $" {templatedParent.StartDate.AddDays(index).ToString("dd-MM-yyyy")}";
+                    label.Content = $" {templatedParent.StartDate.AddDays(index):dd-MM-yyyy}";
                 }
             }
         }
@@ -97,37 +93,38 @@ namespace Scheduler
 
         private void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            if (TrySettingTransformElementValues())
+            if (Children.Count.Equals(0))
             {
-                var change = transform.X + e.HorizontalChange;
-                switch (change)
-                {
-                    case double c when c > templatedParent.RequiredArea.Width:
+                return;
+            }
+
+
+            var transform = (TranslateTransform)Children[currentHeaderIndex].RenderTransform;
+            var change = transform.X + e.HorizontalChange;
+            switch (change)
+            {
+                case double c when c > templatedParent.RequiredArea.Width:
+                    if (currentHeaderIndex < Children.Count)
+                    {
                         transform.X = templatedParent.RequiredArea.Width;
-                        TrySettingTransformElementValues(++currentHeaderIndex);
+                        transform = (TranslateTransform)Children[++currentHeaderIndex].RenderTransform;
                         transform.X = change - templatedParent.RequiredArea.Width;
-                        break;
-                    case double c when c < 0:
+                    }
+
+                    break;
+                case double c when c < 0:
+                    if (currentHeaderIndex > 0)
+                    {
                         transform.X = 0;
-                        TrySettingTransformElementValues(--currentHeaderIndex);
+                        transform = (TranslateTransform)Children[--currentHeaderIndex].RenderTransform;
                         transform.X += change;
-                        break;
-                    default:
-                        transform.X = change;
-                        break;
-                }
-            }
-        }
+                    }
 
-        private bool TrySettingTransformElementValues(int elementIndex = 0)
-        {
-            if (Children.Count == 0 || elementIndex < 0 || elementIndex > Children.Count)
-            {
-                return false;
+                    break;
+                default:
+                    transform.X = change;
+                    break;
             }
-
-            transform = (TranslateTransform)Children[currentHeaderIndex].RenderTransform;
-            return true;
         }
 
         private void RemoveHandlers()

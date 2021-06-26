@@ -58,7 +58,8 @@
                 <ControlTemplate TargetType="{x:Type local:ScheduleControl}">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" 
+                                              MinWidth="150"/>
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
 
