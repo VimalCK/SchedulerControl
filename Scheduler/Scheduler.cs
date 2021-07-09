@@ -35,7 +35,7 @@ namespace Scheduler
             base.PrepareContainerForItemOverride(element, item);
             if (element is AppointmentItem appointmentItem)
             {
-                appointmentItem.Height = parent.ExtendedModeSize- 5;
+                appointmentItem.Height = parent.ExtendedModeSize - 5;
                 appointmentItem.Width = 100;
                 appointmentItem.Background = Brushes.Red;
             }

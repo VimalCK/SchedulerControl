@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
+using System.Linq;
 
 namespace Scheduler
 {
@@ -133,6 +134,7 @@ namespace Scheduler
         {
             var control = (ScheduleControl)d;
             control.InvalidateChildControlsToReRender();
+            control.dateHeader.ReArrangeHeaders();
         }
 
         private static void OnTimeLineProvidersChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -184,64 +186,58 @@ namespace Scheduler
 
         private void HandleEvents()
         {
-            SizeChanged += ScheduleControl_SizeChanged;
             Loaded += ScheduleControl_Loaded;
-        }
-
-        private void UnHandleEvents()
-        {
-            SizeChanged -= ScheduleControl_SizeChanged;
-            Loaded -= ScheduleControl_Loaded;
-            AppointmentSource.CollectionChanged -= AppointmentSource_CollectionChanged;
+            SizeChanged += ScheduleControl_SizeChanged;
         }
 
         private void ScheduleControl_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (horizontalScrollBar == null || verticalScrollBar == null)
+            if (IsLoaded)
             {
-                List<ScrollBar> scrollBars = new List<ScrollBar>();
-                Helper.GetChildOfType<ScrollBar>(scrollViewer, ref scrollBars);
-                foreach (var scrollBar in scrollBars)
-                {
-                    if (scrollBar.Orientation == Orientation.Horizontal)
-                    {
-                        horizontalScrollBar = scrollBar;
-                    }
-                    else
-                    {
-                        verticalScrollBar = scrollBar;
-                    }
-                }
-
+                InvalidateChildControlsToReRender();
             }
-
-            InvalidateChildControlsToReRender();
         }
 
         private void ScheduleControl_Loaded(object sender, RoutedEventArgs e)
         {
+            Loaded -= ScheduleControl_Loaded;
+
+            List<ScrollBar> scrollBars = new List<ScrollBar>();
+            
+            Helper.GetChildOfType<ScrollBar>(scrollViewer, ref scrollBars);
+            scrollBars = scrollBars.DistinctBy(s => s.Orientation).ToList();
+            
+            if (scrollBars.Count.Equals(2))
+            {
+                if (scrollBars[0].Orientation.Equals(Orientation.Horizontal))
+                {
+                    horizontalScrollBar = scrollBars[0];
+                    verticalScrollBar = scrollBars[1];
+                }
+                else
+                {
+                    verticalScrollBar = scrollBars[0];
+                    horizontalScrollBar = scrollBars[1];
+                }
+            }
+
             InvalidateChildControlsToReRender();
+            dateHeader.ReArrangeHeaders();
+        }
+
+        private void UnHandleEvents()
+        {
+            AppointmentSource.CollectionChanged -= AppointmentSource_CollectionChanged;
+            SizeChanged -= ScheduleControl_SizeChanged;
         }
 
         private void InvalidateChildControlsToReRender()
         {
-            if (!IsLoaded)
-            {
-                return;
-            }
-
             InvalidateViewPortArea();
-            if (parentGrid.Width == RequiredArea.Width * ViewRange)
-            {
-                timeLineHeader.InvalidateVisual();
-                rulerGrid.InvalidateVisual();
-            }
-            else
+            if (parentGrid.Width != RequiredArea.Width * ViewRange)
             {
                 parentGrid.Width = RequiredArea.Width * ViewRange;
             }
-
-            dateHeader.ReArrangeHeaders();
         }
 
         private void InvalidateViewPortArea()

@@ -8,6 +8,7 @@ namespace Scheduler
 {
     internal sealed class DateHeader : Grid
     {
+        private double width;
         private int currentHeaderIndex;
         private ScheduleControl templatedParent;
 
@@ -46,7 +47,7 @@ namespace Scheduler
                     }
                     else
                     {
-                        ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                        ColumnDefinitions.Add(new ColumnDefinition());
 
                         label = new Label()
                         {
@@ -89,26 +90,41 @@ namespace Scheduler
         {
             Loaded -= DateHeader_Loaded;
             templatedParent.scrollViewer.ScrollChanged += ScrollViewer_ScrollChanged;
+            SizeChanged += DateHeader_SizeChanged;
+        }
+
+        private void DateHeader_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            width = (e.NewSize.Width - e.PreviousSize.Width) / templatedParent.ViewRange;
         }
 
         private void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            var transform = (TranslateTransform)Children[currentHeaderIndex].RenderTransform;
-            var change = transform.X + e.HorizontalChange;
+            if (e.HorizontalChange.Equals(0))
+            {
+                return;
+            }
+
+            TranslateTransform transform = (TranslateTransform)Children[currentHeaderIndex].RenderTransform;
+            double change = transform.X + e.HorizontalChange;
             switch (change)
             {
                 case double c when c > templatedParent.RequiredArea.Width:
-                    if (currentHeaderIndex < Children.Count) ++currentHeaderIndex;
-                    transform.X = 0;
-                    transform = (TranslateTransform)Children[currentHeaderIndex].RenderTransform;
-                    transform.X = change - templatedParent.RequiredArea.Width;
+                    transform.X = templatedParent.RequiredArea.Width;
+                    if (currentHeaderIndex < Children.Count - 1)
+                    {
+                        transform = (TranslateTransform)Children[++currentHeaderIndex].RenderTransform;
+                        transform.X = change - templatedParent.RequiredArea.Width;
+                    }
 
                     break;
                 case double c when c < 0:
-                    if (currentHeaderIndex > 0) --currentHeaderIndex;
                     transform.X = 0;
-                    transform = (TranslateTransform)Children[currentHeaderIndex].RenderTransform;
-                    transform.X += change;
+                    if (currentHeaderIndex > 0)
+                    {
+                        transform = (TranslateTransform)Children[--currentHeaderIndex].RenderTransform;
+                        transform.X += change;
+                    }
 
                     break;
                 default:
