@@ -16,7 +16,7 @@ namespace Scheduler
     [TemplatePart(Name = "PART_DateHeader", Type = typeof(DateHeader))]
     [TemplatePart(Name = "PART_TimeRulerPanel", Type = typeof(TimeRulerPanel))]
     [TemplatePart(Name = "PART_TimeLineHeader", Type = typeof(TimeLineHeader))]
-    public class ScheduleControl : Control
+    public class ScheduleControl : Control, IControlledExecution
     {
         private ScrollBar horizontalScrollBar;
         private ScrollBar verticalScrollBar;
@@ -27,8 +27,8 @@ namespace Scheduler
         private DateHeader dateHeader;
         private TimeRulerPanel timerulerPanel;
         private TimeLineHeader timeLineHeader;
-
-        internal ScrollViewer scrollViewer;
+        private ScrollViewer scrollViewer;
+        private bool isControlledExecutionEnabled = true;
 
 
         public static readonly DependencyProperty TimeLineColorProperty = DependencyProperty.Register(
@@ -112,6 +112,9 @@ namespace Scheduler
         internal int ViewRange => (EndDate.Date - StartDate.Date).Days + 1;
 
         internal int ExtendedModeSize => IsExtendedMode ? (int)ExtendedMode.Zoom : (int)ExtendedMode.Normal;
+        internal ScrollViewer ScrollViewer => scrollViewer;
+
+        bool IControlledExecution.IsEnabled => isControlledExecutionEnabled;
 
         public ScheduleControl()
         {
@@ -128,11 +131,13 @@ namespace Scheduler
         private static void OnTimeLineZoomChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
+            (control as IControlledExecution).Enable();
             control.InvalidateChildControlsToReRender();
         }
         private static void OnScheduleDateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
+            (control as IControlledExecution).Enable();
             control.InvalidateChildControlsToReRender();
             control.dateHeader.ReArrangeHeaders();
         }
@@ -194,6 +199,7 @@ namespace Scheduler
         {
             if (IsLoaded)
             {
+                (this as IControlledExecution).Disable();
                 InvalidateChildControlsToReRender();
             }
         }
@@ -203,10 +209,10 @@ namespace Scheduler
             Loaded -= ScheduleControl_Loaded;
 
             List<ScrollBar> scrollBars = new List<ScrollBar>();
-            
+
             Helper.GetChildOfType<ScrollBar>(scrollViewer, ref scrollBars);
             scrollBars = scrollBars.DistinctBy(s => s.Orientation).ToList();
-            
+
             if (scrollBars.Count.Equals(2))
             {
                 if (scrollBars[0].Orientation.Equals(Orientation.Horizontal))
@@ -266,5 +272,9 @@ namespace Scheduler
                     break;
             }
         }
+
+        void IControlledExecution.Enable() => isControlledExecutionEnabled = true;
+
+        void IControlledExecution.Disable() => isControlledExecutionEnabled = false;
     }
 }

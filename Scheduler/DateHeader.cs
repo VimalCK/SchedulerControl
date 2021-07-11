@@ -8,7 +8,6 @@ namespace Scheduler
 {
     internal sealed class DateHeader : Grid
     {
-        private double width;
         private int currentHeaderIndex;
         private ScheduleControl templatedParent;
 
@@ -89,13 +88,41 @@ namespace Scheduler
         private void DateHeader_Loaded(object sender, RoutedEventArgs e)
         {
             Loaded -= DateHeader_Loaded;
-            templatedParent.scrollViewer.ScrollChanged += ScrollViewer_ScrollChanged;
+            templatedParent.ScrollViewer.ScrollChanged += ScrollViewer_ScrollChanged;
             SizeChanged += DateHeader_SizeChanged;
+
         }
 
         private void DateHeader_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            width = (e.NewSize.Width - e.PreviousSize.Width) / templatedParent.ViewRange;
+            if ((templatedParent as IControlledExecution).IsEnabled)
+            {
+                return;
+            }
+
+            var change = ((e.NewSize.Width - e.PreviousSize.Width) / templatedParent.ViewRange) * currentHeaderIndex;
+
+            if (!currentHeaderIndex.Equals(0))
+            {
+                var transform = Children[currentHeaderIndex].RenderTransform as TranslateTransform;
+                change = transform.X - change;
+                switch (change)
+                {
+                    case double c when c < 0:
+                        transform.X = 0;
+                        transform = Children[--currentHeaderIndex].RenderTransform as TranslateTransform;
+                        transform.X = templatedParent.RequiredArea.Width + change;
+                        break;
+                    case double c when c > templatedParent.RequiredArea.Width:
+                        transform.X = templatedParent.RequiredArea.Width;
+                        transform = Children[++currentHeaderIndex].RenderTransform as TranslateTransform;
+                        transform.X = 0;
+                        break;
+                    default:
+                        transform.X = change;
+                        break;
+                }
+            }
         }
 
         private void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
@@ -135,7 +162,7 @@ namespace Scheduler
 
         private void RemoveHandlers()
         {
-            templatedParent.scrollViewer.ScrollChanged -= ScrollViewer_ScrollChanged;
+            templatedParent.ScrollViewer.ScrollChanged -= ScrollViewer_ScrollChanged;
         }
     }
 }
