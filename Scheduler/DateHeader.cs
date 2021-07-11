@@ -101,28 +101,33 @@ namespace Scheduler
             }
 
             var change = ((e.NewSize.Width - e.PreviousSize.Width) / templatedParent.ViewRange) * currentHeaderIndex;
-
-            if (!currentHeaderIndex.Equals(0))
+            var transform = Children[currentHeaderIndex].RenderTransform as TranslateTransform;
+            change = transform.X - change;
+            switch (change)
             {
-                var transform = Children[currentHeaderIndex].RenderTransform as TranslateTransform;
-                change = transform.X - change;
-                switch (change)
-                {
-                    case double c when c < 0:
-                        transform.X = 0;
+                case double c when c < 0:
+                    transform.X = 0;
+                    if (currentHeaderIndex > 0)
+                    {
                         transform = Children[--currentHeaderIndex].RenderTransform as TranslateTransform;
                         transform.X = templatedParent.RequiredArea.Width + change;
-                        break;
-                    case double c when c > templatedParent.RequiredArea.Width:
-                        transform.X = templatedParent.RequiredArea.Width;
+                    }
+
+                    break;
+                case double c when c > templatedParent.RequiredArea.Width:
+                    transform.X = templatedParent.RequiredArea.Width;
+                    if (currentHeaderIndex < Children.Count - 1)
+                    {
                         transform = Children[++currentHeaderIndex].RenderTransform as TranslateTransform;
                         transform.X = 0;
-                        break;
-                    default:
-                        transform.X = change;
-                        break;
-                }
+                    }
+
+                    break;
+                default:
+                    transform.X = change;
+                    break;
             }
+
         }
 
         private void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
