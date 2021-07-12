@@ -10,7 +10,7 @@ namespace Scheduler
     {
         private int currentHeaderIndex;
         private ScheduleControl templatedParent;
-
+        
         public DateHeader()
         {
             DefaultStyleKey = typeof(DateHeader);
@@ -23,6 +23,7 @@ namespace Scheduler
         {
             base.OnInitialized(e);
             templatedParent = (ScheduleControl)TemplatedParent;
+            templatedParent.ScrollChanged += ScrollViewer_ScrollChanged;
         }
 
         internal void ReArrangeHeaders()
@@ -88,7 +89,6 @@ namespace Scheduler
         private void DateHeader_Loaded(object sender, RoutedEventArgs e)
         {
             Loaded -= DateHeader_Loaded;
-            templatedParent.ScrollViewer.ScrollChanged += ScrollViewer_ScrollChanged;
             SizeChanged += DateHeader_SizeChanged;
 
         }
@@ -105,7 +105,7 @@ namespace Scheduler
             change = transform.X - change;
             switch (change)
             {
-                case double c when c < 0:
+                case double c when c <= 0:
                     transform.X = 0;
                     if (currentHeaderIndex > 0)
                     {
@@ -114,7 +114,7 @@ namespace Scheduler
                     }
 
                     break;
-                case double c when c > templatedParent.RequiredArea.Width:
+                case double c when c >= Math.Round(templatedParent.RequiredArea.Width, 10):
                     transform.X = templatedParent.RequiredArea.Width;
                     if (currentHeaderIndex < Children.Count - 1)
                     {
@@ -132,7 +132,7 @@ namespace Scheduler
 
         private void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            if (e.HorizontalChange.Equals(0))
+            if (e.HorizontalChange.Equals(0) || ActualWidth.Equals(templatedParent.RequiredArea.Width))
             {
                 return;
             }
@@ -141,7 +141,7 @@ namespace Scheduler
             double change = transform.X + e.HorizontalChange;
             switch (change)
             {
-                case double c when c > templatedParent.RequiredArea.Width:
+                case double c when c >= Math.Round(templatedParent.RequiredArea.Width, 10):
                     transform.X = templatedParent.RequiredArea.Width;
                     if (currentHeaderIndex < Children.Count - 1)
                     {
@@ -150,7 +150,7 @@ namespace Scheduler
                     }
 
                     break;
-                case double c when c < 0:
+                case double c when c <= 0:
                     transform.X = 0;
                     if (currentHeaderIndex > 0)
                     {
@@ -167,7 +167,7 @@ namespace Scheduler
 
         private void RemoveHandlers()
         {
-            templatedParent.ScrollViewer.ScrollChanged -= ScrollViewer_ScrollChanged;
+            templatedParent.ScrollChanged -= ScrollViewer_ScrollChanged;
         }
     }
 }

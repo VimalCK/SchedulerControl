@@ -18,6 +18,8 @@ namespace Scheduler
     [TemplatePart(Name = "PART_TimeLineHeader", Type = typeof(TimeLineHeader))]
     public class ScheduleControl : Control, IControlledExecution
     {
+        public event ScrollChangedEventHandler ScrollChanged;
+
         private ScrollBar horizontalScrollBar;
         private ScrollBar verticalScrollBar;
         private Size viewPortArea;
@@ -112,7 +114,6 @@ namespace Scheduler
         internal int ViewRange => (EndDate.Date - StartDate.Date).Days + 1;
 
         internal int ExtendedModeSize => IsExtendedMode ? (int)ExtendedMode.Zoom : (int)ExtendedMode.Normal;
-        internal ScrollViewer ScrollViewer => scrollViewer;
 
         bool IControlledExecution.IsEnabled => isControlledExecutionEnabled;
 
@@ -193,6 +194,16 @@ namespace Scheduler
         {
             Loaded += ScheduleControl_Loaded;
             SizeChanged += ScheduleControl_SizeChanged;
+            scrollViewer.ScrollChanged += ScrollViewer_ScrollChanged;
+        }
+
+        private void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            if (IsLoaded && e.Source is ScrollViewer)
+            {
+                (this as IControlledExecution).Disable();
+                ScrollChanged?.Invoke(sender, e);
+            }
         }
 
         private void ScheduleControl_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -235,6 +246,7 @@ namespace Scheduler
         {
             AppointmentSource.CollectionChanged -= AppointmentSource_CollectionChanged;
             SizeChanged -= ScheduleControl_SizeChanged;
+            scrollViewer.ScrollChanged -= ScrollViewer_ScrollChanged;
         }
 
         private void InvalidateChildControlsToReRender()
