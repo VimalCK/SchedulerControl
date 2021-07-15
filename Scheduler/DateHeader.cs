@@ -10,7 +10,7 @@ namespace Scheduler
     {
         private int currentHeaderIndex;
         private ScheduleControl templatedParent;
-        
+
         public DateHeader()
         {
             DefaultStyleKey = typeof(DateHeader);
@@ -95,73 +95,75 @@ namespace Scheduler
 
         private void DateHeader_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if ((templatedParent as IControlledExecution).IsEnabled)
-            {
-                return;
-            }
+            //if ((templatedParent as IControlledExecution).IsEnabled)
+            //{
+            //    return;
+            //}
 
-            var change = ((e.NewSize.Width - e.PreviousSize.Width) / templatedParent.ViewRange) * currentHeaderIndex;
-            var transform = Children[currentHeaderIndex].RenderTransform as TranslateTransform;
-            change = transform.X - change;
-            switch (change)
-            {
-                case double c when c <= 0:
-                    transform.X = 0;
-                    if (currentHeaderIndex > 0)
-                    {
-                        transform = Children[--currentHeaderIndex].RenderTransform as TranslateTransform;
-                        transform.X = templatedParent.RequiredArea.Width + change;
-                    }
+            //var change = ((e.NewSize.Width - e.PreviousSize.Width) / templatedParent.ViewRange) * currentHeaderIndex;
+            //var transform = Children[currentHeaderIndex].RenderTransform as TranslateTransform;
+            //change = transform.X - change;
+            //switch (change)
+            //{
+            //    case double c when c <= 0:
+            //        transform.X = 0;
+            //        if (currentHeaderIndex > 0)
+            //        {
+            //            transform = Children[--currentHeaderIndex].RenderTransform as TranslateTransform;
+            //            transform.X = templatedParent.RequiredArea.Width + change;
+            //        }
 
-                    break;
-                case double c when c >= Math.Round(templatedParent.RequiredArea.Width, 10):
-                    transform.X = templatedParent.RequiredArea.Width;
-                    if (currentHeaderIndex < Children.Count - 1)
-                    {
-                        transform = Children[++currentHeaderIndex].RenderTransform as TranslateTransform;
-                        transform.X = 0;
-                    }
+            //        break;
+            //    case double c when c >= Math.Round(templatedParent.RequiredArea.Width, 10):
+            //        transform.X = templatedParent.RequiredArea.Width;
+            //        if (currentHeaderIndex < Children.Count - 1)
+            //        {
+            //            transform = Children[++currentHeaderIndex].RenderTransform as TranslateTransform;
+            //            transform.X = 0;
+            //        }
 
-                    break;
-                default:
-                    transform.X = change;
-                    break;
-            }
+            //        break;
+            //    default:
+            //        transform.X = change;
+            //        break;
+            //}
 
         }
 
         private void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            if (e.HorizontalChange.Equals(0) || ActualWidth.Equals(templatedParent.RequiredArea.Width))
+            if (!e.HorizontalChange.Equals(0))
             {
-                return;
+                TranslateTransform transform = (TranslateTransform)Children[currentHeaderIndex].RenderTransform;
+                double change = transform.X + e.HorizontalChange;
+                switch (change)
+                {
+                    case double c when c >= Math.Round(templatedParent.RequiredArea.Width, 10):
+                        transform.X = templatedParent.RequiredArea.Width;
+                        if (currentHeaderIndex < Children.Count - 1)
+                        {
+                            transform = (TranslateTransform)Children[++currentHeaderIndex].RenderTransform;
+                            transform.X = change - templatedParent.RequiredArea.Width;
+                        }
+
+                        break;
+                    case double c when c <= 0:
+                        transform.X = 0;
+                        if (currentHeaderIndex > 0)
+                        {
+                            transform = (TranslateTransform)Children[--currentHeaderIndex].RenderTransform;
+                            transform.X += change;
+                        }
+
+                        break;
+                    default:
+                        transform.X = change;
+                        break;
+                }
             }
-
-            TranslateTransform transform = (TranslateTransform)Children[currentHeaderIndex].RenderTransform;
-            double change = transform.X + e.HorizontalChange;
-            switch (change)
+            else if (!e.ViewportWidthChange.Equals(0))
             {
-                case double c when c >= Math.Round(templatedParent.RequiredArea.Width, 10):
-                    transform.X = templatedParent.RequiredArea.Width;
-                    if (currentHeaderIndex < Children.Count - 1)
-                    {
-                        transform = (TranslateTransform)Children[++currentHeaderIndex].RenderTransform;
-                        transform.X = change - templatedParent.RequiredArea.Width;
-                    }
 
-                    break;
-                case double c when c <= 0:
-                    transform.X = 0;
-                    if (currentHeaderIndex > 0)
-                    {
-                        transform = (TranslateTransform)Children[--currentHeaderIndex].RenderTransform;
-                        transform.X += change;
-                    }
-
-                    break;
-                default:
-                    transform.X = change;
-                    break;
             }
         }
 

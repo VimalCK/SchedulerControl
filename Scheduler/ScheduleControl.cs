@@ -16,7 +16,7 @@ namespace Scheduler
     [TemplatePart(Name = "PART_DateHeader", Type = typeof(DateHeader))]
     [TemplatePart(Name = "PART_TimeRulerPanel", Type = typeof(TimeRulerPanel))]
     [TemplatePart(Name = "PART_TimeLineHeader", Type = typeof(TimeLineHeader))]
-    public class ScheduleControl : Control, IControlledExecution
+    public class ScheduleControl : Control
     {
         public event ScrollChangedEventHandler ScrollChanged;
 
@@ -115,8 +115,6 @@ namespace Scheduler
 
         internal int ExtendedModeSize => IsExtendedMode ? (int)ExtendedMode.Zoom : (int)ExtendedMode.Normal;
 
-        bool IControlledExecution.IsEnabled => isControlledExecutionEnabled;
-
         public ScheduleControl()
         {
             DefaultStyleKey = typeof(ScheduleControl);
@@ -132,13 +130,11 @@ namespace Scheduler
         private static void OnTimeLineZoomChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
-            (control as IControlledExecution).Enable();
             control.InvalidateChildControlsToReRender();
         }
         private static void OnScheduleDateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
-            (control as IControlledExecution).Enable();
             control.InvalidateChildControlsToReRender();
             control.dateHeader.ReArrangeHeaders();
         }
@@ -193,7 +189,7 @@ namespace Scheduler
         private void HandleEvents()
         {
             Loaded += ScheduleControl_Loaded;
-            SizeChanged += ScheduleControl_SizeChanged;
+           SizeChanged += ScheduleControl_SizeChanged;
             scrollViewer.ScrollChanged += ScrollViewer_ScrollChanged;
         }
 
@@ -201,7 +197,6 @@ namespace Scheduler
         {
             if (IsLoaded && e.Source is ScrollViewer)
             {
-                (this as IControlledExecution).Disable();
                 ScrollChanged?.Invoke(sender, e);
             }
         }
@@ -210,7 +205,6 @@ namespace Scheduler
         {
             if (IsLoaded)
             {
-                (this as IControlledExecution).Disable();
                 InvalidateChildControlsToReRender();
             }
         }
@@ -245,7 +239,6 @@ namespace Scheduler
         private void UnHandleEvents()
         {
             AppointmentSource.CollectionChanged -= AppointmentSource_CollectionChanged;
-            SizeChanged -= ScheduleControl_SizeChanged;
             scrollViewer.ScrollChanged -= ScrollViewer_ScrollChanged;
         }
 
@@ -284,9 +277,5 @@ namespace Scheduler
                     break;
             }
         }
-
-        void IControlledExecution.Enable() => isControlledExecutionEnabled = true;
-
-        void IControlledExecution.Disable() => isControlledExecutionEnabled = false;
     }
 }
