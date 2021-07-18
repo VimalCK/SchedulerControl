@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
+using System.Linq;
 
 namespace Scheduler
 {
@@ -47,7 +48,7 @@ namespace Scheduler
                     }
                     else
                     {
-                        ColumnDefinitions.Add(new ColumnDefinition());
+                        ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(1, GridUnitType.Star) });
 
                         label = new Label()
                         {
@@ -89,57 +90,55 @@ namespace Scheduler
         private void DateHeader_Loaded(object sender, RoutedEventArgs e)
         {
             Loaded -= DateHeader_Loaded;
-            SizeChanged += DateHeader_SizeChanged;
-
-        }
-
-        private void DateHeader_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            //if ((templatedParent as IControlledExecution).IsEnabled)
-            //{
-            //    return;
-            //}
-
-            //var change = ((e.NewSize.Width - e.PreviousSize.Width) / templatedParent.ViewRange) * currentHeaderIndex;
-            //var transform = Children[currentHeaderIndex].RenderTransform as TranslateTransform;
-            //change = transform.X - change;
-            //switch (change)
-            //{
-            //    case double c when c <= 0:
-            //        transform.X = 0;
-            //        if (currentHeaderIndex > 0)
-            //        {
-            //            transform = Children[--currentHeaderIndex].RenderTransform as TranslateTransform;
-            //            transform.X = templatedParent.RequiredArea.Width + change;
-            //        }
-
-            //        break;
-            //    case double c when c >= Math.Round(templatedParent.RequiredArea.Width, 10):
-            //        transform.X = templatedParent.RequiredArea.Width;
-            //        if (currentHeaderIndex < Children.Count - 1)
-            //        {
-            //            transform = Children[++currentHeaderIndex].RenderTransform as TranslateTransform;
-            //            transform.X = 0;
-            //        }
-
-            //        break;
-            //    default:
-            //        transform.X = change;
-            //        break;
-            //}
 
         }
 
         private void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            if (!e.HorizontalChange.Equals(0))
+            if (!e.ViewportWidthChange.Equals(0))
+            {
+                if (e.ViewportWidthChange > 0)
+                {
+
+                }
+                //var change = e.ViewportWidthChange * currentHeaderIndex;
+                //var transform = Children[currentHeaderIndex].RenderTransform as TranslateTransform;
+                //change = transform.X - change;
+
+
+                //switch (change)
+                //{
+                //    case double c when c <= 0:
+                //        transform.X = 0;
+                //        if (currentHeaderIndex > 0)
+                //        {
+                //            transform = Children[--currentHeaderIndex].RenderTransform as TranslateTransform;
+                //            transform.X = templatedParent.RequiredArea.Width + change;
+                //        }
+
+                //        break;
+                //    case double c when c >= Math.Round(templatedParent.RequiredArea.Width, 10):
+                //        transform.X = 0;
+                //        if (currentHeaderIndex < Children.Count - 1)
+                //        {
+                //            transform = Children[++currentHeaderIndex].RenderTransform as TranslateTransform;
+                //            transform.X = templatedParent.RequiredArea.Width - change;
+                //        }
+
+                //        break;
+                //    default:
+                //        transform.X = change;
+                //        break;
+                //}
+            }
+            else if (!e.HorizontalChange.Equals(0))
             {
                 TranslateTransform transform = (TranslateTransform)Children[currentHeaderIndex].RenderTransform;
                 double change = transform.X + e.HorizontalChange;
                 switch (change)
                 {
                     case double c when c >= Math.Round(templatedParent.RequiredArea.Width, 10):
-                        transform.X = templatedParent.RequiredArea.Width;
+                        transform.X = 0;
                         if (currentHeaderIndex < Children.Count - 1)
                         {
                             transform = (TranslateTransform)Children[++currentHeaderIndex].RenderTransform;
@@ -152,7 +151,7 @@ namespace Scheduler
                         if (currentHeaderIndex > 0)
                         {
                             transform = (TranslateTransform)Children[--currentHeaderIndex].RenderTransform;
-                            transform.X += change;
+                            transform.X = change + templatedParent.RequiredArea.Width;
                         }
 
                         break;
@@ -160,10 +159,6 @@ namespace Scheduler
                         transform.X = change;
                         break;
                 }
-            }
-            else if (!e.ViewportWidthChange.Equals(0))
-            {
-
             }
         }
 
