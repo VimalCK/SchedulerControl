@@ -28,6 +28,7 @@ namespace WpfApp1
         {
             InitializeComponent();
             DataContext = this;
+            edt.SelectedDate = DateTime.Today.AddDays(7);
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)

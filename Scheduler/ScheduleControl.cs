@@ -135,8 +135,11 @@ namespace Scheduler
         private static void OnScheduleDateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
-            control.InvalidateChildControlsToReRender();
-            control.dateHeader.ReArrangeHeaders();
+            if (control.IsLoaded)
+            {
+                control.InvalidateChildControlsToReRender();
+                control.dateHeader.ReArrangeHeaders();
+            }
         }
 
         private static void OnTimeLineProvidersChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -189,7 +192,7 @@ namespace Scheduler
         private void HandleEvents()
         {
             Loaded += ScheduleControl_Loaded;
-           SizeChanged += ScheduleControl_SizeChanged;
+            SizeChanged += ScheduleControl_SizeChanged;
             scrollViewer.ScrollChanged += ScrollViewer_ScrollChanged;
         }
 

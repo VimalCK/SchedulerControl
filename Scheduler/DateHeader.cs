@@ -97,14 +97,9 @@ namespace Scheduler
         {
             if (!e.ViewportWidthChange.Equals(0))
             {
-                if (e.ViewportWidthChange > 0)
-                {
-
-                }
                 //var change = e.ViewportWidthChange * currentHeaderIndex;
                 //var transform = Children[currentHeaderIndex].RenderTransform as TranslateTransform;
                 //change = transform.X - change;
-
 
                 //switch (change)
                 //{
@@ -113,7 +108,7 @@ namespace Scheduler
                 //        if (currentHeaderIndex > 0)
                 //        {
                 //            transform = Children[--currentHeaderIndex].RenderTransform as TranslateTransform;
-                //            transform.X = templatedParent.RequiredArea.Width + change;
+                //            transform.X = change + templatedParent.RequiredArea.Width;
                 //        }
 
                 //        break;
@@ -122,7 +117,7 @@ namespace Scheduler
                 //        if (currentHeaderIndex < Children.Count - 1)
                 //        {
                 //            transform = Children[++currentHeaderIndex].RenderTransform as TranslateTransform;
-                //            transform.X = templatedParent.RequiredArea.Width - change;
+                //            transform.X = change - templatedParent.RequiredArea.Width;
                 //        }
 
                 //        break;
