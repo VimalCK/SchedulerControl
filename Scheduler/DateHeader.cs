@@ -95,65 +95,32 @@ namespace Scheduler
 
         private void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            if (!e.ViewportWidthChange.Equals(0))
+            var change = !e.ViewportWidthChange.Equals(0) ? -(e.ViewportWidthChange * currentHeaderIndex) : e.HorizontalChange;
+            TranslateTransform transform = (TranslateTransform)Children[currentHeaderIndex].RenderTransform;
+            change = transform.X + change;
+            switch (change)
             {
-                //var change = e.ViewportWidthChange * currentHeaderIndex;
-                //var transform = Children[currentHeaderIndex].RenderTransform as TranslateTransform;
-                //change = transform.X - change;
+                case double c when c >= Math.Round(templatedParent.RequiredArea.Width, 10):
+                    transform.X = 0;
+                    if (currentHeaderIndex < Children.Count - 1)
+                    {
+                        transform = (TranslateTransform)Children[++currentHeaderIndex].RenderTransform;
+                        transform.X = change - templatedParent.RequiredArea.Width;
+                    }
 
-                //switch (change)
-                //{
-                //    case double c when c <= 0:
-                //        transform.X = 0;
-                //        if (currentHeaderIndex > 0)
-                //        {
-                //            transform = Children[--currentHeaderIndex].RenderTransform as TranslateTransform;
-                //            transform.X = change + templatedParent.RequiredArea.Width;
-                //        }
+                    break;
+                case double c when c <= 0:
+                    transform.X = 0;
+                    if (currentHeaderIndex > 0)
+                    {
+                        transform = (TranslateTransform)Children[--currentHeaderIndex].RenderTransform;
+                        transform.X = change + templatedParent.RequiredArea.Width;
+                    }
 
-                //        break;
-                //    case double c when c >= Math.Round(templatedParent.RequiredArea.Width, 10):
-                //        transform.X = 0;
-                //        if (currentHeaderIndex < Children.Count - 1)
-                //        {
-                //            transform = Children[++currentHeaderIndex].RenderTransform as TranslateTransform;
-                //            transform.X = change - templatedParent.RequiredArea.Width;
-                //        }
-
-                //        break;
-                //    default:
-                //        transform.X = change;
-                //        break;
-                //}
-            }
-            else if (!e.HorizontalChange.Equals(0))
-            {
-                TranslateTransform transform = (TranslateTransform)Children[currentHeaderIndex].RenderTransform;
-                double change = transform.X + e.HorizontalChange;
-                switch (change)
-                {
-                    case double c when c >= Math.Round(templatedParent.RequiredArea.Width, 10):
-                        transform.X = 0;
-                        if (currentHeaderIndex < Children.Count - 1)
-                        {
-                            transform = (TranslateTransform)Children[++currentHeaderIndex].RenderTransform;
-                            transform.X = change - templatedParent.RequiredArea.Width;
-                        }
-
-                        break;
-                    case double c when c <= 0:
-                        transform.X = 0;
-                        if (currentHeaderIndex > 0)
-                        {
-                            transform = (TranslateTransform)Children[--currentHeaderIndex].RenderTransform;
-                            transform.X = change + templatedParent.RequiredArea.Width;
-                        }
-
-                        break;
-                    default:
-                        transform.X = change;
-                        break;
-                }
+                    break;
+                default:
+                    transform.X = change;
+                    break;
             }
         }
 
