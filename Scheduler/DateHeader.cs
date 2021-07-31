@@ -100,7 +100,8 @@ namespace Scheduler
             var change = !e.HorizontalChange.Equals(0) ? e.HorizontalChange : -(e.ViewportWidthChange * headerRange);
             TranslateTransform transform = (TranslateTransform)Children[headerRange].RenderTransform;
             change = transform.X + change;
-            if (headerRange.Equals(0) && change <=0)
+
+            if (RestrictTransform(change, e))
             {
                 transform.X = 0;
                 return;
@@ -125,6 +126,10 @@ namespace Scheduler
                     break;
             }
         }
+
+        private bool RestrictTransform(double change, ScrollChangedEventArgs e) =>
+            (headerRange.Equals(0) && change <= 0) ||
+            (headerRange.Equals(headerRange.Upper) && e.ViewportWidthChange < 0);
 
         private void RemoveHandlers()
         {

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Scheduler
 {
@@ -23,7 +22,11 @@ namespace Scheduler
         public static RangeInt operator --(RangeInt r) => r.CurrentIndex > r.Lower ?
             new RangeInt(r.Lower, r.Upper, (short)(r.CurrentIndex - 1)) : r;
 
-        public override bool Equals(object obj)
+        public static bool operator ==(RangeInt left, RangeInt right) => left.Equals(right);
+
+        public static bool operator !=(RangeInt left, RangeInt right) => !left.Equals(right);
+
+        public readonly override bool Equals(object obj)
         {
             if (obj is RangeInt rangeInt)
             {
@@ -36,5 +39,7 @@ namespace Scheduler
 
             return false;
         }
+
+        public override int GetHashCode() => base.GetHashCode();
     }
 }
