@@ -98,20 +98,18 @@ namespace Scheduler
             var currentHeaderIndex = (int)(e.HorizontalOffset / templatedParent.RequiredArea.Width);
             var combinedHeaderWidth = templatedParent.RequiredArea.Width * (currentHeaderIndex + 1);
             var offsetChange = (e.HorizontalOffset + templatedParent.RequiredArea.Width) - combinedHeaderWidth;
-            TranslateTransform headerTransform;
+            if (previousHeaderIndex >= Children.Count || previousHeaderIndex < 0)
+            {
+                previousHeaderIndex = currentHeaderIndex;
+            }
 
+            var headerTransform = (TranslateTransform)Children[previousHeaderIndex].RenderTransform;
             if (RestrictTransition(e, offsetChange))
             {
-                headerTransform = (TranslateTransform)Children[currentHeaderIndex].RenderTransform;
-                if (!headerTransform.X.Equals(0))
-                {
-                    headerTransform.X = 0;
-                }
-
+                headerTransform.X = 0;
                 return;
             }
 
-            headerTransform = (TranslateTransform)Children[previousHeaderIndex].RenderTransform;
             switch (headerTransform.X + e.HorizontalChange)
             {
                 case double c when c > templatedParent.RequiredArea.Width:
