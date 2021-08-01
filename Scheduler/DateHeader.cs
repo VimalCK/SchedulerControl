@@ -9,7 +9,6 @@ namespace Scheduler
 {
     internal sealed class DateHeader : Grid
     {
-        private RangeInt headerRange;
         private ScheduleControl templatedParent;
 
         public DateHeader()
@@ -85,8 +84,6 @@ namespace Scheduler
                     label.Content = $" {templatedParent.StartDate.AddDays(index):dd-MM-yyyy}";
                 }
             }
-
-            headerRange = new RangeInt(0, (short)(Children.Count - 1), headerRange.CurrentIndex);
         }
 
         private void DateHeader_Loaded(object sender, RoutedEventArgs e)
@@ -97,39 +94,45 @@ namespace Scheduler
 
         private void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            var change = !e.HorizontalChange.Equals(0) ? e.HorizontalChange : -(e.ViewportWidthChange * headerRange);
-            TranslateTransform transform = (TranslateTransform)Children[headerRange].RenderTransform;
-            change = transform.X + change;
+            var previousHeaderIndex = (int)((e.HorizontalOffset - e.HorizontalChange) / templatedParent.RequiredArea.Width);
+            var currentHeaderIndex = (int)(e.HorizontalOffset / templatedParent.RequiredArea.Width);
+            var combinedHeaderWidth = templatedParent.RequiredArea.Width * (currentHeaderIndex + 1);
+            var offsetChange = (e.HorizontalOffset + templatedParent.RequiredArea.Width) - combinedHeaderWidth;
+            TranslateTransform headerTransform;
 
-            if (RestrictTransform(change, e))
+            if (RestrictTransition(e, offsetChange))
             {
-                transform.X = 0;
+                headerTransform = (TranslateTransform)Children[currentHeaderIndex].RenderTransform;
+                if (!headerTransform.X.Equals(0))
+                {
+                    headerTransform.X = 0;
+                }
+
                 return;
             }
 
-            switch (change)
+            headerTransform = (TranslateTransform)Children[previousHeaderIndex].RenderTransform;
+            switch (headerTransform.X + e.HorizontalChange)
             {
-                case double c when c >= Math.Round(templatedParent.RequiredArea.Width, 10):
-                    transform.X = 0;
-                    transform = (TranslateTransform)Children[++headerRange].RenderTransform;
-                    transform.X = change - templatedParent.RequiredArea.Width;
-
+                case double c when c > templatedParent.RequiredArea.Width:
+                    headerTransform.X = 0;
+                    headerTransform = (TranslateTransform)Children[currentHeaderIndex].RenderTransform;
+                    headerTransform.X = offsetChange;
                     break;
-                case double c when c <= 0:
-                    transform.X = 0;
-                    transform = (TranslateTransform)Children[--headerRange].RenderTransform;
-                    transform.X = change + templatedParent.RequiredArea.Width;
-
+                case double c when c < 0:
+                    headerTransform.X = 0;
+                    headerTransform = (TranslateTransform)Children[currentHeaderIndex].RenderTransform;
+                    headerTransform.X = offsetChange;
                     break;
                 default:
-                    transform.X = change;
+                    headerTransform.X = offsetChange;
                     break;
             }
         }
 
-        private bool RestrictTransform(double change, ScrollChangedEventArgs e) =>
-            (headerRange.Equals(0) && change <= 0) ||
-            (headerRange.Equals(headerRange.Upper) && e.ViewportWidthChange < 0);
+        private bool RestrictTransition(ScrollChangedEventArgs e, double offsetChange) =>
+            e.HorizontalOffset.Equals(0) || offsetChange.Equals(0) || offsetChange > templatedParent.RequiredArea.Width;
+
 
         private void RemoveHandlers()
         {

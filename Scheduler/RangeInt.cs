@@ -12,11 +12,10 @@ namespace Scheduler
         {
             Lower = lowerBound;
             Upper = upperBound;
-            CurrentIndex = current;
+            CurrentIndex = current < lowerBound ? lowerBound : current > upperBound ? upperBound : current;
         }
 
         public static implicit operator short(RangeInt value) => value.CurrentIndex;
-
         public static RangeInt operator ++(RangeInt r) => r.CurrentIndex < r.Upper ?
             new RangeInt(r.Lower, r.Upper, (short)(r.CurrentIndex + 1)) : r;
         public static RangeInt operator --(RangeInt r) => r.CurrentIndex > r.Lower ?
