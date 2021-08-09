@@ -248,9 +248,10 @@ namespace Scheduler
         private void InvalidateChildControlsToReRender()
         {
             InvalidateViewPortArea();
-            if (parentGrid.Width != RequiredArea.Width * ViewRange)
+            var width = requiredArea.Width * ViewRange;
+            if (!parentGrid.Width.Equals(width))
             {
-                parentGrid.Width = RequiredArea.Width * ViewRange;
+                parentGrid.Width = width;
             }
         }
 

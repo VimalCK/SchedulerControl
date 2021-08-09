@@ -7,13 +7,14 @@ using System.Linq;
 
 namespace Scheduler
 {
-    internal sealed class DateHeader : Grid
+    internal sealed class DateHeader : StackPanel
     {
         private ScheduleControl templatedParent;
 
         public DateHeader()
         {
             DefaultStyleKey = typeof(DateHeader);
+            Orientation = Orientation.Horizontal;
             Loaded += DateHeader_Loaded;
         }
 
@@ -47,11 +48,9 @@ namespace Scheduler
                     }
                     else
                     {
-                        ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(1, GridUnitType.Star) });
-
                         label = new Label()
                         {
-                            BorderThickness = new Thickness(.5, .5, .5, 0),
+                            BorderThickness = new Thickness(.5),
                             VerticalAlignment = VerticalAlignment.Stretch,
                             VerticalContentAlignment = VerticalAlignment.Center,
                             FontSize = 10,
@@ -60,7 +59,6 @@ namespace Scheduler
                         };
 
                         Children.Add(label);
-                        Grid.SetColumn(label, index);
                         Panel.SetZIndex(label, index);
                         label.SetBinding(Label.BorderBrushProperty, new Binding
                         {
@@ -71,13 +69,13 @@ namespace Scheduler
 
                     label.Content = $" {templatedParent.StartDate.AddDays(index):dd-MM-yyyy}";
                     label.Background = index % 2 == 0 ? Brushes.Green : Brushes.Red;
+                    label.Width = templatedParent.RequiredArea.Width;
                 }
             }
             else if (requiredItems < 0)
             {
                 requiredItems = Math.Abs(requiredItems);
                 Children.RemoveRange(templatedParent.ViewRange, requiredItems);
-                ColumnDefinitions.RemoveRange(templatedParent.ViewRange, requiredItems);
                 for (int index = 0; index < Children.Count; index++)
                 {
                     var label = (Label)Children[index];
@@ -94,15 +92,16 @@ namespace Scheduler
 
         private void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            var previousHeaderIndex = (int)((e.HorizontalOffset - e.HorizontalChange) / templatedParent.RequiredArea.Width);
-            var currentHeaderIndex = (int)(e.HorizontalOffset / templatedParent.RequiredArea.Width);
-            var combinedHeaderWidth = templatedParent.RequiredArea.Width * (currentHeaderIndex + 1);
-            var offsetChange = (e.HorizontalOffset + templatedParent.RequiredArea.Width) - combinedHeaderWidth;
-            if (previousHeaderIndex >= Children.Count || previousHeaderIndex < 0)
+            var change = e.HorizontalChange;
+            if (!e.ExtentWidthChange.Equals(0))
             {
-                previousHeaderIndex = currentHeaderIndex;
+                UpdateDateHeaderWidth();
+                change = -e.ExtentWidthChange;
             }
 
+            var currentHeaderIndex = (int)(e.HorizontalOffset / templatedParent.RequiredArea.Width);
+            var offsetChange = (templatedParent.RequiredArea.Width + e.HorizontalOffset) - (templatedParent.RequiredArea.Width * (currentHeaderIndex + 1));
+            var previousHeaderIndex = new RangeInt(0, (short)(Children.Count - 1), (short)((e.HorizontalOffset - change) / templatedParent.RequiredArea.Width));
             var headerTransform = (TranslateTransform)Children[previousHeaderIndex].RenderTransform;
             if (RestrictTransition(e, offsetChange))
             {
@@ -110,7 +109,7 @@ namespace Scheduler
                 return;
             }
 
-            switch (headerTransform.X + e.HorizontalChange)
+            switch (headerTransform.X + change)
             {
                 case double c when c > templatedParent.RequiredArea.Width:
                     headerTransform.X = 0;
@@ -123,7 +122,7 @@ namespace Scheduler
                     headerTransform.X = offsetChange;
                     break;
                 default:
-                    headerTransform.X = offsetChange;
+                    headerTransform.X = offsetChange - .01;
                     break;
             }
         }
@@ -135,6 +134,14 @@ namespace Scheduler
         private void RemoveHandlers()
         {
             templatedParent.ScrollChanged -= ScrollViewer_ScrollChanged;
+        }
+
+        private void UpdateDateHeaderWidth()
+        {
+            foreach (Label item in this.Children)
+            {
+                item.Width = templatedParent.RequiredArea.Width;
+            }
         }
     }
 }
