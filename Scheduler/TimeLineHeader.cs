@@ -7,9 +7,6 @@ namespace Scheduler
 {
     internal sealed class TimeLineHeader : RulerBase
     {
-        private CultureInfo cultureInfo = new CultureInfo("en-US");
-        private Typeface typeface = new Typeface("Arial");
-
         public TimeLineHeader()
         {
             DefaultStyleKey = typeof(TimeLineHeader);
@@ -25,7 +22,6 @@ namespace Scheduler
                 {
                     var clippingPoint = new Point();
                     var renderPoint = new Point(0, ActualHeight / 3);
-                    var pixelPerDip = VisualTreeHelper.GetDpi(this).PixelsPerDip;
                     var headerText = 0;
 
                     HorizontalLines = 2;
@@ -37,8 +33,8 @@ namespace Scheduler
 
                     for (int i = 0; i < VerticalLines; i++)
                     {
-                        var formattedTime = new FormattedText($" {TimeSpan.FromHours(headerText).ToString(@"hh\:mm")}", cultureInfo,
-                                FlowDirection.LeftToRight, typeface, 10D, Brushes.Gray, pixelPerDip);
+                        var formattedTime = new FormattedText($" {TimeSpan.FromHours(headerText).ToString(@"hh\:mm")}", Helper.CultureInfo,
+                                FlowDirection.LeftToRight, Helper.Typeface, 10D, Brushes.Gray, Helper.GetPixelsPerDpi(this));
 
                         drawingContext.PushClip(new RectangleGeometry(new Rect(clippingPoint, new Size
                         {

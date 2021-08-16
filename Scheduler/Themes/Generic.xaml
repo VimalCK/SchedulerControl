@@ -15,6 +15,19 @@
                 Value="True" />
         <Setter Property="SnapsToDevicePixels"
                 Value="True" />
+        <Setter Property="ClipToBounds"
+                Value="True" />
+    </Style>
+
+    <Style TargetType="local:ContentTransformLabel">
+        <Setter Property="UseLayoutRounding"
+                Value="True"/>
+        <Setter Property="BorderThickness"
+                Value="1"/>
+        <Setter Property="Background"
+                Value="White"/>
+        <Setter Property="BorderBrush"
+                Value="{Binding Path=TimeLineColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:ScheduleControl}}"/>
     </Style>
 
     <Style TargetType="{x:Type local:TimeLineHeader}">
