@@ -54,7 +54,7 @@ namespace Scheduler
             set
             {
                 horizontalContentOffset = value;
-                if (transform != null)
+                if (transform?.X != horizontalContentOffset)
                 {
                     transform.X = horizontalContentOffset;
                 }
