@@ -75,7 +75,7 @@ namespace Scheduler
             var currentIndex = (short)(e.HorizontalOffset / templatedParent.RequiredArea.Width);
             var change = (templatedParent.RequiredArea.Width + e.HorizontalOffset) - (templatedParent.RequiredArea.Width * (currentIndex + 1));
             var previousIndex = (short)((e.HorizontalOffset - e.HorizontalChange) / templatedParent.RequiredArea.Width);
-            if (change.Equals(0))
+            if (change.Equals(0) || previousIndex.LessThan())
             {
                 ((ContentTransformLabel)Children[previousIndex]).HorizontalContentOffset = 0;
                 return;
@@ -85,36 +85,13 @@ namespace Scheduler
             label.HorizontalContentOffset = change;
             if (!previousIndex.Equals(currentIndex))
             {
+                if (previousIndex > Children.Count - 1)
+                {
+                    previousIndex = (short)(currentIndex - 1);
+                }
+
                 ((ContentTransformLabel)Children[previousIndex]).HorizontalContentOffset = 0;
             }
-
-            //var change = !e.ExtentWidthChange.Equals(0) ? -e.ExtentWidthChange : e.HorizontalChange;
-            //var currentHeaderIndex = (int)(e.HorizontalOffset / templatedParent.RequiredArea.Width);
-            //var offsetChange = (templatedParent.RequiredArea.Width + e.HorizontalOffset) - (templatedParent.RequiredArea.Width * (currentHeaderIndex + 1));
-            //var previousHeaderIndex = new RangeInt(0, (short)(Children.Count - 1), (short)((e.HorizontalOffset - change) / templatedParent.RequiredArea.Width));
-            //var label = (ContentTransformLabel)Children[previousHeaderIndex];
-            //if (RestrictTransition(e, offsetChange))
-            //{
-            //    label.HorizontalContentOffset = 0;
-            //    return;
-            //}
-
-            //switch (label.HorizontalContentOffset + change)
-            //{
-            //    case double c when c > templatedParent.RequiredArea.Width:
-            //        label.HorizontalContentOffset = 0;
-            //        label = (ContentTransformLabel)Children[currentHeaderIndex];
-            //        label.HorizontalContentOffset = offsetChange;
-            //        break;
-            //    case double c when c < 0:
-            //        label.HorizontalContentOffset = 0;
-            //        label = (ContentTransformLabel)Children[currentHeaderIndex];
-            //        label.HorizontalContentOffset = offsetChange;
-            //        break;
-            //    default:
-            //        label.HorizontalContentOffset = offsetChange;
-            //        break;
-            //}
         }
 
         private bool RestrictTransition(ScrollChangedEventArgs e, double offsetChange) =>
