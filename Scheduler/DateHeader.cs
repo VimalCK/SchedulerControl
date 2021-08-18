@@ -77,13 +77,18 @@ namespace Scheduler
             var previousIndex = (short)((e.HorizontalOffset - e.HorizontalChange) / templatedParent.RequiredArea.Width);
             if (change.Equals(0))
             {
-                ((ContentTransformLabel)Children[previousIndex]).HorizontalContentOffset = 0;
+                DefaultHorizontalOffset();
                 return;
             }
 
             var label = (ContentTransformLabel)Children[currentIndex];
             label.HorizontalContentOffset = change;
             if (!previousIndex.Equals(currentIndex))
+            {
+                DefaultHorizontalOffset();
+            }
+
+            void DefaultHorizontalOffset()
             {
                 if (previousIndex > Children.Count - 1)
                 {

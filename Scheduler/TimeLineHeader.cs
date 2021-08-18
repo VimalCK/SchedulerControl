@@ -28,7 +28,7 @@ namespace Scheduler
                     HorizontalGap = ActualHeight;
                     RulerColor = control.TimeLineColor;
                     VerticalGap = control.ViewPortArea.Width / (int)control.TimeLineZoom;
-
+                    var clipWidth = VerticalGap <= 3 ? 0 : VerticalGap - 3;
                     base.OnRender(drawingContext);
 
                     for (int i = 0; i < VerticalLines; i++)
@@ -38,7 +38,7 @@ namespace Scheduler
 
                         drawingContext.PushClip(new RectangleGeometry(new Rect(clippingPoint, new Size
                         {
-                            Width = VerticalGap - 3,
+                            Width = clipWidth,
                             Height = ActualHeight
                         })));
 
