@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 
@@ -21,7 +22,7 @@ namespace Scheduler
             "BorderThickness", typeof(Thickness), typeof(ContentTransformLabel), new PropertyMetadata(default(Thickness)));
 
         public static readonly DependencyProperty ContentProperty = DependencyProperty.Register(
-            "Content", typeof(string), typeof(ContentTransformLabel), new PropertyMetadata(default(string)));
+            "Content", typeof(string), typeof(ContentTransformLabel), new FrameworkPropertyMetadata(default(string), FrameworkPropertyMetadataOptions.AffectsRender));
 
 
         public Brush BorderBrush
