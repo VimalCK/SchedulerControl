@@ -10,12 +10,15 @@ using System.Linq;
 
 namespace Scheduler
 {
-    [TemplatePart(Name = "PART_ParentGrid", Type = typeof(Grid))]
+    [TemplatePart(Name = "PART_ScheduleGrid", Type = typeof(Grid))]
     [TemplatePart(Name = "PART_RulerGrid", Type = typeof(RulerGrid))]
     [TemplatePart(Name = "PART_ScrollViewer", Type = typeof(ScrollViewer))]
     [TemplatePart(Name = "PART_DateHeader", Type = typeof(DateHeader))]
     [TemplatePart(Name = "PART_TimeRulerPanel", Type = typeof(TimeRulerPanel))]
     [TemplatePart(Name = "PART_TimeLineHeader", Type = typeof(TimeLineHeader))]
+    [TemplatePart(Name = "PART_GroupHeader", Type = typeof(ItemsControl))]
+    [TemplatePart(Name = "PART_HeaderSection", Type = typeof(Grid))]
+    [TemplatePart(Name = "PART_ScrollGapMask", Type = typeof(Grid))]
     public class ScheduleControl : Control
     {
         public event ScrollChangedEventHandler ScrollChanged;
@@ -24,14 +27,15 @@ namespace Scheduler
         private ScrollBar verticalScrollBar;
         private Size viewPortArea;
         private Size requiredArea;
-        private Grid parentGrid;
+        private Grid scheduleGrid;
         private RulerGrid rulerGrid;
         private DateHeader dateHeader;
         private TimeRulerPanel timerulerPanel;
         private TimeLineHeader timeLineHeader;
         private ScrollViewer scrollViewer;
-        private bool isControlledExecutionEnabled = true;
-
+        internal ItemsControl groupHeader;
+        private Grid headerSection;
+        private Border scrollGapMask;
 
         public static readonly DependencyProperty TimeLineColorProperty = DependencyProperty.Register(
             "TimeLineColor", typeof(Brush), typeof(ScheduleControl), new FrameworkPropertyMetadata(Brushes.LightGray, OnTimeLineColorChanged));
@@ -165,6 +169,10 @@ namespace Scheduler
             if (d is ScheduleControl control)
             {
                 control.AppointmentSource.CollectionChanged += AppointmentSource_CollectionChanged;
+                var lambda = CommonFunctions.GetPropertyValue<IAppointment, string>(nameof(IAppointment.Group));
+                var group = control.AppointmentSource.Select(a => lambda(a)).Distinct();
+                control.groupHeader.ItemsSource = group;
+                control.InvalidateChildControlsToReRender();
             }
         }
 
@@ -179,12 +187,15 @@ namespace Scheduler
         {
             base.OnApplyTemplate();
 
-            parentGrid = GetTemplateChild("PART_ParentGrid") as Grid;
+            scheduleGrid = GetTemplateChild("PART_ScheduleGrid") as Grid;
             rulerGrid = GetTemplateChild("PART_RulerGrid") as RulerGrid;
             scrollViewer = GetTemplateChild("PART_ScrollViewer") as ScrollViewer;
             dateHeader = GetTemplateChild("PART_DateHeader") as DateHeader;
             timerulerPanel = GetTemplateChild("PART_TimeRulerPanel") as TimeRulerPanel;
             timeLineHeader = GetTemplateChild("PART_TimeLineHeader") as TimeLineHeader;
+            groupHeader = GetTemplateChild("PART_GroupHeader") as ItemsControl;
+            headerSection = GetTemplateChild("PART_HeaderSection") as Grid;
+            scrollGapMask = GetTemplateChild("PART_ScrollGapMask") as Border;
 
             HandleEvents();
         }
@@ -218,21 +229,11 @@ namespace Scheduler
 
             List<ScrollBar> scrollBars = new List<ScrollBar>();
 
-            Helper.GetChildOfType<ScrollBar>(scrollViewer, ref scrollBars);
-            scrollBars = scrollBars.DistinctBy(s => s.Orientation).ToList();
-
+            Helper.GetChildOfType<ScrollBar>(scrollViewer, ref scrollBars, level: 2);
             if (scrollBars.Count.Equals(2))
             {
-                if (scrollBars[0].Orientation.Equals(Orientation.Horizontal))
-                {
-                    horizontalScrollBar = scrollBars[0];
-                    verticalScrollBar = scrollBars[1];
-                }
-                else
-                {
-                    verticalScrollBar = scrollBars[0];
-                    horizontalScrollBar = scrollBars[1];
-                }
+                horizontalScrollBar = scrollBars[0].Orientation.Equals(Orientation.Horizontal) ? scrollBars[0] : scrollBars[1];
+                verticalScrollBar = scrollBars[1].Orientation.Equals(Orientation.Vertical) ? scrollBars[1] : scrollBars[0];
             }
 
             InvalidateChildControlsToReRender();
@@ -249,9 +250,12 @@ namespace Scheduler
         {
             InvalidateViewPortArea();
             var width = requiredArea.Width * ViewRange;
-            if (!parentGrid.Width.Equals(width))
+            if (!scheduleGrid.Width.Equals(width) || !scheduleGrid.Height.Equals(requiredArea.Height))
             {
-                parentGrid.Width = width;
+                scheduleGrid.Width = width;
+                headerSection.Width = width;
+                scrollGapMask.Width = verticalScrollBar.ActualWidth;
+                scheduleGrid.Height = requiredArea.Height;
             }
         }
 
@@ -259,6 +263,7 @@ namespace Scheduler
         {
             viewPortArea.Width = scrollViewer.ActualWidth - verticalScrollBar.ActualWidth;
             viewPortArea.Height = scrollViewer.ActualHeight - horizontalScrollBar.ActualHeight;
+            requiredArea.Height = groupHeader.Items.Count.Equals(0) ? viewPortArea.Height : groupHeader.Items.Count * ExtendedModeSize;
 
             switch (TimeLineZoom)
             {

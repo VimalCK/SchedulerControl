@@ -7,16 +7,39 @@ namespace Scheduler
 {
     internal sealed class TimeLineHeader : RulerBase
     {
+        private ScheduleControl parent;
+        private TranslateTransform transform;
         public TimeLineHeader()
         {
             DefaultStyleKey = typeof(TimeLineHeader);
+            transform = new TranslateTransform();
+            this.RenderTransform = transform;
+        }
+
+        ~TimeLineHeader()
+        {
+            parent.ScrollChanged -= Parent_ScrollChanged;
+        }
+        protected override void OnInitialized(EventArgs e)
+        {
+            base.OnInitialized(e);
+            parent = (ScheduleControl)TemplatedParent;
+            parent.ScrollChanged += Parent_ScrollChanged;
+        }
+
+        private void Parent_ScrollChanged(object sender, System.Windows.Controls.ScrollChangedEventArgs e)
+        {
+            if (e.HorizontalChange != 0)
+            {
+                transform.X -= e.HorizontalChange;
+            }
         }
 
         protected override void OnRender(DrawingContext drawingContext)
         {
             if (TemplatedParent is ScheduleControl control && control.ActualWidth != 0)
             {
-                VerticalLines = 24 * control.ViewRange;
+                VerticalLines = 25 * control.ViewRange;
 
                 if (VerticalLines > 0)
                 {

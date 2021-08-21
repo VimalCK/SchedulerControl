@@ -87,10 +87,22 @@ namespace WpfApp1
 
         private void Button_Click_5(object sender, RoutedEventArgs e)
         {
-            var items = new List<IAppointment>();
-            for (int i = 0; i < 10; i++)
+            var chars = new List<char>();
+            for (char c = 'A'; c <= 'Z'; c++)
             {
-                items.Add(new Appointment());
+                chars.Add(c);
+            }
+
+            var items = new List<IAppointment>();
+            for (int i = 0; i < 26; i++)
+            {
+                items.Add(new Appointment()
+                {
+                    StartDate = DateTime.Now,
+                    EndDate = DateTime.Now,
+                    Description = "Appointment " + i,
+                    Group = chars[0].ToString() + chars[0].ToString() + chars[i].ToString()
+                }); ; 
             }
 
             sc.AppointmentSource = new ObservableCollection<IAppointment>(items);

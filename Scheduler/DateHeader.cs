@@ -10,10 +10,13 @@ namespace Scheduler
     internal sealed class DateHeader : Grid
     {
         private ScheduleControl templatedParent;
+        private TranslateTransform transform;
 
         public DateHeader()
         {
             DefaultStyleKey = typeof(DateHeader);
+            transform = new TranslateTransform();
+            RenderTransform = transform;
             Loaded += DateHeader_Loaded;
         }
 
@@ -24,7 +27,6 @@ namespace Scheduler
             base.OnInitialized(e);
             templatedParent = (ScheduleControl)TemplatedParent;
             templatedParent.ScrollChanged += ScrollViewer_ScrollChanged;
-            Background = Brushes.Red;
         }
 
         internal void ReArrangeHeaders()
@@ -43,7 +45,7 @@ namespace Scheduler
                     }
                     else
                     {
-                        ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(1, GridUnitType.Star) });
+                        ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(635, GridUnitType.Star) });
                         label = new ContentTransformLabel();
                         Children.Add(label);
                         Grid.SetColumn(label, index);
@@ -75,6 +77,7 @@ namespace Scheduler
             var currentIndex = (short)(e.HorizontalOffset / templatedParent.RequiredArea.Width);
             var change = (templatedParent.RequiredArea.Width + e.HorizontalOffset) - (templatedParent.RequiredArea.Width * (currentIndex + 1));
             var previousIndex = (short)((e.HorizontalOffset - e.HorizontalChange) / templatedParent.RequiredArea.Width);
+            transform.X = -e.HorizontalOffset;
             if (change.Equals(0))
             {
                 DefaultHorizontalOffset();

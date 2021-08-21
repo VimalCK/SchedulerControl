@@ -39,9 +39,9 @@ namespace Scheduler
             }
         }
 
-        public static bool GetChildOfType<T>(this DependencyObject control, ref List<T> items) where T : DependencyObject
+        public static bool GetChildOfType<T>(this DependencyObject control, ref List<T> items, int level = int.MaxValue) where T : DependencyObject
         {
-            if (control == null)
+            if (control == null || level.Equals(-1))
             {
                 return false;
             }
@@ -52,10 +52,12 @@ namespace Scheduler
                 var result = child as T;
                 if (result is null)
                 {
-                    GetChildOfType<T>(child, ref items);
+                    GetChildOfType<T>(child, ref items, --level);
+                    level++;
                 }
                 else
                 {
+
                     items.Add(result);
                 }
             }

@@ -11,11 +11,11 @@ namespace Scheduler
         {
             if (TemplatedParent is ScheduleControl control && control.ActualWidth > 0)
             {
-                VerticalLines = 24 * control.ViewRange;
+                VerticalLines = 25 * control.ViewRange;
                 if (VerticalLines > 0)
                 {
                     HorizontalGap = control.ExtendedModeSize;
-                    HorizontalLines = (int)Math.Round(ActualHeight / HorizontalGap);
+                    HorizontalLines = (int)Math.Round(control.groupHeader.ActualHeight / HorizontalGap);
                     VerticalGap = control.ViewPortArea.Width / (int)control.TimeLineZoom;
                     RulerColor = control.TimeLineColor;
                     base.OnRender(drawingContext);
