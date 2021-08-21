@@ -198,6 +198,12 @@ namespace Scheduler
             scrollGapMask = GetTemplateChild("PART_ScrollGapMask") as Border;
 
             HandleEvents();
+            PrepareChildControls();
+        }
+
+        private void PrepareChildControls()
+        {
+            groupHeader.RenderTransform = new TranslateTransform();
         }
 
         private void HandleEvents()
@@ -212,9 +218,18 @@ namespace Scheduler
             if (IsLoaded && e.Source is ScrollViewer)
             {
                 ScrollChanged?.Invoke(sender, e);
+                ScrollGroupHeaderVertically(-e.VerticalOffset);
+            }
+
+
+        }
+        private void ScrollGroupHeaderVertically(double offset)
+        {
+            if (!offset.Equals(0))
+            {
+                ((TranslateTransform)groupHeader.RenderTransform).Y = offset;
             }
         }
-
         private void ScheduleControl_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             if (IsLoaded)
