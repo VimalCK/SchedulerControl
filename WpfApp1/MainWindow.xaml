@@ -11,6 +11,16 @@
         Height="450"
         Width="800">
     <Grid>
+        <Grid.Resources>
+            <DataTemplate x:Key="GroupHeaderTemplate">
+                <Border BorderBrush="AliceBlue" BorderThickness="1">
+                    <Button HorizontalAlignment="Stretch" 
+                            VerticalAlignment="Top" 
+                            Content="{Binding}"
+                            Height="28"/>
+                </Border>
+            </DataTemplate>
+        </Grid.Resources>
         <Grid.RowDefinitions>
             <RowDefinition Height="2*" />
             <RowDefinition Height="Auto" />

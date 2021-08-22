@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Scheduler
 {
-    [TemplatePart(Name = "PART_ScheduleGrid", Type = typeof(Grid))]
+    [TemplatePart(Name = "PART_ContentSection", Type = typeof(Grid))]
     [TemplatePart(Name = "PART_RulerGrid", Type = typeof(RulerGrid))]
     [TemplatePart(Name = "PART_ScrollViewer", Type = typeof(ScrollViewer))]
     [TemplatePart(Name = "PART_DateHeader", Type = typeof(DateHeader))]
@@ -27,7 +27,7 @@ namespace Scheduler
         private ScrollBar verticalScrollBar;
         private Size viewPortArea;
         private Size requiredArea;
-        private Grid scheduleGrid;
+        private Grid contentSection;
         private RulerGrid rulerGrid;
         private DateHeader dateHeader;
         private TimeRulerPanel timerulerPanel;
@@ -62,7 +62,23 @@ namespace Scheduler
         public static readonly DependencyProperty GroupHeaderProperty = DependencyProperty.Register(
             "GroupHeader", typeof(string), typeof(ScheduleControl), new PropertyMetadata(OnGroupHeaderChanged));
 
+        public static readonly DependencyProperty GroupHeaderContentTemplateProperty = DependencyProperty.Register(
+            "GroupHeaderContentTemplate", typeof(DataTemplate), typeof(ScheduleControl), new PropertyMetadata(default(DataTemplate)));
 
+        public static readonly DependencyProperty ExtendedModeHeightProperty = DependencyProperty.Register(
+            "ExtendedModeHeight", typeof(double), typeof(ScheduleControl), new PropertyMetadata((double)ExtendedMode.Normal));
+
+        public double ExtendedModeHeight
+        {
+            get => (double)GetValue(ExtendedModeHeightProperty);
+            private set => SetValue(ExtendedModeHeightProperty, value);
+        }
+
+        public DataTemplate GroupHeaderContentTemplate
+        {
+            get => (DataTemplate)GetValue(GroupHeaderContentTemplateProperty);
+            set => SetValue(GroupHeaderContentTemplateProperty, value);
+        }
         public string GroupHeader
         {
             get => (string)GetValue(GroupHeaderProperty);
@@ -117,8 +133,6 @@ namespace Scheduler
 
         internal int ViewRange => (EndDate.Date - StartDate.Date).Days + 1;
 
-        internal int ExtendedModeSize => IsExtendedMode ? (int)ExtendedMode.Zoom : (int)ExtendedMode.Normal;
-
         public ScheduleControl()
         {
             DefaultStyleKey = typeof(ScheduleControl);
@@ -128,6 +142,7 @@ namespace Scheduler
         private static void OnIsExtendedModeChanges(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
+            control.ExtendedModeHeight = (double)(control.IsExtendedMode ? ExtendedMode.Zoom : ExtendedMode.Normal);
             control.rulerGrid?.InvalidateVisual();
         }
 
@@ -187,7 +202,7 @@ namespace Scheduler
         {
             base.OnApplyTemplate();
 
-            scheduleGrid = GetTemplateChild("PART_ScheduleGrid") as Grid;
+            contentSection = GetTemplateChild("PART_ContentSection") as Grid;
             rulerGrid = GetTemplateChild("PART_RulerGrid") as RulerGrid;
             scrollViewer = GetTemplateChild("PART_ScrollViewer") as ScrollViewer;
             dateHeader = GetTemplateChild("PART_DateHeader") as DateHeader;
@@ -225,10 +240,10 @@ namespace Scheduler
         }
         private void ScrollGroupHeaderVertically(double offset)
         {
-            if (!offset.Equals(0))
-            {
-                ((TranslateTransform)groupHeader.RenderTransform).Y = offset;
-            }
+            //if (!offset.Equals(0))
+            //{
+            ((TranslateTransform)groupHeader.RenderTransform).Y = offset;
+            //}
         }
         private void ScheduleControl_SizeChanged(object sender, SizeChangedEventArgs e)
         {
@@ -243,8 +258,8 @@ namespace Scheduler
             Loaded -= ScheduleControl_Loaded;
 
             List<ScrollBar> scrollBars = new List<ScrollBar>();
-
             Helper.GetChildOfType<ScrollBar>(scrollViewer, ref scrollBars, level: 2);
+
             if (scrollBars.Count.Equals(2))
             {
                 horizontalScrollBar = scrollBars[0].Orientation.Equals(Orientation.Horizontal) ? scrollBars[0] : scrollBars[1];
@@ -265,12 +280,12 @@ namespace Scheduler
         {
             InvalidateViewPortArea();
             var width = requiredArea.Width * ViewRange;
-            if (!scheduleGrid.Width.Equals(width) || !scheduleGrid.Height.Equals(requiredArea.Height))
+            if (!contentSection.Width.Equals(width) || !contentSection.Height.Equals(requiredArea.Height))
             {
-                scheduleGrid.Width = width;
+                contentSection.Width = width;
                 headerSection.Width = width;
+                contentSection.Height = requiredArea.Height;
                 scrollGapMask.Width = verticalScrollBar.ActualWidth;
-                scheduleGrid.Height = requiredArea.Height;
             }
         }
 
@@ -278,7 +293,9 @@ namespace Scheduler
         {
             viewPortArea.Width = scrollViewer.ActualWidth - verticalScrollBar.ActualWidth;
             viewPortArea.Height = scrollViewer.ActualHeight - horizontalScrollBar.ActualHeight;
-            requiredArea.Height = groupHeader.Items.Count.Equals(0) ? viewPortArea.Height : groupHeader.Items.Count * ExtendedModeSize;
+
+            var requiredHeight = groupHeader.Items.Count * this.ExtendedModeHeight;
+            requiredArea.Height = requiredHeight < viewPortArea.Height ? viewPortArea.Height : requiredHeight;
 
             switch (TimeLineZoom)
             {

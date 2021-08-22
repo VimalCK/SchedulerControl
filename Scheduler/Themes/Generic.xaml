@@ -3,16 +3,38 @@
                     xmlns:local="clr-namespace:Scheduler">
 
     <Style x:Key="GroupHeaderStyle" TargetType="ItemsControl">
-        <Setter Property="ItemTemplate">
+        <Setter Property="ItemContainerStyle">
             <Setter.Value>
-                <DataTemplate>
-                    <Border BorderBrush="Gray" BorderThickness="0,.5,0,0">
-                        <TextBlock Text="{Binding}" Height="29.5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                </DataTemplate>
+                <Style TargetType="ContentPresenter">
+                    <Setter Property="Height"
+                            Value="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:ScheduleControl}, Path=ExtendedModeHeight}"/>
+                </Style>
             </Setter.Value>
         </Setter>
+        <Setter Property="ItemTemplate"
+                Value="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:ScheduleControl}, Path=GroupHeaderContentTemplate}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:ScheduleControl}, Path=GroupHeaderContentTemplate}"
+                         Value="{x:Null}">
+                <Setter Property="ItemTemplate">
+                    <Setter.Value>
+                        <DataTemplate>
+                            <Border BorderBrush="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:ScheduleControl},Path=TimeLineColor}" 
+                                    BorderThickness="0,0,0,.5">
+                                <Button Content="{Binding}" 
+                                           HorizontalAlignment="Stretch" 
+                                           VerticalAlignment="Stretch"
+                                           VerticalContentAlignment="Center"
+                                          HorizontalContentAlignment="Center"
+                                           FontSize="11"/>
+                            </Border>
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+            </DataTrigger>
+        </Style.Triggers>
     </Style>
+
     <Style x:Key="ScheduleGridStyle"
            TargetType="Grid">
         <Setter Property="VerticalAlignment"
@@ -96,9 +118,11 @@
                                 BorderThickness="0,0,.5,.5"
                                 Background="White"
                                 Panel.ZIndex="1"/>
-                        <Border Grid.Row="2" 
+                        <Border Grid.Row="1" 
                                 BorderBrush="{TemplateBinding TimeLineColor}" 
-                                BorderThickness=".5,0,.5,.5">
+                                BorderThickness=".5,0,.5,.5"
+                                Height="{Binding Path=ActualHeight, ElementName=PART_ContentSection}"
+                                VerticalAlignment="Top">
                             <ItemsControl x:Name="PART_GroupHeader" 
                                           Style="{StaticResource GroupHeaderStyle}">
                             </ItemsControl>
@@ -129,7 +153,7 @@
                                       VerticalScrollBarVisibility="Visible"
                                       Grid.Column="1"
                                       Grid.Row="2">
-                            <Grid x:Name="PART_ScheduleGrid"
+                            <Grid x:Name="PART_ContentSection"
                                   Style="{StaticResource ScheduleGridStyle}">
                                 <local:RulerGrid x:Name="PART_RulerGrid" />
                                 <local:Scheduler x:Name="PART_Scheduler"

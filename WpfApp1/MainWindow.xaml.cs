@@ -94,15 +94,21 @@ namespace WpfApp1
             }
 
             var items = new List<IAppointment>();
-            for (int i = 0; i < 26; i++)
+            for (int index = 0, iteration = 0; index < 26; index++)
             {
                 items.Add(new Appointment()
                 {
                     StartDate = DateTime.Now,
                     EndDate = DateTime.Now,
-                    Description = "Appointment " + i,
-                    Group = chars[0].ToString() + chars[0].ToString() + chars[i].ToString()
-                }); ; 
+                    Description = "Appointment " + index,
+                    Group = chars[iteration].ToString() + chars[iteration].ToString() + chars[index].ToString()
+                });
+
+                if (index==25 && iteration < 2)
+                {
+                    index =-1;
+                    iteration++;
+                }
             }
 
             sc.AppointmentSource = new ObservableCollection<IAppointment>(items);

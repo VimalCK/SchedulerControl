@@ -14,8 +14,8 @@ namespace Scheduler
                 VerticalLines = 25 * control.ViewRange;
                 if (VerticalLines > 0)
                 {
-                    HorizontalGap = control.ExtendedModeSize;
-                    HorizontalLines = (int)Math.Round(control.groupHeader.ActualHeight / HorizontalGap);
+                    HorizontalGap = control.ExtendedModeHeight;
+                    HorizontalLines = (int)Math.Round(control.RequiredArea.Height / HorizontalGap);
                     VerticalGap = control.ViewPortArea.Width / (int)control.TimeLineZoom;
                     RulerColor = control.TimeLineColor;
                     base.OnRender(drawingContext);
