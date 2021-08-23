@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Scheduler
 {
@@ -24,6 +25,7 @@ namespace Scheduler
 
         internal ItemsControl groupHeader;
 
+        private SortedDictionary<string, List<IAppointment>> appointments;
         private double scrollBarSpace;
         private Size viewPortArea;
         private Size requiredArea;
@@ -135,6 +137,7 @@ namespace Scheduler
         {
             DefaultStyleKey = typeof(ScheduleControl);
             TimeLineProviders = new FreezableCollection<TimeRuler>();
+            appointments = new SortedDictionary<string, List<IAppointment>>();
         }
 
         private static void OnIsExtendedModeChanges(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -177,22 +180,15 @@ namespace Scheduler
 
         }
 
-        private static void OnAppointmentSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private async static void OnAppointmentSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is ScheduleControl control)
             {
                 control.AppointmentSource.CollectionChanged += AppointmentSource_CollectionChanged;
-                GenerateGroupHeader(control);
+                await control.GenerateGroupHeader((IEnumerable<IAppointment>)e.NewValue);
             }
         }
 
-        private static void GenerateGroupHeader(ScheduleControl control)
-        {
-            var lambda = CommonFunctions.GetPropertyValue<IAppointment, string>(nameof(IAppointment.Group));
-            var group = control.AppointmentSource.Select(a => lambda(a)).Distinct();
-            control.groupHeader.ItemsSource = group;
-            control.InvalidateChildControlsToReRender();
-        }
 
         private static void AppointmentSource_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
@@ -215,7 +211,30 @@ namespace Scheduler
             headerSection = GetTemplateChild("PART_HeaderSection") as Grid;
 
             HandleEvents();
-            //PrepareChildControls();
+        }
+        private async Task GenerateGroupHeader(IEnumerable<IAppointment> source)
+        {
+            var task = Task.Run(() =>
+            {
+                var lambda = CommonFunctions.GetPropertyValue<IAppointment, string>(nameof(IAppointment.Group));
+                foreach (var appointment in source)
+                {
+                    var group = lambda(appointment);
+                    if (appointments.ContainsKey(group))
+                    {
+                        appointments[group].Add(appointment);
+                    }
+                    else
+                    {
+                        appointments[group] = new List<IAppointment>(new[] { appointment });
+                    }
+                }
+            });
+
+            await task;
+
+            groupHeader.ItemsSource = appointments.Keys;
+            InvalidateChildControlsToReRender();
         }
 
         private void PrepareChildControls()
