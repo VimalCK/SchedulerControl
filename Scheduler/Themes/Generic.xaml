@@ -22,11 +22,11 @@
                             <Border BorderBrush="{local:AncestorBinding AncestorType=local:ScheduleControl, Path=TimeLineColor}" 
                                     BorderThickness="0,0,0,.5">
                                 <Button Content="{Binding}" 
-                                           HorizontalAlignment="Stretch" 
-                                           VerticalAlignment="Stretch"
-                                           VerticalContentAlignment="Center"
-                                           HorizontalContentAlignment="Center"
-                                           FontSize="11"/>
+                                        HorizontalAlignment="Stretch" 
+                                        VerticalAlignment="Stretch"
+                                        VerticalContentAlignment="Center"
+                                        HorizontalContentAlignment="Center"
+                                        FontSize="11"/>
                             </Border>
                         </DataTemplate>
                     </Setter.Value>
@@ -124,6 +124,7 @@
                                 Height="{Binding Path=ActualHeight, ElementName=PART_ContentSection}"
                                 VerticalAlignment="Top">
                             <ItemsControl x:Name="PART_GroupHeader" 
+                                          ItemsSource="{Binding Group, RelativeSource={RelativeSource Mode=TemplatedParent}}"
                                           Style="{StaticResource GroupHeaderStyle}">
                             </ItemsControl>
                         </Border>

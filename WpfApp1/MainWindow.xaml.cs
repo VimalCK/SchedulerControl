@@ -94,19 +94,19 @@ namespace WpfApp1
             }
 
             var items = new List<IAppointment>();
-            for (int index = 0, iteration = 0; index < 26; index++)
+            for (int index = 0, iteration = 0; index < 5; index++)
             {
                 items.Add(new Appointment()
                 {
                     StartDate = DateTime.Now,
                     EndDate = DateTime.Now,
                     Description = "Appointment " + index,
-                    Group = chars[iteration].ToString() + chars[iteration].ToString() + chars[index].ToString()
-                });
+                    Group = "AAA"//chars[iteration].ToString() + chars[iteration].ToString() + chars[index].ToString()
+                }) ;
 
-                if (index==25 && iteration < 2)
+                if (index == 25 && iteration < 2)
                 {
-                    index =-1;
+                    index = -1;
                     iteration++;
                 }
             }
@@ -118,7 +118,13 @@ namespace WpfApp1
         {
             for (int i = 0; i < 20; i++)
             {
-                sc.AppointmentSource.Add(new Appointment());
+                sc.AppointmentSource.Add(new Appointment()
+                {
+                    StartDate = DateTime.Now,
+                    EndDate = DateTime.Now,
+                    Description = "Appointment " + i,
+                    Group = $"AAA{i}"
+                });
             }
         }
     }
