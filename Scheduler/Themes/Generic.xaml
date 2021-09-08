@@ -124,7 +124,7 @@
                                 Height="{Binding Path=ActualHeight, ElementName=PART_ContentSection}"
                                 VerticalAlignment="Top">
                             <ItemsControl x:Name="PART_GroupHeader" 
-                                          ItemsSource="{Binding Group, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+                                          ItemsSource="{TemplateBinding GroupResources}"
                                           Style="{StaticResource GroupHeaderStyle}">
                             </ItemsControl>
                         </Border>

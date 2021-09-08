@@ -10,6 +10,9 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         Height="450"
         Width="800">
+    <Window.DataContext>
+        <local:MainViewModel/>
+    </Window.DataContext>
     <Grid>
         <Grid.Resources>
             <DataTemplate x:Key="GroupHeaderTemplate">
@@ -29,27 +32,26 @@
         <control:ScheduleControl x:Name="sc"
                                  StartDate="{Binding ElementName=sdt, Path=SelectedDate}"
                                  EndDate="{Binding ElementName=edt, Path=SelectedDate}"
-                                 GroupHeader="Group">
-            <control:ScheduleControl.TimeLineProviders>
+                                 IsExtendedMode="{Binding ExtendedMode}"
+                                 TimeLineZoom="{Binding TimeLineZoom}"
+                                 TimeLineColor="{Binding TimelineColor, Mode=TwoWay}"
+                                 GroupHeader="Group"
+                                 GroupResources="{Binding GroupResources}">
+            <!--<control:ScheduleControl.TimeLineProviders>
                 <control:TimeRuler Color="Red" />
                 <control:TimeRuler Color="Orange"
                                    Time="02:30" />
-            </control:ScheduleControl.TimeLineProviders>
+            </control:ScheduleControl.TimeLineProviders>-->
         </control:ScheduleControl>
-
         <WrapPanel Orientation="Horizontal"
                    Grid.Row="1">
-            <Button Height="30"
-                    Content="Timeline Color"
-                    Click="Button_Click" />
-            <DatePicker x:Name="sdt" />
-            <DatePicker x:Name="edt" />
-            <Button Content="Extended Mode"
-                    Click="Button_Click_1" />
-            <Button Content="TimeLine Zoom"
-                    Click="Button_Click_2" />
-            <Button Content="Add TimeLine"
-                    Click="Button_Click_3" />
+            <Button Content="Timeline Color" Command="{Binding TimeLineColorCommand}" />
+            <DatePicker x:Name="sdt" SelectedDate="{Binding StartDate}" />
+            <DatePicker x:Name="edt" SelectedDate="{Binding EndDate}" />
+            <Button Content="Extended Mode" Command="{Binding ExtendedModeCommand}"/>
+            <Button Content="TimeLine Zoom" Command="{Binding TimeLineZoomCommand}"/>
+            <Button Content="Add Group Headers" Command="{Binding AddGroupHeadersCommand}"/>
+            <Button Content="Add TimeLine" />
             <Button Content="Remove TimeLine"
                     Click="Button_Click_4" />
             <Button Content="Load Appointments"

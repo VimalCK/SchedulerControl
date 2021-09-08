@@ -8,6 +8,9 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections;
+using System.ComponentModel;
+using System.Collections.Specialized;
 
 namespace Scheduler
 {
@@ -24,7 +27,7 @@ namespace Scheduler
         public event ScrollChangedEventHandler ScrollChanged;
 
         internal ItemsControl groupHeader;
-        private Func<IAppointment, string> groupValueLambda;
+        //private Func<IAppointment, string> groupValueLambda;
         private SortedList<string, List<IAppointment>> appointments;
         private double scrollBarSpace;
         private Size viewPortArea;
@@ -64,11 +67,20 @@ namespace Scheduler
         public static readonly DependencyProperty GroupHeaderProperty = DependencyProperty.Register(
             "GroupHeader", typeof(string), typeof(ScheduleControl), new PropertyMetadata(OnGroupHeaderChanged));
 
+        public static readonly DependencyProperty GroupResourcesProperty = DependencyProperty.Register(
+            "GroupResources", typeof(IEnumerable), typeof(ScheduleControl), new PropertyMetadata(default(IEnumerable)));
+
         public static readonly DependencyProperty GroupHeaderContentTemplateProperty = DependencyProperty.Register(
             "GroupHeaderContentTemplate", typeof(DataTemplate), typeof(ScheduleControl), new PropertyMetadata(default(DataTemplate)));
 
         public static readonly DependencyProperty ExtendedModeHeightProperty = DependencyProperty.Register(
             "ExtendedModeHeight", typeof(double), typeof(ScheduleControl), new PropertyMetadata((double)ExtendedMode.Normal));
+
+        public IEnumerable GroupResources
+        {
+            get => (IEnumerable)GetValue(GroupResourcesProperty);
+            set => SetValue(GroupResourcesProperty, value);
+        }
 
         public double ExtendedModeHeight
         {
@@ -140,9 +152,9 @@ namespace Scheduler
             DefaultStyleKey = typeof(ScheduleControl);
             TimeLineProviders = new FreezableCollection<TimeRuler>();
             appointments = new SortedList<string, List<IAppointment>>();
-            groupValueLambda = CommonFunctions.GetPropertyValue<IAppointment, string>(nameof(IAppointment.Group));
+            //groupValueLambda = CommonFunctions.GetPropertyValue<IAppointment, string>(nameof(IAppointment.Group));
         }
-
+        
         private static void OnIsExtendedModeChanges(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
@@ -153,7 +165,10 @@ namespace Scheduler
         private static void OnTimeLineZoomChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
-            control.InvalidateChildControlsToReRender();
+            if (control.IsLoaded)
+            {
+                control.InvalidateChildControlsToReRender();
+            }
         }
         private static void OnScheduleDateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -174,8 +189,11 @@ namespace Scheduler
         private static void OnTimeLineColorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
-            control.rulerGrid?.InvalidateVisual();
-            control.timeLineHeader?.InvalidateVisual();
+            if (control.IsLoaded)
+            {
+                control.rulerGrid?.InvalidateVisual();
+                control.timeLineHeader?.InvalidateVisual();
+            }
         }
 
         private static void OnGroupHeaderChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -188,7 +206,7 @@ namespace Scheduler
             if (d is ScheduleControl control)
             {
                 control.AppointmentSource.CollectionChanged += AppointmentSource_CollectionChanged;
-                if (await control.AddGroupHeaders((IEnumerable<IAppointment>)e.NewValue))
+                if (await control.AddGroupResources((IEnumerable<IAppointment>)e.NewValue))
                 {
                     control.groupHeader.Items.Refresh();
                 }
@@ -205,14 +223,14 @@ namespace Scheduler
             var control = sender as ScheduleControl;
             if (!e.NewItems.Count.Equals(0))
             {
-                isAdded = await control.AddGroupHeaders((IEnumerable<IAppointment>)e.NewItems);
+                isAdded = await control.AddGroupResources((IEnumerable<IAppointment>)e.NewItems);
             }
 
             if (!e.OldItems.Count.Equals(0))
             {
                 foreach (IAppointment item in e.NewItems)
                 {
-                    isRemoved = await control.RemoveGroupHeaders((IEnumerable<IAppointment>)e.OldItems);
+                    isRemoved = await control.RemoveAppointmentsAndNotifyIfGroupChanged((IEnumerable<IAppointment>)e.OldItems);
                 }
             }
 
@@ -240,55 +258,58 @@ namespace Scheduler
             HandleEvents();
         }
 
-        private async ValueTask<bool> AddGroupHeaders(IEnumerable<IAppointment> source)
+        private async ValueTask<bool> AddGroupResources(IEnumerable source)
         {
-            bool isAdded = false;
+            //if (source is null)
+            //{
+            //    return await Task<bool>.Run(() =>
+            //     {
+            //         bool isAdded = false;
+            //         foreach (IAppointment appointment in source)
+            //         {
+            //             var group = groupValueLambda(appointment);
+            //             if (appointments.ContainsKey(group))
+            //             {
+            //                 appointments[group].Add(appointment);
+            //             }
+            //             else
+            //             {
+            //                 appointments[group] = new List<IAppointment>(new[] { appointment });
+            //                 isAdded = true;
+            //             }
+            //         }
 
-            await Task.Run(() =>
-            {
-                foreach (IAppointment appointment in source)
-                {
-                    var group = groupValueLambda(appointment);
-                    if (appointments.ContainsKey(group))
-                    {
-                        appointments[group].Add(appointment);
-                    }
-                    else
-                    {
-                        appointments[group] = new List<IAppointment>(new[] { appointment });
-                        isAdded = true;
-                    }
-                }
-            });
-
-            return isAdded;
+            //         return isAdded;
+            //     });
+            //}
+            return false;
         }
 
-        private async ValueTask<bool> RemoveGroupHeaders(IEnumerable<IAppointment> source)
+        private async ValueTask<bool> RemoveAppointmentsAndNotifyIfGroupChanged(IEnumerable<IAppointment> source)
         {
-            bool isRemoved = false;
+            //return await Task<bool>.Run(() =>
+            //{
+            //    bool isRemoved = false;
+            //    foreach (IAppointment appointment in source)
+            //    {
+            //        var group = groupValueLambda(appointment);
+            //        if (appointments.ContainsKey(group))
+            //        {
+            //            appointments[group].Remove(appointment);
 
-            await Task.Run(() =>
-            {
-                foreach (IAppointment appointment in source)
-                {
-                    var group = groupValueLambda(appointment);
-                    if (appointments.ContainsKey(group))
-                    {
-                        appointments[group].Remove(appointment);
-                    }
+            //        }
 
-                    if (!isRemoved && appointments[group].Count.Equals(0))
-                    {
-                        isRemoved = true;
-                    }
-                }
-            });
+            //        if (!isRemoved && appointments[group].Count.Equals(0))
+            //        {
+            //            isRemoved = true;
+            //        }
+            //    }
+            //});
 
-            return isRemoved;
+            return false;
         }
 
-        private void PrepareChildControls()
+        private void PrepareScheduleControl()
         {
             groupHeader.RenderTransform = new TranslateTransform();
             (GetTemplateChild("PART_ScrollGapMask") as Border).Width = scrollBarSpace;
@@ -329,7 +350,7 @@ namespace Scheduler
             Helper.GetChildOfType<ScrollBar>(scrollViewer, ref scrollBars, level: 2);
             scrollBarSpace = scrollBars[0].Width;
 
-            PrepareChildControls();
+            PrepareScheduleControl();
             InvalidateChildControlsToReRender();
             dateHeader.ReArrangeHeaders();
         }
