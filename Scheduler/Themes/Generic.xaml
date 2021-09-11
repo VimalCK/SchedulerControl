@@ -38,7 +38,7 @@
     <Style x:Key="ScheduleGridStyle"
            TargetType="Grid">
         <Setter Property="VerticalAlignment"
-                Value="Stretch" />
+                Value="Top" />
         <Setter Property="HorizontalAlignment"
                 Value="Left" />
     </Style>
@@ -128,6 +128,13 @@
                                           Style="{StaticResource GroupHeaderStyle}">
                             </ItemsControl>
                         </Border>
+                        <Border x:Name="PART_HorizontalScrollGapMask" 
+                                BorderBrush="{TemplateBinding TimeLineColor}"
+                                BorderThickness="0,.5,.5,0"
+                                Background="White"
+                                Panel.ZIndex="1"
+                                Grid.Row="1"
+                                VerticalAlignment="Bottom"/>
 
                         <Grid x:Name="PART_HeaderSection" 
                               Grid.Column="1" 
@@ -143,7 +150,7 @@
                                                   Margin="0,0,0,1"/>
                         </Grid>
 
-                        <Border x:Name="PART_ScrollGapMask" 
+                        <Border x:Name="PART_VerticalScrollGapMask" 
                                 Grid.Column="1"
                                 Grid.RowSpan="1"
                                 Background="White"

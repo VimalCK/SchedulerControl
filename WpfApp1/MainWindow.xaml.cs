@@ -171,7 +171,7 @@ namespace WpfApp1
             }
 
             var list = new List<string>();
-            for (int index = 0, iteration = 1; index < 20; index++)
+            for (int index = 0, iteration = 1; index < 1; index++)
             {
                 groupResources.Add(chars[iteration].ToString() + chars[iteration].ToString() + chars[index].ToString());
             }
@@ -186,7 +186,7 @@ namespace WpfApp1
             }
 
             var list = new List<string>();
-            for (int index = 0, iteration = 0; index < 20; index++)
+            for (int index = 0, iteration = 0; index < 4; index++)
             {
                 list.Add(chars[iteration].ToString() + chars[iteration].ToString() + chars[index].ToString());
             }

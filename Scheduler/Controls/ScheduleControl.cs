@@ -65,10 +65,10 @@ namespace Scheduler
             new PropertyMetadata(new ObservableCollection<IAppointment>(), OnAppointmentSourceChanged));
 
         public static readonly DependencyProperty GroupHeaderProperty = DependencyProperty.Register(
-            "GroupHeader", typeof(string), typeof(ScheduleControl), new PropertyMetadata(OnGroupHeaderChanged));
+            "GroupHeader", typeof(string), typeof(ScheduleControl), new PropertyMetadata());
 
         public static readonly DependencyProperty GroupResourcesProperty = DependencyProperty.Register(
-            "GroupResources", typeof(IEnumerable), typeof(ScheduleControl), new PropertyMetadata(default(IEnumerable)));
+            "GroupResources", typeof(IEnumerable), typeof(ScheduleControl), new PropertyMetadata(default(IEnumerable), OnGroupResourcesChanged));
 
         public static readonly DependencyProperty GroupHeaderContentTemplateProperty = DependencyProperty.Register(
             "GroupHeaderContentTemplate", typeof(DataTemplate), typeof(ScheduleControl), new PropertyMetadata(default(DataTemplate)));
@@ -154,7 +154,22 @@ namespace Scheduler
             appointments = new SortedList<string, List<IAppointment>>();
             //groupValueLambda = CommonFunctions.GetPropertyValue<IAppointment, string>(nameof(IAppointment.Group));
         }
-        
+
+        private static void OnGroupResourcesChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is ScheduleControl control && control.GroupResources != null)
+            {
+                var notiftyCollection = (INotifyCollectionChanged)control.GroupResources;
+                notiftyCollection.CollectionChanged -= control.GroupResourcesChanged;
+                notiftyCollection.CollectionChanged += control.GroupResourcesChanged;
+            }
+        }
+
+        private void GroupResourcesChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            InvalidateChildControlsToReRender();
+        }
+
         private static void OnIsExtendedModeChanges(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
@@ -194,11 +209,6 @@ namespace Scheduler
                 control.rulerGrid?.InvalidateVisual();
                 control.timeLineHeader?.InvalidateVisual();
             }
-        }
-
-        private static void OnGroupHeaderChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-
         }
 
         private async static void OnAppointmentSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -312,7 +322,8 @@ namespace Scheduler
         private void PrepareScheduleControl()
         {
             groupHeader.RenderTransform = new TranslateTransform();
-            (GetTemplateChild("PART_ScrollGapMask") as Border).Width = scrollBarSpace;
+            (GetTemplateChild("PART_VerticalScrollGapMask") as Border).Width = scrollBarSpace;
+            (GetTemplateChild("PART_HorizontalScrollGapMask") as Border).Height = scrollBarSpace;
         }
 
         private void HandleEvents()
@@ -363,7 +374,8 @@ namespace Scheduler
 
         private void InvalidateChildControlsToReRender()
         {
-            InvalidateViewPortArea();
+            CalculateViewPortSize();
+            CalculateRequiredAreaSize();
             var width = requiredArea.Width * ViewRange;
             if (!contentSection.Width.Equals(width) || !contentSection.Height.Equals(requiredArea.Height))
             {
@@ -373,11 +385,14 @@ namespace Scheduler
             }
         }
 
-        private void InvalidateViewPortArea()
+        private void CalculateViewPortSize()
         {
             viewPortArea.Width = scrollViewer.ActualWidth - scrollBarSpace;
             viewPortArea.Height = scrollViewer.ActualHeight - scrollBarSpace;
+        }
 
+        private void CalculateRequiredAreaSize()
+        {
             var requiredHeight = groupHeader.Items.Count * this.ExtendedModeHeight;
             requiredArea.Height = requiredHeight < viewPortArea.Height ? viewPortArea.Height : requiredHeight;
 
