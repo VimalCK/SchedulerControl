@@ -43,19 +43,24 @@ namespace Scheduler
 
 
         public static readonly DependencyProperty TimeLineColorProperty = DependencyProperty.Register(
-            "TimeLineColor", typeof(Brush), typeof(ScheduleControl), new FrameworkPropertyMetadata(Brushes.LightGray, OnTimeLineColorChanged));
+            "TimeLineColor", typeof(Brush), typeof(ScheduleControl), new FrameworkPropertyMetadata(OnTimeLineColorChanged,
+            (d, value) => value ?? Brushes.LightGray));
 
         public static readonly DependencyProperty StartDateProperty = DependencyProperty.Register(
-              "StartDate", typeof(DateTime), typeof(ScheduleControl), new PropertyMetadata(DateTime.Now, OnScheduleDateChanged));
+            "StartDate", typeof(DateTime), typeof(ScheduleControl), new PropertyMetadata(DateTime.Now, OnScheduleDateChanged,
+            (d, value) => value.Equals(default(DateTime)) ? DateTime.Now : value));
 
         public static readonly DependencyProperty EndDateProperty = DependencyProperty.Register(
-               "EndDate", typeof(DateTime), typeof(ScheduleControl), new PropertyMetadata(DateTime.Now, OnScheduleDateChanged));
+            "EndDate", typeof(DateTime), typeof(ScheduleControl), new PropertyMetadata(DateTime.Now, OnScheduleDateChanged,
+            (d, value) => value.Equals(default(DateTime)) ? DateTime.Now : value));
 
         public static readonly DependencyProperty TimeLineZoomProperty = DependencyProperty.Register(
-            "TimeLineZoom", typeof(TimeLineZoom), typeof(ScheduleControl), new PropertyMetadata(TimeLineZoom.TwentyFour, OnTimeLineZoomChanged));
+            "TimeLineZoom", typeof(TimeLineZoom), typeof(ScheduleControl), new PropertyMetadata(TimeLineZoom.TwentyFour, OnTimeLineZoomChanged,
+            (d, value) => Enum.IsDefined(typeof(TimeLineZoom), value) ? value : TimeLineZoom.TwentyFour));
 
-        public static readonly DependencyProperty IsExtendedModeProperty = DependencyProperty.Register(
-            "IsExtendedMode", typeof(bool), typeof(ScheduleControl), new PropertyMetadata(default(bool), OnIsExtendedModeChanges));
+        public static readonly DependencyProperty ExtendedModeProperty = DependencyProperty.Register(
+            "ExtendedMode", typeof(ExtendedMode), typeof(ScheduleControl), new PropertyMetadata(default(ExtendedMode), OnExtendedModeChanged,
+            (d, value) => Enum.IsDefined(typeof(ExtendedMode), value) ? value : ExtendedMode.Normal));
 
         public static readonly DependencyProperty TimeLineProvidersProperty = DependencyProperty.Register(
             "TimeLineProviders", typeof(FreezableCollection<TimeRuler>), typeof(ScheduleControl), new PropertyMetadata(OnTimeLineProvidersChanged));
@@ -65,7 +70,7 @@ namespace Scheduler
             new PropertyMetadata(new ObservableCollection<IAppointment>(), OnAppointmentSourceChanged));
 
         public static readonly DependencyProperty GroupHeaderProperty = DependencyProperty.Register(
-            "GroupHeader", typeof(string), typeof(ScheduleControl), new PropertyMetadata());
+            "GroupHeader", typeof(string), typeof(ScheduleControl));
 
         public static readonly DependencyProperty GroupResourcesProperty = DependencyProperty.Register(
             "GroupResources", typeof(IEnumerable), typeof(ScheduleControl), new PropertyMetadata(default(IEnumerable), OnGroupResourcesChanged));
@@ -73,19 +78,16 @@ namespace Scheduler
         public static readonly DependencyProperty GroupHeaderContentTemplateProperty = DependencyProperty.Register(
             "GroupHeaderContentTemplate", typeof(DataTemplate), typeof(ScheduleControl), new PropertyMetadata(default(DataTemplate)));
 
-        public static readonly DependencyProperty ExtendedModeHeightProperty = DependencyProperty.Register(
-            "ExtendedModeHeight", typeof(double), typeof(ScheduleControl), new PropertyMetadata((double)ExtendedMode.Normal));
+        public ExtendedMode ExtendedMode
+        {
+            get => (ExtendedMode)GetValue(ExtendedModeProperty);
+            set => SetValue(ExtendedModeProperty, value);
+        }
 
         public IEnumerable GroupResources
         {
             get => (IEnumerable)GetValue(GroupResourcesProperty);
             set => SetValue(GroupResourcesProperty, value);
-        }
-
-        public double ExtendedModeHeight
-        {
-            get => (double)GetValue(ExtendedModeHeightProperty);
-            private set => SetValue(ExtendedModeHeightProperty, value);
         }
 
         public DataTemplate GroupHeaderContentTemplate
@@ -103,12 +105,6 @@ namespace Scheduler
         {
             get => (ObservableCollection<IAppointment>)GetValue(AppointmentSourceProperty);
             set => SetValue(AppointmentSourceProperty, value);
-        }
-
-        public bool IsExtendedMode
-        {
-            get => (bool)GetValue(IsExtendedModeProperty);
-            set => SetValue(IsExtendedModeProperty, value);
         }
 
         public TimeLineZoom TimeLineZoom
@@ -170,11 +166,10 @@ namespace Scheduler
             InvalidateChildControlsToReRender();
         }
 
-        private static void OnIsExtendedModeChanges(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnExtendedModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
-            control.ExtendedModeHeight = (double)(control.IsExtendedMode ? ExtendedMode.Zoom : ExtendedMode.Normal);
-            control.rulerGrid?.InvalidateVisual();
+            control.rulerGrid?.Render();
         }
 
         private static void OnTimeLineZoomChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -206,8 +201,8 @@ namespace Scheduler
             var control = (ScheduleControl)d;
             if (control.IsLoaded)
             {
-                control.rulerGrid?.InvalidateVisual();
-                control.timeLineHeader?.InvalidateVisual();
+                control.rulerGrid?.Render();
+                control.timeLineHeader?.Render();
             }
         }
 
@@ -393,7 +388,7 @@ namespace Scheduler
 
         private void CalculateRequiredAreaSize()
         {
-            var requiredHeight = groupHeader.Items.Count * this.ExtendedModeHeight;
+            var requiredHeight = groupHeader.Items.Count * (int)this.ExtendedMode;
             requiredArea.Height = requiredHeight < viewPortArea.Height ? viewPortArea.Height : requiredHeight;
 
             switch (TimeLineZoom)

@@ -8,11 +8,11 @@ namespace Scheduler
     internal sealed class TimeLineHeader : RulerBase
     {
         private ScheduleControl parent;
-        private TranslateTransform transform;
+        private TranslateTransform transform = new TranslateTransform();
+        private DrawingGroup backingStore = new DrawingGroup();
         public TimeLineHeader()
         {
             DefaultStyleKey = typeof(TimeLineHeader);
-            transform = new TranslateTransform();
             this.RenderTransform = transform;
         }
 
@@ -37,12 +37,19 @@ namespace Scheduler
 
         protected override void OnRender(DrawingContext drawingContext)
         {
+            Render();
+            drawingContext.DrawDrawing(backingStore);
+        }
+
+        protected internal override void Render()
+        {
             if (TemplatedParent is ScheduleControl control && control.ActualWidth != 0)
             {
                 VerticalLines = 25 * control.ViewRange;
 
                 if (VerticalLines > 0)
                 {
+                    var drawingContext = backingStore.Open();
                     var clippingPoint = new Point();
                     var renderPoint = new Point(0, ActualHeight / 3);
                     var headerText = 0;
@@ -70,6 +77,8 @@ namespace Scheduler
                         clippingPoint.X = renderPoint.X += VerticalGap;
                         headerText = headerText >= 23 ? 0 : headerText + 1;
                     }
+
+                    drawingContext.Close();
                 }
             }
         }

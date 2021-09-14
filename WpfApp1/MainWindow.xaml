@@ -32,7 +32,7 @@
         <control:ScheduleControl x:Name="sc"
                                  StartDate="{Binding ElementName=sdt, Path=SelectedDate}"
                                  EndDate="{Binding ElementName=edt, Path=SelectedDate}"
-                                 IsExtendedMode="{Binding ExtendedMode}"
+                                 ExtendedMode="{Binding ExtendedMode}"
                                  TimeLineZoom="{Binding TimeLineZoom}"
                                  TimeLineColor="{Binding TimelineColor, Mode=TwoWay}"
                                  GroupHeader="Group"

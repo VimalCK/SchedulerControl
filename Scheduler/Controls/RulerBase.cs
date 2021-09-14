@@ -59,8 +59,6 @@ namespace Scheduler
 
         protected override void OnRender(DrawingContext drawingContext)
         {
-            base.OnRender(drawingContext);
-
             var pen = new Pen(RulerColor, .5);
             var startPoint = new Point(0, 0);
             var endPoint = new Point(0, ActualHeight);
@@ -82,5 +80,7 @@ namespace Scheduler
                 drawingContext.DrawLine(pen, startPoint, endPoint);
             }
         }
+
+        protected internal abstract void Render();
     }
 }

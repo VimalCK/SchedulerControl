@@ -80,9 +80,9 @@ namespace WpfApp1
 
         private DateTime startDate;
         private DateTime endDate;
-        private bool extendedMode;
-        private Brush timelineColor = Brushes.LightGray;
-        private TimeLineZoom timeLineZoom = TimeLineZoom.TwentyFour;
+        private ExtendedMode extendedMode;
+        private Brush timelineColor;
+        private TimeLineZoom timeLineZoom;
         private ObservableCollection<string> groupResources;
         public ICommand ExtendedModeCommand { get; set; }
         public ICommand TimeLineZoomCommand { get; set; }
@@ -109,7 +109,7 @@ namespace WpfApp1
             }
         }
 
-        public bool ExtendedMode
+        public ExtendedMode ExtendedMode
         {
             get { return extendedMode; }
             set
@@ -152,7 +152,8 @@ namespace WpfApp1
 
         public MainViewModel()
         {
-            StartDate = DateTime.Now;
+            //StartDate = DateTime.Now;
+            StartDate = default(DateTime);
             EndDate = DateTime.Now.AddDays(7);
 
             ExtendedModeCommand = new RelayCommand(ChangeExtendedMode);
@@ -235,7 +236,7 @@ namespace WpfApp1
 
         private void ChangeExtendedMode(object obj)
         {
-            ExtendedMode = !ExtendedMode;
+            ExtendedMode = extendedMode == ExtendedMode.Zoom ? ExtendedMode.Normal : ExtendedMode.Zoom;
         }
     }
 
