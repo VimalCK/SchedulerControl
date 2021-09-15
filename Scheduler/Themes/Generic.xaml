@@ -7,19 +7,26 @@
             <Setter.Value>
                 <Style TargetType="ContentPresenter">
                     <Setter Property="Height"
-                            Value="{local:AncestorBinding Path=ExtendedModeHeight, AncestorType=local:ScheduleControl}"/>
+                            Value="{Binding RelativeSource={RelativeSource 
+                                            AncestorType=local:ScheduleControl}, 
+                                            Path=ExtendedMode, 
+                                            Converter={local:EnumToValueConverter}}"/>
                 </Style>
             </Setter.Value>
         </Setter>
         <Setter Property="ItemTemplate"
-                Value="{local:AncestorBinding AncestorType=local:ScheduleControl, Path=GroupHeaderContentTemplate}"/>
+                Value="{Binding RelativeSource={RelativeSource AncestorType=local:ScheduleControl}, Path=GroupHeaderContentTemplate}"/>
         <Style.Triggers>
-            <DataTrigger Binding="{local:AncestorBinding AncestorType=local:ScheduleControl, Path=GroupHeaderContentTemplate}"
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource 
+                                           AncestorType=local:ScheduleControl}, 
+                                           Path=GroupHeaderContentTemplate}"
                          Value="{x:Null}">
                 <Setter Property="ItemTemplate">
                     <Setter.Value>
                         <DataTemplate>
-                            <Border BorderBrush="{local:AncestorBinding AncestorType=local:ScheduleControl, Path=TimeLineColor}" 
+                            <Border BorderBrush="{Binding RelativeSource={RelativeSource 
+                                                          AncestorType=local:ScheduleControl}, 
+                                                          Path=TimeLineColor}" 
                                     BorderThickness="0,0,0,.5">
                                 <Button Content="{Binding}" 
                                         HorizontalAlignment="Stretch" 
@@ -52,7 +59,7 @@
                 Value="True" />
     </Style>
 
-    <Style TargetType="local:ContentTransformLabel">
+    <Style TargetType="{x:Type local:ContentTransformLabel}">
         <Setter Property="UseLayoutRounding"
                 Value="True"/>
         <Setter Property="BorderThickness"
@@ -60,7 +67,7 @@
         <Setter Property="Background"
                 Value="White"/>
         <Setter Property="BorderBrush"
-                Value="{local:AncestorBinding Path=TimeLineColor, AncestorType=local:ScheduleControl}"/>
+                Value="{Binding RelativeSource={RelativeSource AncestorType=local:ScheduleControl}, Path=TimeLineColor}"/>
     </Style>
 
     <Style TargetType="{x:Type local:TimeLineHeader}">
@@ -154,7 +161,7 @@
                                 Grid.Column="1"
                                 Grid.RowSpan="1"
                                 Background="White"
-                                BorderBrush="{local:AncestorBinding AncestorType=local:ScheduleControl, Path=TimeLineColor}"
+                                BorderBrush="{Binding RelativeSource={RelativeSource AncestorType=local:ScheduleControl}, Path=TimeLineColor}"
                                 BorderThickness=".5,0,0,0"
                                 HorizontalAlignment="Right"/>
 
@@ -167,7 +174,9 @@
                                   Style="{StaticResource ScheduleGridStyle}">
                                 <local:RulerGrid x:Name="PART_RulerGrid" />
                                 <local:Scheduler x:Name="PART_Scheduler"
-                                                 ItemsSource="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=AppointmentSource}" />
+                                                 ItemsSource="{Binding RelativeSource={RelativeSource 
+                                                                       Mode=TemplatedParent}, 
+                                                                       Path=AppointmentSource}" />
                                 <local:TimeRulerPanel x:Name="PART_TimeRulerPanel" />
                             </Grid>
                         </ScrollViewer>

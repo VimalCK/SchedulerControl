@@ -169,7 +169,10 @@ namespace Scheduler
         private static void OnExtendedModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
-            control.rulerGrid?.Render();
+            if (control.IsLoaded && !control.InvalidateChildControlsToReRender())
+            {
+                control.rulerGrid.Render();
+            }
         }
 
         private static void OnTimeLineZoomChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -208,41 +211,41 @@ namespace Scheduler
 
         private async static void OnAppointmentSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is ScheduleControl control)
-            {
-                control.AppointmentSource.CollectionChanged += AppointmentSource_CollectionChanged;
-                if (await control.AddGroupResources((IEnumerable<IAppointment>)e.NewValue))
-                {
-                    control.groupHeader.Items.Refresh();
-                }
+            //if (d is ScheduleControl control)
+            //{
+            //    control.AppointmentSource.CollectionChanged += AppointmentSource_CollectionChanged;
+            //    if (await control.AddGroupResources((IEnumerable<IAppointment>)e.NewValue))
+            //    {
+            //        control.groupHeader.Items.Refresh();
+            //    }
 
-                control.InvalidateChildControlsToReRender();
-            }
+            //    control.InvalidateChildControlsToReRender();
+            //}
         }
 
 
         private async static void AppointmentSource_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            bool isAdded = false;
-            bool isRemoved = false;
-            var control = sender as ScheduleControl;
-            if (!e.NewItems.Count.Equals(0))
-            {
-                isAdded = await control.AddGroupResources((IEnumerable<IAppointment>)e.NewItems);
-            }
+            //bool isAdded = false;
+            //bool isRemoved = false;
+            //var control = sender as ScheduleControl;
+            //if (!e.NewItems.Count.Equals(0))
+            //{
+            //    isAdded = await control.AddGroupResources((IEnumerable<IAppointment>)e.NewItems);
+            //}
 
-            if (!e.OldItems.Count.Equals(0))
-            {
-                foreach (IAppointment item in e.NewItems)
-                {
-                    isRemoved = await control.RemoveAppointmentsAndNotifyIfGroupChanged((IEnumerable<IAppointment>)e.OldItems);
-                }
-            }
+            //if (!e.OldItems.Count.Equals(0))
+            //{
+            //    foreach (IAppointment item in e.NewItems)
+            //    {
+            //        isRemoved = await control.RemoveAppointmentsAndNotifyIfGroupChanged((IEnumerable<IAppointment>)e.OldItems);
+            //    }
+            //}
 
-            if (isRemoved || isAdded)
-            {
-                control.groupHeader.Items.Refresh();
-            }
+            //if (isRemoved || isAdded)
+            //{
+            //    control.groupHeader.Items.Refresh();
+            //}
         }
 
         ~ScheduleControl() => UnHandleEvents();
@@ -367,7 +370,7 @@ namespace Scheduler
             scrollViewer.ScrollChanged -= ScrollViewer_ScrollChanged;
         }
 
-        private void InvalidateChildControlsToReRender()
+        private bool InvalidateChildControlsToReRender()
         {
             CalculateViewPortSize();
             CalculateRequiredAreaSize();
@@ -377,7 +380,10 @@ namespace Scheduler
                 contentSection.Width = width;
                 headerSection.Width = width;
                 contentSection.Height = requiredArea.Height;
+                return true;
             }
+
+            return false;
         }
 
         private void CalculateViewPortSize()
