@@ -20,13 +20,13 @@ namespace Scheduler
     [TemplatePart(Name = "PART_DateHeader", Type = typeof(DateHeader))]
     [TemplatePart(Name = "PART_TimeRulerPanel", Type = typeof(TimeRulerPanel))]
     [TemplatePart(Name = "PART_TimeLineHeader", Type = typeof(TimeLineHeader))]
-    [TemplatePart(Name = "PART_GroupHeader", Type = typeof(ItemsControl))]
+    [TemplatePart(Name = "PART_GroupHeader", Type = typeof(ListBox))]
     [TemplatePart(Name = "PART_HeaderSection", Type = typeof(Grid))]
     public class ScheduleControl : Control
     {
         public event ScrollChangedEventHandler ScrollChanged;
 
-        internal ItemsControl groupHeader;
+        private ListBox groupHeader;
         //private Func<IAppointment, string> groupValueLambda;
         private SortedList<string, List<IAppointment>> appointments;
         private double scrollBarSpace;
@@ -260,7 +260,7 @@ namespace Scheduler
             dateHeader = GetTemplateChild("PART_DateHeader") as DateHeader;
             timerulerPanel = GetTemplateChild("PART_TimeRulerPanel") as TimeRulerPanel;
             timeLineHeader = GetTemplateChild("PART_TimeLineHeader") as TimeLineHeader;
-            groupHeader = GetTemplateChild("PART_GroupHeader") as ItemsControl;
+            groupHeader = GetTemplateChild("PART_GroupHeader") as ListBox;
             headerSection = GetTemplateChild("PART_HeaderSection") as Grid;
 
             HandleEvents();
@@ -319,9 +319,9 @@ namespace Scheduler
 
         private void PrepareScheduleControl()
         {
-            groupHeader.RenderTransform = new TranslateTransform();
-            (GetTemplateChild("PART_VerticalScrollGapMask") as Border).Width = scrollBarSpace;
-            (GetTemplateChild("PART_HorizontalScrollGapMask") as Border).Height = scrollBarSpace;
+            //groupHeader.RenderTransform = new TranslateTransform();
+            (GetTemplateChild("PART_HeaderSectionRightGapMask") as Border).Width = scrollBarSpace;
+            (GetTemplateChild("PART_HeaderSectionBottomGapMask") as Border).Height = scrollBarSpace;
         }
 
         private void HandleEvents()
@@ -341,8 +341,13 @@ namespace Scheduler
 
 
         }
-        private void ScrollGroupHeaderVertically(double offset) => ((TranslateTransform)groupHeader.RenderTransform).Y = offset;
 
+        private void ScrollGroupHeaderVertically(double offset)
+        {
+            var count = groupHeader.Items.Count;
+            var item = groupHeader.ItemContainerGenerator.ContainerFromIndex(0);
+            (item as FrameworkElement)?.BringIntoView();
+        }
         private void ScheduleControl_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             if (IsLoaded)

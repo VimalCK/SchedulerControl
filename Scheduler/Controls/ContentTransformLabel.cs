@@ -86,7 +86,7 @@ namespace Scheduler
             }
             else
             {
-                drawingContext.DrawRectangle(Background, null, new Rect(this.RenderSize));
+               // drawingContext.DrawRectangle(Background, null, new Rect(this.RenderSize));
 
                 // Left border
                 point2.Y = ActualHeight;

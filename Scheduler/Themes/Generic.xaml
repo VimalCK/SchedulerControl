@@ -2,20 +2,40 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:Scheduler">
 
-    <Style x:Key="GroupHeaderStyle" TargetType="ItemsControl">
+    <Style x:Key="GroupHeaderStyle" 
+           TargetType="ListBox">
+        <Setter Property="Margin"
+                Value="0,-1,0,0"/>
+        <Setter Property="BorderBrush" 
+                Value="Transparent"/>
+        <Setter Property="BorderThickness" 
+                Value="1"/>
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility"
+                Value="Hidden"/>
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility"
+                Value="Hidden"/>
         <Setter Property="ItemContainerStyle">
             <Setter.Value>
-                <Style TargetType="ContentPresenter">
-                    <Setter Property="Height"
-                            Value="{Binding RelativeSource={RelativeSource 
-                                            AncestorType=local:ScheduleControl}, 
-                                            Path=ExtendedMode, 
-                                            Converter={local:EnumToValueConverter}}"/>
+                <Style TargetType="ListBoxItem">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ListBoxItem">
+                                <ContentPresenter HorizontalAlignment="Stretch"
+                                                  VerticalAlignment="Stretch" 
+                                                  Height="{Binding RelativeSource={RelativeSource 
+                                                                   AncestorType=local:ScheduleControl}, 
+                                                                   Path=ExtendedMode, 
+                                                                   Converter={local:EnumToValueConverter}}"/>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
                 </Style>
             </Setter.Value>
         </Setter>
-        <Setter Property="ItemTemplate"
-                Value="{Binding RelativeSource={RelativeSource AncestorType=local:ScheduleControl}, Path=GroupHeaderContentTemplate}"/>
+        <Setter Property="ItemTemplate" 
+                Value="{Binding RelativeSource={RelativeSource 
+                                AncestorType=local:ScheduleControl}, 
+                                Path=GroupHeaderContentTemplate}"/>
         <Style.Triggers>
             <DataTrigger Binding="{Binding RelativeSource={RelativeSource 
                                            AncestorType=local:ScheduleControl}, 
@@ -24,17 +44,9 @@
                 <Setter Property="ItemTemplate">
                     <Setter.Value>
                         <DataTemplate>
-                            <Border BorderBrush="{Binding RelativeSource={RelativeSource 
-                                                          AncestorType=local:ScheduleControl}, 
-                                                          Path=TimeLineColor}" 
-                                    BorderThickness="0,0,0,.5">
-                                <Button Content="{Binding}" 
-                                        HorizontalAlignment="Stretch" 
-                                        VerticalAlignment="Stretch"
-                                        VerticalContentAlignment="Center"
-                                        HorizontalContentAlignment="Center"
-                                        FontSize="11"/>
-                            </Border>
+                            <Button HorizontalAlignment="Stretch" 
+                                    VerticalAlignment="Stretch" 
+                                    Content="{Binding}" />
                         </DataTemplate>
                     </Setter.Value>
                 </Setter>
@@ -67,7 +79,9 @@
         <Setter Property="Background"
                 Value="White"/>
         <Setter Property="BorderBrush"
-                Value="{Binding RelativeSource={RelativeSource AncestorType=local:ScheduleControl}, Path=TimeLineColor}"/>
+                Value="{Binding RelativeSource={RelativeSource 
+                                AncestorType=local:ScheduleControl}, 
+                                Path=TimeLineColor}"/>
     </Style>
 
     <Style TargetType="{x:Type local:TimeLineHeader}">
@@ -121,27 +135,13 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
-                        <Border BorderBrush="{TemplateBinding TimeLineColor}"
-                                BorderThickness="0,0,.5,.5"
-                                Background="White"
-                                Panel.ZIndex="1"/>
-                        <Border Grid.Row="1" 
-                                BorderBrush="{TemplateBinding TimeLineColor}" 
-                                BorderThickness=".5,0,.5,.5"
-                                Height="{Binding Path=ActualHeight, ElementName=PART_ContentSection}"
-                                VerticalAlignment="Top">
-                            <ItemsControl x:Name="PART_GroupHeader" 
-                                          ItemsSource="{TemplateBinding GroupResources}"
-                                          Style="{StaticResource GroupHeaderStyle}">
-                            </ItemsControl>
-                        </Border>
-                        <Border x:Name="PART_HorizontalScrollGapMask" 
-                                BorderBrush="{TemplateBinding TimeLineColor}"
-                                BorderThickness="0,.5,.5,0"
-                                Background="White"
-                                Panel.ZIndex="1"
-                                Grid.Row="1"
-                                VerticalAlignment="Bottom"/>
+                        <ListBox x:Name="PART_GroupHeader" 
+                                 Grid.Row="1" 
+                                 ItemsSource="{TemplateBinding GroupResources}"
+                                 Style="{StaticResource GroupHeaderStyle}"
+                                 BorderBrush="{Binding RelativeSource={RelativeSource 
+                                                       AncestorType=local:ScheduleControl}, 
+                                                       Path=TimeLineColor}"/>
 
                         <Grid x:Name="PART_HeaderSection" 
                               Grid.Column="1" 
@@ -157,13 +157,24 @@
                                                   Margin="0,0,0,1"/>
                         </Grid>
 
-                        <Border x:Name="PART_VerticalScrollGapMask" 
-                                Grid.Column="1"
+                        <Border x:Name="PART_GroupHeaderTopGapMask" 
+                                BorderBrush="{TemplateBinding TimeLineColor}"
+                                BorderThickness="0,0,1,.5"/>
+                        
+                        <Border x:Name="PART_HeaderSectionRightGapMask" 
                                 Grid.RowSpan="1"
+                                Grid.Column="1"
                                 Background="White"
-                                BorderBrush="{Binding RelativeSource={RelativeSource AncestorType=local:ScheduleControl}, Path=TimeLineColor}"
-                                BorderThickness=".5,0,0,0"
+                                BorderBrush="{TemplateBinding TimeLineColor}"
+                                BorderThickness="1,0,0,0"
                                 HorizontalAlignment="Right"/>
+
+                        <Border x:Name="PART_HeaderSectionBottomGapMask" 
+                                BorderBrush="{TemplateBinding TimeLineColor}"
+                                BorderThickness="0,1,0,0"
+                                Background="White"
+                                Grid.Row="1"
+                                VerticalAlignment="Bottom"/>
 
                         <ScrollViewer x:Name="PART_ScrollViewer"
                                       HorizontalScrollBarVisibility="Visible"

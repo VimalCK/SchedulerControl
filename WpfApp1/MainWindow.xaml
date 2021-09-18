@@ -18,9 +18,8 @@
             <DataTemplate x:Key="GroupHeaderTemplate">
                 <Border BorderBrush="AliceBlue" BorderThickness="1">
                     <Button HorizontalAlignment="Stretch" 
-                            VerticalAlignment="Top" 
-                            Content="{Binding}"
-                            Height="28"/>
+                            VerticalAlignment="Stretch" 
+                            Content="{Binding}"/>
                 </Border>
             </DataTemplate>
         </Grid.Resources>
@@ -36,6 +35,7 @@
                                  TimeLineZoom="{Binding TimeLineZoom}"
                                  TimeLineColor="{Binding TimelineColor, Mode=TwoWay}"
                                  GroupHeader="Group"
+                                 GroupHeaderContentTemplate="{StaticResource GroupHeaderTemplate}"
                                  GroupResources="{Binding GroupResources}">
             <!--<control:ScheduleControl.TimeLineProviders>
                 <control:TimeRuler Color="Red" />
