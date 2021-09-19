@@ -65,6 +65,31 @@ namespace Scheduler
             return items.Count > 0;
         }
 
+        public static T GetChildOfType<T>(this DependencyObject control) where T : DependencyObject
+        {
+            if (control == null)
+            {
+                return default;
+            }
+
+            T foundControl = default(T);
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(control); i++)
+            {
+                var child = VisualTreeHelper.GetChild(control, i);
+                if (child is T)
+                {
+                    foundControl = (T)child;
+                    break;
+                }
+                else
+                {
+                    foundControl = GetChildOfType<T>(child);
+                }
+            }
+
+            return foundControl;
+        }
+
         public static double GetPixelsPerDpi(Visual visual)
         {
             if (pixelsPerDpi.Equals(0))

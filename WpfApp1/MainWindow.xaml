@@ -51,6 +51,7 @@
             <Button Content="Extended Mode" Command="{Binding ExtendedModeCommand}"/>
             <Button Content="TimeLine Zoom" Command="{Binding TimeLineZoomCommand}"/>
             <Button Content="Add Group Headers" Command="{Binding AddGroupHeadersCommand}"/>
+            <Button Content="Remove Group Headers" Command="{Binding RemoveGroupHeadersCommand}"/>
             <Button Content="Add TimeLine" />
             <Button Content="Remove TimeLine"
                     Click="Button_Click_4" />

@@ -26,7 +26,7 @@ namespace Scheduler
     {
         public event ScrollChangedEventHandler ScrollChanged;
 
-        private ListBox groupHeader;
+        private ListBox groupHeaderList;
         //private Func<IAppointment, string> groupValueLambda;
         private SortedList<string, List<IAppointment>> appointments;
         private double scrollBarSpace;
@@ -37,7 +37,8 @@ namespace Scheduler
         private DateHeader dateHeader;
         private TimeRulerPanel timerulerPanel;
         private TimeLineHeader timeLineHeader;
-        private ScrollViewer scrollViewer;
+        private ScrollViewer schedulerScrollViewer;
+        private ScrollViewer groupHeaderScrollViewer;
         private Grid headerSection;
 
 
@@ -256,11 +257,11 @@ namespace Scheduler
 
             contentSection = GetTemplateChild("PART_ContentSection") as Grid;
             rulerGrid = GetTemplateChild("PART_RulerGrid") as RulerGrid;
-            scrollViewer = GetTemplateChild("PART_ScrollViewer") as ScrollViewer;
+            schedulerScrollViewer = GetTemplateChild("PART_ScrollViewer") as ScrollViewer;
             dateHeader = GetTemplateChild("PART_DateHeader") as DateHeader;
             timerulerPanel = GetTemplateChild("PART_TimeRulerPanel") as TimeRulerPanel;
             timeLineHeader = GetTemplateChild("PART_TimeLineHeader") as TimeLineHeader;
-            groupHeader = GetTemplateChild("PART_GroupHeader") as ListBox;
+            groupHeaderList = GetTemplateChild("PART_GroupHeader") as ListBox;
             headerSection = GetTemplateChild("PART_HeaderSection") as Grid;
 
             HandleEvents();
@@ -319,7 +320,6 @@ namespace Scheduler
 
         private void PrepareScheduleControl()
         {
-            //groupHeader.RenderTransform = new TranslateTransform();
             (GetTemplateChild("PART_HeaderSectionRightGapMask") as Border).Width = scrollBarSpace;
             (GetTemplateChild("PART_HeaderSectionBottomGapMask") as Border).Height = scrollBarSpace;
         }
@@ -328,7 +328,7 @@ namespace Scheduler
         {
             Loaded += ScheduleControl_Loaded;
             SizeChanged += ScheduleControl_SizeChanged;
-            scrollViewer.ScrollChanged += ScrollViewer_ScrollChanged;
+            schedulerScrollViewer.ScrollChanged += ScrollViewer_ScrollChanged;
         }
 
         private void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
@@ -336,18 +336,11 @@ namespace Scheduler
             if (IsLoaded && e.Source is ScrollViewer)
             {
                 ScrollChanged?.Invoke(sender, e);
-                ScrollGroupHeaderVertically(-e.VerticalOffset);
+                ScrollGroupHeaderVertically(e.VerticalOffset);
             }
-
-
         }
 
-        private void ScrollGroupHeaderVertically(double offset)
-        {
-            var count = groupHeader.Items.Count;
-            var item = groupHeader.ItemContainerGenerator.ContainerFromIndex(0);
-            (item as FrameworkElement)?.BringIntoView();
-        }
+        private void ScrollGroupHeaderVertically(double offset)=> groupHeaderScrollViewer?.ScrollToVerticalOffset(offset);
         private void ScheduleControl_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             if (IsLoaded)
@@ -360,9 +353,10 @@ namespace Scheduler
         {
             Loaded -= ScheduleControl_Loaded;
 
-            List<ScrollBar> scrollBars = new List<ScrollBar>();
-            Helper.GetChildOfType<ScrollBar>(scrollViewer, ref scrollBars, level: 2);
-            scrollBarSpace = scrollBars[0].Width;
+            var scrollbars = new List<ScrollBar>();
+            groupHeaderScrollViewer = groupHeaderList.GetChildOfType<ScrollViewer>();
+            schedulerScrollViewer.GetChildOfType<ScrollBar>(ref scrollbars, level: 2);
+            scrollBarSpace = scrollbars.ElementAt(0).ActualWidth;
 
             PrepareScheduleControl();
             InvalidateChildControlsToReRender();
@@ -372,7 +366,7 @@ namespace Scheduler
         private void UnHandleEvents()
         {
             AppointmentSource.CollectionChanged -= AppointmentSource_CollectionChanged;
-            scrollViewer.ScrollChanged -= ScrollViewer_ScrollChanged;
+            schedulerScrollViewer.ScrollChanged -= ScrollViewer_ScrollChanged;
         }
 
         private bool InvalidateChildControlsToReRender()
@@ -393,13 +387,13 @@ namespace Scheduler
 
         private void CalculateViewPortSize()
         {
-            viewPortArea.Width = scrollViewer.ActualWidth - scrollBarSpace;
-            viewPortArea.Height = scrollViewer.ActualHeight - scrollBarSpace;
+            viewPortArea.Width = schedulerScrollViewer.ActualWidth - scrollBarSpace;
+            viewPortArea.Height = schedulerScrollViewer.ActualHeight - scrollBarSpace;
         }
 
         private void CalculateRequiredAreaSize()
         {
-            var requiredHeight = groupHeader.Items.Count * (int)this.ExtendedMode;
+            var requiredHeight = groupHeaderList.Items.Count * (int)this.ExtendedMode;
             requiredArea.Height = requiredHeight < viewPortArea.Height ? viewPortArea.Height : requiredHeight;
 
             switch (TimeLineZoom)

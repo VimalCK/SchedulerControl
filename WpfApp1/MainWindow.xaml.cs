@@ -88,6 +88,7 @@ namespace WpfApp1
         public ICommand TimeLineZoomCommand { get; set; }
         public ICommand TimeLineColorCommand { get; set; }
         public ICommand AddGroupHeadersCommand { get; set; }
+        public ICommand RemoveGroupHeadersCommand { get; set; }
 
         public Brush TimelineColor
         {
@@ -160,6 +161,7 @@ namespace WpfApp1
             TimeLineZoomCommand = new RelayCommand(ChangeTimeLine);
             TimeLineColorCommand = new RelayCommand(ChangeTimeLineColor);
             AddGroupHeadersCommand = new RelayCommand(AddGroupHeaders);
+            RemoveGroupHeadersCommand = new RelayCommand(RemoveGroupHeaders);
             LoadGroupResources();
         }
 
@@ -171,11 +173,25 @@ namespace WpfApp1
                 chars.Add(c);
             }
 
-            var list = new List<string>();
-            for (int index = 0, iteration = 1; index < 1; index++)
+            do
             {
-                groupResources.Add(chars[iteration].ToString() + chars[iteration].ToString() + chars[index].ToString());
-            }
+                var random = new Random();
+                var group = chars[random.Next(0, 25)].ToString() +
+                    chars[random.Next(0, 25)].ToString() +
+                    chars[random.Next(0, 25)].ToString();
+
+                if (!GroupResources.Contains(group))
+                {
+                    GroupResources.Add(group);
+                    break;
+                }
+
+            } while (true);
+        }
+
+        private void RemoveGroupHeaders(object obj)
+        {
+            groupResources.RemoveAt(new Random().Next(0, GroupResources.Count - 1));
         }
 
         private void LoadGroupResources()
@@ -187,7 +203,7 @@ namespace WpfApp1
             }
 
             var list = new List<string>();
-            for (int index = 0, iteration = 0; index < 4; index++)
+            for (int index = 0, iteration = 0; index < 26; index++)
             {
                 list.Add(chars[iteration].ToString() + chars[iteration].ToString() + chars[index].ToString());
             }
