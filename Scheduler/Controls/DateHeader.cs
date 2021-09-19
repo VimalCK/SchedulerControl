@@ -45,7 +45,7 @@ namespace Scheduler
                     }
                     else
                     {
-                        ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(635, GridUnitType.Star) });
+                        ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(1, GridUnitType.Star) });
                         label = new ContentTransformLabel();
                         Children.Add(label);
                         Grid.SetColumn(label, index);

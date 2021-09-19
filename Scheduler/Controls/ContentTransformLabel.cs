@@ -64,6 +64,7 @@ namespace Scheduler
 
         public ContentTransformLabel()
         {
+            DefaultStyleKey = typeof(ContentTransformLabel);
             drawingGroup = new DrawingGroup();
         }
 
@@ -76,37 +77,50 @@ namespace Scheduler
         private void CreateVisual()
         {
             var drawingContext = drawingGroup.Open();
-            var point1 = new Point();
-            var point2 = new Point();
             var pen = new Pen(BorderBrush, BorderThickness.Left);
-
             if (BorderThickness.Equals(new Thickness(BorderThickness.Left)))
             {
                 drawingContext.DrawRectangle(Background, pen, new Rect(this.RenderSize));
             }
             else
             {
-               // drawingContext.DrawRectangle(Background, null, new Rect(this.RenderSize));
+                var point1 = new Point();
+                var point2 = new Point();
+                drawingContext.DrawRectangle(Background, null, new Rect(this.RenderSize));
 
-                // Left border
-                point2.Y = ActualHeight;
-                drawingContext.DrawLine(pen, point1, point2);
+                if (BorderThickness.Left != 0)
+                {
+                    pen = new Pen(BorderBrush, BorderThickness.Left);
+                    point2.Y = ActualHeight;
+                    point1.X = point1.Y = point2.X = 0;
+                    drawingContext.DrawLine(pen, point1, point2);
+                }
 
-                // Top border
-                point2.X = ActualWidth;
-                point2.Y = 0;
-                drawingContext.DrawLine(pen, point1, point2);
+                if (BorderThickness.Top != 0)
+                {
+                    pen = new Pen(BorderBrush, BorderThickness.Top);
+                    point2.X = ActualWidth;
+                    point1.X = point1.Y = point2.Y = 0;
+                    drawingContext.DrawLine(pen, point1, point2);
+                }
 
-                // Right border
-                point1.X = ActualWidth;
-                point2.X = ActualWidth;
-                point2.Y = ActualHeight;
-                drawingContext.DrawLine(pen, point1, point2);
+                if (BorderThickness.Right != 0)
+                {
+                    pen = new Pen(BorderBrush, BorderThickness.Right);
+                    point1.Y = 0;
+                    point2.Y = ActualHeight;
+                    point1.X = point2.X = ActualWidth;
+                    drawingContext.DrawLine(pen, point1, point2);
+                }
 
-                // Bottom border
-                point1.X = 0;
-                point1.Y = ActualHeight;
-                drawingContext.DrawLine(pen, point1, point2);
+                if (BorderThickness.Bottom != 0)
+                {
+                    pen = new Pen(BorderBrush, BorderThickness.Bottom);
+                    point1.X = 0;
+                    point2.X = ActualWidth;
+                    point1.Y = point2.Y = ActualHeight;
+                    drawingContext.DrawLine(pen, point1, point2);
+                }
             }
 
             drawingContext.PushTransform(new TranslateTransform());
