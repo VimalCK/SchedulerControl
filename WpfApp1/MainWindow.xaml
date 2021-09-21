@@ -37,11 +37,11 @@
                                  GroupHeader="Group"
                                  GroupHeaderContentTemplate="{StaticResource GroupHeaderTemplate}"
                                  GroupResources="{Binding GroupResources}">
-            <!--<control:ScheduleControl.TimeLineProviders>
-                <control:TimeRuler Color="Red" />
-                <control:TimeRuler Color="Orange"
-                                   Time="02:30" />
-            </control:ScheduleControl.TimeLineProviders>-->
+            <control:ScheduleControl.TimeLineProviders>
+                <control:TimeRuler Color="Purple" Time="-02:00" Thickness="1"/>
+                <control:TimeRuler Color="Red" Thickness="2"/>
+                <control:TimeRuler Color="Green" Time="23:00" Thickness="1"/>
+            </control:ScheduleControl.TimeLineProviders>
         </control:ScheduleControl>
         <WrapPanel Orientation="Horizontal"
                    Grid.Row="1">

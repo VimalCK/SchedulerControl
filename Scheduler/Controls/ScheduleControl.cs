@@ -64,7 +64,8 @@ namespace Scheduler
             (d, value) => Enum.IsDefined(typeof(ExtendedMode), value) ? value : ExtendedMode.Normal));
 
         public static readonly DependencyProperty TimeLineProvidersProperty = DependencyProperty.Register(
-            "TimeLineProviders", typeof(FreezableCollection<TimeRuler>), typeof(ScheduleControl), new PropertyMetadata(OnTimeLineProvidersChanged));
+            "TimeLineProviders", typeof(ObservableCollection<TimeRuler>), typeof(ScheduleControl),
+            new PropertyMetadata(new ObservableCollection<TimeRuler>(), OnTimeLineProvidersChanged));
 
         public static readonly DependencyProperty AppointmentSourceProperty = DependencyProperty.Register(
             "AppointmentSource", typeof(ObservableCollection<IAppointment>), typeof(ScheduleControl),
@@ -132,9 +133,9 @@ namespace Scheduler
             set => SetValue(TimeLineColorProperty, value);
         }
 
-        public FreezableCollection<TimeRuler> TimeLineProviders
+        public ObservableCollection<TimeRuler> TimeLineProviders
         {
-            get => (FreezableCollection<TimeRuler>)GetValue(TimeLineProvidersProperty);
+            get => (ObservableCollection<TimeRuler>)GetValue(TimeLineProvidersProperty);
             set => SetValue(TimeLineProvidersProperty, value);
         }
 
@@ -147,7 +148,6 @@ namespace Scheduler
         public ScheduleControl()
         {
             DefaultStyleKey = typeof(ScheduleControl);
-            TimeLineProviders = new FreezableCollection<TimeRuler>();
             appointments = new SortedList<string, List<IAppointment>>();
             //groupValueLambda = CommonFunctions.GetPropertyValue<IAppointment, string>(nameof(IAppointment.Group));
         }
@@ -197,7 +197,7 @@ namespace Scheduler
         private static void OnTimeLineProvidersChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
-            control.timerulerPanel?.InvalidateVisual();
+            control.timerulerPanel?.Render();
         }
 
         private static void OnTimeLineColorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -340,7 +340,7 @@ namespace Scheduler
             }
         }
 
-        private void ScrollGroupHeaderVertically(double offset)=> groupHeaderScrollViewer?.ScrollToVerticalOffset(offset);
+        private void ScrollGroupHeaderVertically(double offset) => groupHeaderScrollViewer?.ScrollToVerticalOffset(offset);
         private void ScheduleControl_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             if (IsLoaded)

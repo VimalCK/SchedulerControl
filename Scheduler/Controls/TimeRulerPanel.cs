@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -10,9 +9,11 @@ namespace Scheduler
     {
         private DispatcherTimer timer;
         private ScheduleControl parent;
+        private DrawingGroup backingStore;
 
         public TimeRulerPanel()
         {
+            backingStore = new DrawingGroup();
             timer = new DispatcherTimer(new TimeSpan(0, 0, 0), DispatcherPriority.Normal,
                 OnDispatcherCallbck, Dispatcher.CurrentDispatcher);
 
@@ -32,38 +33,41 @@ namespace Scheduler
         }
         protected override void OnRender(DrawingContext drawingContext)
         {
-            base.OnRender(drawingContext);
-
-            if (RenderRequired())
-            {
-                var verticalGap = parent.ViewPortArea.Width / (int)parent.TimeLineZoom;
-                var currentPosition = verticalGap * (((DateTime.Now - parent.StartDate).Days * 24) + DateTime.Now.TimeOfDay.Hours);
-                var minuteGap = verticalGap / 60;
-
-                currentPosition += DateTime.Now.TimeOfDay.Minutes * minuteGap;
-                foreach (var ruler in parent.TimeLineProviders)
-                {
-                    double position = currentPosition;
-                    if (!string.IsNullOrEmpty(ruler.Time))
-                    {
-                        var time = ruler.Time.Split(':');
-                        if (time.Length == 0)
-                        {
-                            throw new Exception();
-                        }
-
-                        position += (verticalGap * int.Parse(time[0])) + (int.Parse(time[1]) * minuteGap);
-                    }
-
-                    var pen = new Pen(ruler.Color, 2);
-                    drawingContext.DrawLine(pen, new Point(position, 0), new Point(position, ActualHeight));
-                }
-            }
-
+            Render();
+            drawingContext.DrawDrawing(backingStore);
         }
 
-        private void OnDispatcherCallbck(object sender, EventArgs e) => InvalidateVisual();
+        public void Render()
+        {
+            if (RenderRequired())
+            {
+                if (parent.ViewPortArea.Width > 0)
+                {
+                    var drawingContext = backingStore.Open();
+                    var hourGap = parent.ViewPortArea.Width / (int)parent.TimeLineZoom;
+                    var minuteGap = hourGap / 60;
+                    var noOfDays = (DateTime.Now.Date - parent.StartDate.Date).Days;
 
-        private bool RenderRequired() => parent.StartDate != DateTime.MinValue && parent.StartDate <= DateTime.Now;
+                    var currentTimePosition = hourGap * (noOfDays * 24);
+                    currentTimePosition += ((hourGap * DateTime.Now.Hour) + (minuteGap * DateTime.Now.Minute));
+
+                    foreach (var ruler in parent.TimeLineProviders)
+                    {
+                        var xAxis = currentTimePosition + (hourGap * ruler.Hour) + (minuteGap * ruler.Minute);
+                        if (xAxis > 0 && xAxis <= ActualWidth)
+                        {
+                            var pen = new Pen(ruler.Color, ruler.Thickness);
+                            drawingContext.DrawLine(pen, new Point(xAxis, 0), new Point(xAxis, ActualHeight));
+                        }
+                    }
+
+                    drawingContext.Close();
+                }
+            }
+        }
+
+        private void OnDispatcherCallbck(object sender, EventArgs e) => Render();
+
+        private bool RenderRequired() => parent.StartDate != DateTime.MinValue;
     }
 }

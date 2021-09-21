@@ -153,8 +153,7 @@ namespace WpfApp1
 
         public MainViewModel()
         {
-            //StartDate = DateTime.Now;
-            StartDate = default(DateTime);
+            StartDate = DateTime.Now;
             EndDate = DateTime.Now.AddDays(7);
 
             ExtendedModeCommand = new RelayCommand(ChangeExtendedMode);
