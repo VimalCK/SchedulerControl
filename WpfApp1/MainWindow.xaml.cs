@@ -83,7 +83,7 @@ namespace WpfApp1
         private ExtendedMode extendedMode;
         private Brush timelineColor;
         private TimeLineZoom timeLineZoom;
-        private ObservableCollection<string> groupResources;
+        private ObservableCollection<GroupResource> groupResources;
         public ICommand ExtendedModeCommand { get; set; }
         public ICommand TimeLineZoomCommand { get; set; }
         public ICommand TimeLineColorCommand { get; set; }
@@ -140,7 +140,7 @@ namespace WpfApp1
             }
         }
 
-        public ObservableCollection<string> GroupResources
+        public ObservableCollection<GroupResource> GroupResources
         {
             get => groupResources;
             set
@@ -175,9 +175,12 @@ namespace WpfApp1
             do
             {
                 var random = new Random();
-                var group = chars[random.Next(0, 25)].ToString() +
+                var group = new CustomGroup
+                {
+                    Header = chars[random.Next(0, 25)].ToString() +
                     chars[random.Next(0, 25)].ToString() +
-                    chars[random.Next(0, 25)].ToString();
+                    chars[random.Next(0, 25)].ToString()
+                };
 
                 if (!GroupResources.Contains(group))
                 {
@@ -201,13 +204,16 @@ namespace WpfApp1
                 chars.Add(c);
             }
 
-            var list = new List<string>();
+            var list = new List<GroupResource>();
             for (int index = 0, iteration = 0; index < 26; index++)
             {
-                list.Add(chars[iteration].ToString() + chars[iteration].ToString() + chars[index].ToString());
+                list.Add(new CustomGroup
+                {
+                    Header = chars[iteration].ToString() + chars[iteration].ToString() + chars[index].ToString()
+                });
             }
 
-            GroupResources = new ObservableCollection<string>(list);
+            GroupResources = new ObservableCollection<GroupResource>(list);
         }
 
         private void ChangeTimeLineColor(object obj)
@@ -284,6 +290,35 @@ namespace WpfApp1
         public void Execute(object parameter)
         {
             _execute(parameter);
+        }
+    }
+
+    public class CustomGroup : GroupResource
+    {
+        private string header;
+
+        public string Header
+        {
+            get { return header; }
+            set
+            {
+                header = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public CustomGroup()
+        {
+        }
+
+        public override int GetHashCode()
+        {
+            return header.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return header;
         }
     }
 

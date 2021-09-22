@@ -19,6 +19,8 @@
         <Setter Property="ItemContainerStyle">
             <Setter.Value>
                 <Style TargetType="ListBoxItem">
+                    <Setter Property="Visibility"
+                            Value="{Binding Visibility, Mode=OneWay}"/>
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="ListBoxItem">
@@ -140,7 +142,7 @@
 
                         <ListBox x:Name="PART_GroupHeader" 
                                  Grid.Row="1" 
-                                 ItemsSource="{TemplateBinding GroupResources}"
+                                 ItemsSource="{TemplateBinding GroupBy}"
                                  Style="{StaticResource GroupHeaderStyle}"
                                  BorderBrush="{Binding RelativeSource={RelativeSource 
                                                        AncestorType=local:ScheduleControl}, 

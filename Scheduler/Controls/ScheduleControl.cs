@@ -27,8 +27,8 @@ namespace Scheduler
         public event ScrollChangedEventHandler ScrollChanged;
 
         private ListBox groupHeaderList;
+        private Dictionary<int, GroupResource> appointmentContext;
         //private Func<IAppointment, string> groupValueLambda;
-        private SortedList<string, List<IAppointment>> appointments;
         private double scrollBarSpace;
         private Size viewPortArea;
         private Size requiredArea;
@@ -74,8 +74,9 @@ namespace Scheduler
         public static readonly DependencyProperty GroupHeaderProperty = DependencyProperty.Register(
             "GroupHeader", typeof(string), typeof(ScheduleControl));
 
-        public static readonly DependencyProperty GroupResourcesProperty = DependencyProperty.Register(
-            "GroupResources", typeof(IEnumerable), typeof(ScheduleControl), new PropertyMetadata(default(IEnumerable), OnGroupResourcesChanged));
+        public static readonly DependencyProperty GroupByProperty = DependencyProperty.Register(
+            "GroupBy", typeof(ObservableCollection<GroupResource>), typeof(ScheduleControl),
+            new PropertyMetadata(new ObservableCollection<GroupResource>(), OnGroupByChanged));
 
         public static readonly DependencyProperty GroupHeaderContentTemplateProperty = DependencyProperty.Register(
             "GroupHeaderContentTemplate", typeof(DataTemplate), typeof(ScheduleControl), new PropertyMetadata(default(DataTemplate)));
@@ -86,10 +87,10 @@ namespace Scheduler
             set => SetValue(ExtendedModeProperty, value);
         }
 
-        public IEnumerable GroupResources
+        public ObservableCollection<GroupResource> GroupBy
         {
-            get => (IEnumerable)GetValue(GroupResourcesProperty);
-            set => SetValue(GroupResourcesProperty, value);
+            get => (ObservableCollection<GroupResource>)GetValue(GroupByProperty);
+            set => SetValue(GroupByProperty, value);
         }
 
         public DataTemplate GroupHeaderContentTemplate
@@ -141,22 +142,20 @@ namespace Scheduler
 
         public Size ViewPortArea => viewPortArea;
         public Size RequiredArea => requiredArea;
-        public IEnumerable<string> Group => appointments?.Keys;
-
         internal int ViewRange => (EndDate.Date - StartDate.Date).Days + 1;
 
         public ScheduleControl()
         {
             DefaultStyleKey = typeof(ScheduleControl);
-            appointments = new SortedList<string, List<IAppointment>>();
+            appointmentContext = new Dictionary<int, GroupResource>();
             //groupValueLambda = CommonFunctions.GetPropertyValue<IAppointment, string>(nameof(IAppointment.Group));
         }
 
-        private static void OnGroupResourcesChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnGroupByChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is ScheduleControl control && control.GroupResources != null)
+            if (d is ScheduleControl control && control.GroupBy != null)
             {
-                var notiftyCollection = (INotifyCollectionChanged)control.GroupResources;
+                var notiftyCollection = (INotifyCollectionChanged)control.GroupBy;
                 notiftyCollection.CollectionChanged -= control.GroupResourcesChanged;
                 notiftyCollection.CollectionChanged += control.GroupResourcesChanged;
             }

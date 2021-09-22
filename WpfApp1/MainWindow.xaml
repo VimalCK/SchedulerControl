@@ -19,7 +19,7 @@
                 <Border BorderBrush="AliceBlue" BorderThickness="1">
                     <Button HorizontalAlignment="Stretch" 
                             VerticalAlignment="Stretch" 
-                            Content="{Binding}"/>
+                            Content="{Binding Header}"/>
                 </Border>
             </DataTemplate>
         </Grid.Resources>
@@ -36,7 +36,7 @@
                                  TimeLineColor="{Binding TimelineColor, Mode=TwoWay}"
                                  GroupHeader="Group"
                                  GroupHeaderContentTemplate="{StaticResource GroupHeaderTemplate}"
-                                 GroupResources="{Binding GroupResources}">
+                                 GroupBy="{Binding GroupResources}">
             <control:ScheduleControl.TimeLineProviders>
                 <control:TimeRuler Color="Purple" Time="-02:00" Thickness="1"/>
                 <control:TimeRuler Color="Red" Thickness="2"/>
@@ -45,9 +45,9 @@
         </control:ScheduleControl>
         <WrapPanel Orientation="Horizontal"
                    Grid.Row="1">
-            <Button Content="Timeline Color" Command="{Binding TimeLineColorCommand}" />
             <DatePicker x:Name="sdt" SelectedDate="{Binding StartDate}" />
             <DatePicker x:Name="edt" SelectedDate="{Binding EndDate}" />
+            <Button Content="Timeline Color" Command="{Binding TimeLineColorCommand}" />
             <Button Content="Extended Mode" Command="{Binding ExtendedModeCommand}"/>
             <Button Content="TimeLine Zoom" Command="{Binding TimeLineZoomCommand}"/>
             <Button Content="Add Group Headers" Command="{Binding AddGroupHeadersCommand}"/>
