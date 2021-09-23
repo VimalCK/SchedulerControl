@@ -83,12 +83,26 @@ namespace WpfApp1
         private ExtendedMode extendedMode;
         private Brush timelineColor;
         private TimeLineZoom timeLineZoom;
+        private ObservableCollection<TimeRuler> timelineProviders;
         private ObservableCollection<GroupResource> groupResources;
+
         public ICommand ExtendedModeCommand { get; set; }
         public ICommand TimeLineZoomCommand { get; set; }
         public ICommand TimeLineColorCommand { get; set; }
         public ICommand AddGroupHeadersCommand { get; set; }
         public ICommand RemoveGroupHeadersCommand { get; set; }
+        public ICommand AddTimelineCommand { get; set; }
+        public ICommand RemoveTimelineCommand { get; set; }
+
+        public ObservableCollection<TimeRuler> TimelineProviders
+        {
+            get { return timelineProviders; }
+            set
+            {
+                timelineProviders = value;
+                OnPropertyChanged();
+            }
+        }
 
         public Brush TimelineColor
         {
@@ -161,7 +175,28 @@ namespace WpfApp1
             TimeLineColorCommand = new RelayCommand(ChangeTimeLineColor);
             AddGroupHeadersCommand = new RelayCommand(AddGroupHeaders);
             RemoveGroupHeadersCommand = new RelayCommand(RemoveGroupHeaders);
+            AddTimelineCommand = new RelayCommand(AddTimeline);
+            RemoveTimelineCommand = new RelayCommand(RemoveTimeline);
             LoadGroupResources();
+            LoadTimelineProviders();
+        }
+
+        private void LoadTimelineProviders()
+        {
+            timelineProviders = new ObservableCollection<TimeRuler>();
+            timelineProviders.Add(new TimeRuler { Color = Brushes.Red, Thickness = 2 });
+            timelineProviders.Add(new TimeRuler { Color = Brushes.Purple, Thickness = 1, Time = "-02:00" });
+            timelineProviders.Add(new TimeRuler { Color = Brushes.Green, Thickness = 2, Time = "23:00" });
+        }
+
+        private void RemoveTimeline(object obj)
+        {
+            TimelineProviders.RemoveAt(timelineProviders.Count - 1);
+        }
+
+        private void AddTimeline(object obj)
+        {
+            TimelineProviders.Add(new TimeRuler { Color = Brushes.Brown, Thickness = 1.5, Time = $"0{TimelineProviders.Count}:00" });
         }
 
         private void AddGroupHeaders(object obj)

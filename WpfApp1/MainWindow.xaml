@@ -36,12 +36,13 @@
                                  TimeLineColor="{Binding TimelineColor, Mode=TwoWay}"
                                  GroupHeader="Group"
                                  GroupHeaderContentTemplate="{StaticResource GroupHeaderTemplate}"
-                                 GroupBy="{Binding GroupResources}">
-            <control:ScheduleControl.TimeLineProviders>
+                                 GroupBy="{Binding GroupResources}"
+                                 TimeLineProviders="{Binding TimelineProviders}">
+            <!--<control:ScheduleControl.TimeLineProviders>
                 <control:TimeRuler Color="Purple" Time="-02:00" Thickness="1"/>
                 <control:TimeRuler Color="Red" Thickness="2"/>
                 <control:TimeRuler Color="Green" Time="23:00" Thickness="1"/>
-            </control:ScheduleControl.TimeLineProviders>
+            </control:ScheduleControl.TimeLineProviders>-->
         </control:ScheduleControl>
         <WrapPanel Orientation="Horizontal"
                    Grid.Row="1">
@@ -52,9 +53,8 @@
             <Button Content="TimeLine Zoom" Command="{Binding TimeLineZoomCommand}"/>
             <Button Content="Add Group Headers" Command="{Binding AddGroupHeadersCommand}"/>
             <Button Content="Remove Group Headers" Command="{Binding RemoveGroupHeadersCommand}"/>
-            <Button Content="Add TimeLine" />
-            <Button Content="Remove TimeLine"
-                    Click="Button_Click_4" />
+            <Button Content="Add TimeLine" Command="{Binding AddTimelineCommand}" />
+            <Button Content="Remove TimeLine" Command="{Binding RemoveTimelineCommand}"/>
             <Button Content="Load Appointments"
                     Click="Button_Click_5" />
             <Button Content="Add Appointment"

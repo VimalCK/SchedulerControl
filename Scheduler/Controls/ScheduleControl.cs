@@ -196,8 +196,13 @@ namespace Scheduler
         private static void OnTimeLineProvidersChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
+            var notifyCollection = (INotifyCollectionChanged)control.TimeLineProviders;
+            notifyCollection.CollectionChanged -= control.TimeLineProvidersCollectionChanged;
+            notifyCollection.CollectionChanged += control.TimeLineProvidersCollectionChanged;
             control.timerulerPanel?.Render();
         }
+
+        private void TimeLineProvidersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) => timerulerPanel?.Render();
 
         private static void OnTimeLineColorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -366,6 +371,8 @@ namespace Scheduler
         {
             AppointmentSource.CollectionChanged -= AppointmentSource_CollectionChanged;
             schedulerScrollViewer.ScrollChanged -= ScrollViewer_ScrollChanged;
+            (GroupBy as INotifyCollectionChanged).CollectionChanged -= GroupResourcesChanged;
+            (TimeLineProviders as INotifyCollectionChanged).CollectionChanged -= TimeLineProvidersCollectionChanged;
         }
 
         private bool InvalidateChildControlsToReRender()
