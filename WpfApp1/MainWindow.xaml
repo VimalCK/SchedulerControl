@@ -55,6 +55,7 @@
             <Button Content="Remove Group Headers" Command="{Binding RemoveGroupHeadersCommand}"/>
             <Button Content="Add TimeLine" Command="{Binding AddTimelineCommand}" />
             <Button Content="Remove TimeLine" Command="{Binding RemoveTimelineCommand}"/>
+            <Button Content="Hide/Show Groups" Command="{Binding HideShowGroupCommand}"/>   
             <Button Content="Load Appointments"
                     Click="Button_Click_5" />
             <Button Content="Add Appointment"

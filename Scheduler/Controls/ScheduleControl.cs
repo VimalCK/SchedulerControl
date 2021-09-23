@@ -153,11 +153,15 @@ namespace Scheduler
 
         private static void OnGroupByChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is ScheduleControl control && control.GroupBy != null)
+            var control = (ScheduleControl)d;
+            if (e.OldValue is INotifyCollectionChanged oldCollection)
             {
-                var notiftyCollection = (INotifyCollectionChanged)control.GroupBy;
-                notiftyCollection.CollectionChanged -= control.GroupResourcesChanged;
-                notiftyCollection.CollectionChanged += control.GroupResourcesChanged;
+                oldCollection.CollectionChanged -= control.GroupResourcesChanged;
+            }
+
+            if (e.NewValue is INotifyCollectionChanged newCollection)
+            {
+                newCollection.CollectionChanged += control.GroupResourcesChanged;
             }
         }
 
@@ -196,9 +200,16 @@ namespace Scheduler
         private static void OnTimeLineProvidersChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
-            var notifyCollection = (INotifyCollectionChanged)control.TimeLineProviders;
-            notifyCollection.CollectionChanged -= control.TimeLineProvidersCollectionChanged;
-            notifyCollection.CollectionChanged += control.TimeLineProvidersCollectionChanged;
+            if (e.OldValue is INotifyCollectionChanged oldCollection)
+            {
+                oldCollection.CollectionChanged -= control.TimeLineProvidersCollectionChanged;
+            }
+
+            if (e.NewValue is INotifyCollectionChanged newCollection)
+            {
+                newCollection.CollectionChanged -= control.TimeLineProvidersCollectionChanged;
+            }
+
             control.timerulerPanel?.Render();
         }
 
@@ -371,8 +382,15 @@ namespace Scheduler
         {
             AppointmentSource.CollectionChanged -= AppointmentSource_CollectionChanged;
             schedulerScrollViewer.ScrollChanged -= ScrollViewer_ScrollChanged;
-            (GroupBy as INotifyCollectionChanged).CollectionChanged -= GroupResourcesChanged;
-            (TimeLineProviders as INotifyCollectionChanged).CollectionChanged -= TimeLineProvidersCollectionChanged;
+            if (GroupBy is not null)
+            {
+                (GroupBy as INotifyCollectionChanged).CollectionChanged -= GroupResourcesChanged;
+            }
+
+            if (TimeLineProviders is not null)
+            {
+                (TimeLineProviders as INotifyCollectionChanged).CollectionChanged -= TimeLineProvidersCollectionChanged;
+            }
         }
 
         private bool InvalidateChildControlsToReRender()
@@ -399,7 +417,7 @@ namespace Scheduler
 
         private void CalculateRequiredAreaSize()
         {
-            var requiredHeight = groupHeaderList.Items.Count * (int)this.ExtendedMode;
+            var requiredHeight = GroupBy.Count(g => g.Visibility == Visibility.Visible) * (int)this.ExtendedMode;
             requiredArea.Height = requiredHeight < viewPortArea.Height ? viewPortArea.Height : requiredHeight;
 
             switch (TimeLineZoom)

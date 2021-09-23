@@ -93,6 +93,7 @@ namespace WpfApp1
         public ICommand RemoveGroupHeadersCommand { get; set; }
         public ICommand AddTimelineCommand { get; set; }
         public ICommand RemoveTimelineCommand { get; set; }
+        public ICommand HideShowGroupCommand { get; set; }
 
         public ObservableCollection<TimeRuler> TimelineProviders
         {
