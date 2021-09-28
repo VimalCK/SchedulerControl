@@ -32,10 +32,9 @@ namespace Scheduler
         }
         protected override void PrepareContainerForItemOverride(DependencyObject element, object item)
         {
-            base.PrepareContainerForItemOverride(element, item);
             if (element is AppointmentItem appointmentItem)
             {
-                appointmentItem.Height = (int)parent.ExtendedMode - 5;
+                appointmentItem.Height = (int)parent.ExtendedMode;
                 appointmentItem.Width = 100;
                 appointmentItem.Background = Brushes.Red;
             }

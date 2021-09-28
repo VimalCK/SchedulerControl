@@ -85,6 +85,7 @@ namespace WpfApp1
         private TimeLineZoom timeLineZoom;
         private ObservableCollection<TimeRuler> timelineProviders;
         private ObservableCollection<GroupResource> groupResources;
+        private ObservableCollection<Appointment> appointments;
 
         public ICommand ExtendedModeCommand { get; set; }
         public ICommand TimeLineZoomCommand { get; set; }
@@ -93,7 +94,16 @@ namespace WpfApp1
         public ICommand RemoveGroupHeadersCommand { get; set; }
         public ICommand AddTimelineCommand { get; set; }
         public ICommand RemoveTimelineCommand { get; set; }
-        public ICommand HideShowGroupCommand { get; set; }
+
+        public ObservableCollection<Appointment> Appointments
+        {
+            get { return appointments; }
+            set
+            {
+                appointments = value;
+                OnPropertyChanged();
+            }
+        }
 
         public ObservableCollection<TimeRuler> TimelineProviders
         {
@@ -180,6 +190,42 @@ namespace WpfApp1
             RemoveTimelineCommand = new RelayCommand(RemoveTimeline);
             LoadGroupResources();
             LoadTimelineProviders();
+            LoadAppointments();
+        }
+
+        private void LoadAppointments()
+        {
+            var flightLegs = new List<Appointment>();
+            foreach (var group in GroupResources)
+            {
+                var startDate = DateTime.Today;
+                var noOfFlights = new Random().Next(3, 8);
+                var hour = new Random();
+                for (int i = 0; i <= noOfFlights; i++)
+                {
+                    startDate = startDate.AddHours(hour.Next(0, 3));
+                    var endDate = startDate.AddHours(hour.Next(1, 3));
+                    flightLegs.Add(new Appointment
+                    {
+                        Description = $"FL-{group.ToString()}-{i + 1}",
+                        Group = group,
+                        StartDate = startDate,
+                        EndDate = endDate
+                    });
+
+                    startDate = endDate;
+                    if (i == 4 || i == 6)
+                    {
+                        startDate = startDate.AddMinutes(i * 5);
+                    }
+                    else
+                    {
+                        startDate = startDate.AddHours(1);
+                    }
+                }
+            }
+
+            Appointments = new ObservableCollection<Appointment>(flightLegs);
         }
 
         private void LoadTimelineProviders()

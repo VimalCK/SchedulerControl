@@ -1,13 +1,13 @@
-﻿using Scheduler;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace WpfApp1
+namespace Scheduler.Types
 {
     public class Appointment : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
+        public static event GroupResourceChangedEventHandler GroupResourceChanged;
 
         private DateTime startDate;
         private DateTime endDate;
@@ -19,8 +19,10 @@ namespace WpfApp1
             get => group;
             set
             {
+                var oldValue = group;
                 group = value;
                 OnPropertyChanged();
+                OnGroupResourceChanged(oldValue, group);
             }
         }
 
@@ -54,9 +56,11 @@ namespace WpfApp1
             }
         }
 
-        public void OnPropertyChanged([CallerMemberName] string propertyName = "")
-        {
+        public void OnPropertyChanged([CallerMemberName] string propertyName = "") =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+
+        private void OnGroupResourceChanged(GroupResource oldValue, GroupResource newValue) =>
+           GroupResourceChanged?.Invoke(this, new GroupResourceChangedEventArgs(oldValue, newValue));
+
     }
 }

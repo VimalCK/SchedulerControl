@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace Scheduler
@@ -18,13 +19,13 @@ namespace Scheduler
 
         ~TimeLineHeader()
         {
-            parent.ScrollChanged -= Parent_ScrollChanged;
+            WeakEventManager<ScheduleControl, ScrollChangedEventArgs>.RemoveHandler(parent, nameof(parent.ScrollChanged), Parent_ScrollChanged);
         }
         protected override void OnInitialized(EventArgs e)
         {
             base.OnInitialized(e);
             parent = (ScheduleControl)TemplatedParent;
-            parent.ScrollChanged += Parent_ScrollChanged;
+            WeakEventManager<ScheduleControl, ScrollChangedEventArgs>.AddHandler(parent, nameof(parent.ScrollChanged), Parent_ScrollChanged);
         }
 
         private void Parent_ScrollChanged(object sender, System.Windows.Controls.ScrollChangedEventArgs e)

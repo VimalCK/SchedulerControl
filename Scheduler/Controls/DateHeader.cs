@@ -17,7 +17,7 @@ namespace Scheduler
             DefaultStyleKey = typeof(DateHeader);
             transform = new TranslateTransform();
             RenderTransform = transform;
-            Loaded += DateHeader_Loaded;
+            WeakEventManager<DateHeader, RoutedEventArgs>.AddHandler(this, nameof(Loaded), DateHeader_Loaded);
         }
 
         ~DateHeader() => RemoveHandlers();
@@ -26,7 +26,7 @@ namespace Scheduler
         {
             base.OnInitialized(e);
             templatedParent = (ScheduleControl)TemplatedParent;
-            templatedParent.ScrollChanged += ScrollViewer_ScrollChanged;
+            WeakEventManager<ScheduleControl, ScrollChangedEventArgs>.AddHandler(templatedParent, nameof(templatedParent.ScrollChanged), ScrollViewer_ScrollChanged);
         }
 
         internal void ReArrangeHeaders()
@@ -67,10 +67,8 @@ namespace Scheduler
             }
         }
 
-        private void DateHeader_Loaded(object sender, RoutedEventArgs e)
-        {
-            Loaded -= DateHeader_Loaded;
-        }
+        private void DateHeader_Loaded(object sender, RoutedEventArgs e) =>
+            WeakEventManager<DateHeader, RoutedEventArgs>.RemoveHandler(this, nameof(Loaded), DateHeader_Loaded);
 
         private void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
@@ -106,9 +104,8 @@ namespace Scheduler
             e.HorizontalOffset.Equals(0) || offsetChange.Equals(0) || offsetChange > templatedParent.RequiredArea.Width;
 
 
-        private void RemoveHandlers()
-        {
-            templatedParent.ScrollChanged -= ScrollViewer_ScrollChanged;
-        }
+        private void RemoveHandlers() =>
+            WeakEventManager<ScheduleControl, ScrollChangedEventArgs>.RemoveHandler(templatedParent, 
+                nameof(templatedParent.ScrollChanged), ScrollViewer_ScrollChanged);
     }
 }
