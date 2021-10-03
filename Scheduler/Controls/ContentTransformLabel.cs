@@ -65,7 +65,7 @@ namespace Scheduler
         public ContentTransformLabel()
         {
             DefaultStyleKey = typeof(ContentTransformLabel);
-            drawingGroup = new DrawingGroup();
+            drawingGroup = new();
         }
 
         protected override void OnRender(DrawingContext drawingContext)
@@ -77,20 +77,20 @@ namespace Scheduler
         private void CreateVisual()
         {
             var drawingContext = drawingGroup.Open();
-            var pen = new Pen(BorderBrush, BorderThickness.Left);
+            Pen pen = new(BorderBrush, BorderThickness.Left);
             if (BorderThickness.Equals(new Thickness(BorderThickness.Left)))
             {
-                drawingContext.DrawRectangle(Background, pen, new Rect(this.RenderSize));
+                drawingContext.DrawRectangle(Background, pen, new(this.RenderSize));
             }
             else
             {
-                var point1 = new Point();
-                var point2 = new Point();
-                drawingContext.DrawRectangle(Background, null, new Rect(this.RenderSize));
+                Point point1 = new();
+                Point point2 = new();
+                drawingContext.DrawRectangle(Background, null, new(this.RenderSize));
 
                 if (BorderThickness.Left != 0)
                 {
-                    pen = new Pen(BorderBrush, BorderThickness.Left);
+                    pen = new(BorderBrush, BorderThickness.Left);
                     point2.Y = ActualHeight;
                     point1.X = point1.Y = point2.X = 0;
                     drawingContext.DrawLine(pen, point1, point2);
@@ -98,7 +98,7 @@ namespace Scheduler
 
                 if (BorderThickness.Top != 0)
                 {
-                    pen = new Pen(BorderBrush, BorderThickness.Top);
+                    pen = new(BorderBrush, BorderThickness.Top);
                     point2.X = ActualWidth;
                     point1.X = point1.Y = point2.Y = 0;
                     drawingContext.DrawLine(pen, point1, point2);
@@ -106,7 +106,7 @@ namespace Scheduler
 
                 if (BorderThickness.Right != 0)
                 {
-                    pen = new Pen(BorderBrush, BorderThickness.Right);
+                    pen = new(BorderBrush, BorderThickness.Right);
                     point1.Y = 0;
                     point2.Y = ActualHeight;
                     point1.X = point2.X = ActualWidth;
@@ -115,7 +115,7 @@ namespace Scheduler
 
                 if (BorderThickness.Bottom != 0)
                 {
-                    pen = new Pen(BorderBrush, BorderThickness.Bottom);
+                    pen = new(BorderBrush, BorderThickness.Bottom);
                     point1.X = 0;
                     point2.X = ActualWidth;
                     point1.Y = point2.Y = ActualHeight;

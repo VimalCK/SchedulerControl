@@ -9,8 +9,8 @@ namespace Scheduler
     internal sealed class TimeLineHeader : RulerBase
     {
         private ScheduleControl parent;
-        private TranslateTransform transform = new TranslateTransform();
-        private DrawingGroup backingStore = new DrawingGroup();
+        private TranslateTransform transform = new();
+        private DrawingGroup backingStore = new();
         public TimeLineHeader()
         {
             DefaultStyleKey = typeof(TimeLineHeader);
@@ -51,8 +51,8 @@ namespace Scheduler
                 if (VerticalLines > 0)
                 {
                     var drawingContext = backingStore.Open();
-                    var clippingPoint = new Point();
-                    var renderPoint = new Point(0, ActualHeight / 3);
+                    Point clippingPoint = new();
+                    Point renderPoint = new(0, ActualHeight / 3);
                     var headerText = 0;
 
                     HorizontalLines = 2;

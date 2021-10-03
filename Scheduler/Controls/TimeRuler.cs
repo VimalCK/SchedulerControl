@@ -4,24 +4,23 @@ using System.Windows.Media;
 
 namespace Scheduler
 {
-    public sealed class TimeRuler
+    public readonly struct TimeRuler
     {
-        private string time;
-        private int hour;
-        private int minute;
+        private readonly string time;
 
-        internal int Hour => hour;
-        internal int Minute => minute;
-        public Brush Color { get; set; }
-        public double Thickness { get; set; } = 1.5;
+        internal int Hour { get; init; }
+        internal int Minute { get; init; }
+        public Brush Color { get; init; }
+        public double Thickness { get; init; } = 1.5;
+
         public string Time
         {
             get => time;
-            set
+            init
             {
                 time = value;
-                hour = 0;
-                minute = 0;
+                Hour = 0;
+                Minute = 0;
 
                 if (!string.IsNullOrEmpty(time))
                 {
@@ -38,8 +37,8 @@ namespace Scheduler
                         case (int a, int b) when b < 0 && b > 59:
                             throw new Exception("Minute specified in Time is not valid");
                         default:
-                            hour = values.ElementAt(0);
-                            minute = Math.Abs(values.ElementAt(1));
+                            Hour = values.ElementAt(0);
+                            Minute = Math.Abs(values.ElementAt(1));
                             break;
                     }
                 }

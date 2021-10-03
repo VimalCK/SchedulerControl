@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
@@ -100,5 +101,6 @@ namespace Scheduler
             return pixelsPerDpi;
         }
 
+        public static bool IsNullOrEmpty(this IEnumerable value) => value is null || !value.GetEnumerator().MoveNext();
     }
 }

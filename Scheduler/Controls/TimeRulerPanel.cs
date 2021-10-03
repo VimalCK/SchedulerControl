@@ -13,11 +13,10 @@ namespace Scheduler
 
         public TimeRulerPanel()
         {
-            backingStore = new DrawingGroup();
-            timer = new DispatcherTimer(new TimeSpan(0, 0, 0), DispatcherPriority.Normal,
-                OnDispatcherCallbck, Dispatcher.CurrentDispatcher);
+            backingStore = new();
+            timer = new(new(0, 0, 0), DispatcherPriority.Normal, OnDispatcherCallbck, Dispatcher.CurrentDispatcher);
 
-            timer.Interval = new TimeSpan(0, 1, 0);
+            timer.Interval = new(0, 1, 0);
             timer.Start();
         }
         ~TimeRulerPanel()

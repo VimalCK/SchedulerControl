@@ -9,12 +9,13 @@ namespace Scheduler
 {
     public abstract class GroupResource : INotifyPropertyChanged
     {
-        private Guid id = Guid.NewGuid();
-        private Visibility visibility = Visibility.Visible;
         public event PropertyChangedEventHandler PropertyChanged;
 
+        private Guid id = Guid.NewGuid();
+        private Visibility visibility = Visibility.Visible;
+
         public Guid Id => id;
-        public IList<Appointment> Appointments { get; internal set; }
+        public IList<Appointment> Appointments { get; internal set; } = new List<Appointment>();
 
         public Visibility Visibility
         {
@@ -26,10 +27,9 @@ namespace Scheduler
             }
         }
 
-        public void OnPropertyChanged([CallerMemberName] string propertyName = "") =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
         public abstract override string ToString();
         public abstract override int GetHashCode();
+        public void OnPropertyChanged([CallerMemberName] string propertyName = "") =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

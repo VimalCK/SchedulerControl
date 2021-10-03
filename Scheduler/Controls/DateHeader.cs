@@ -15,7 +15,7 @@ namespace Scheduler
         public DateHeader()
         {
             DefaultStyleKey = typeof(DateHeader);
-            transform = new TranslateTransform();
+            transform = new();
             RenderTransform = transform;
             WeakEventManager<DateHeader, RoutedEventArgs>.AddHandler(this, nameof(Loaded), DateHeader_Loaded);
         }
@@ -45,8 +45,8 @@ namespace Scheduler
                     }
                     else
                     {
-                        ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(1, GridUnitType.Star) });
-                        label = new ContentTransformLabel();
+                        ColumnDefinitions.Add(new() { Width = new GridLength(1, GridUnitType.Star) });
+                        label = new();
                         Children.Add(label);
                         Grid.SetColumn(label, index);
                     }
@@ -105,7 +105,7 @@ namespace Scheduler
 
 
         private void RemoveHandlers() =>
-            WeakEventManager<ScheduleControl, ScrollChangedEventArgs>.RemoveHandler(templatedParent, 
+            WeakEventManager<ScheduleControl, ScrollChangedEventArgs>.RemoveHandler(templatedParent,
                 nameof(templatedParent.ScrollChanged), ScrollViewer_ScrollChanged);
     }
 }

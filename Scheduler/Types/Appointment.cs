@@ -22,7 +22,7 @@ namespace Scheduler.Types
                 var oldValue = group;
                 group = value;
                 OnPropertyChanged();
-                OnGroupResourceChanged(oldValue, group);
+                //OnGroupResourceChanged(oldValue, group);
             }
         }
 

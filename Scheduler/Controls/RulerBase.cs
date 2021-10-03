@@ -59,9 +59,9 @@ namespace Scheduler
 
         protected override void OnRender(DrawingContext drawingContext)
         {
-            var pen = new Pen(RulerColor, .5);
-            var startPoint = new Point(0, 0);
-            var endPoint = new Point(0, ActualHeight);
+            Pen pen = new(RulerColor, .5);
+            Point startPoint = new(0, 0);
+            Point endPoint = new(0, ActualHeight);
 
             pen.Freeze();
 
@@ -71,8 +71,8 @@ namespace Scheduler
                 endPoint.X = startPoint.X = i * VerticalGap;
             }
 
-            startPoint = new Point(0, 0);
-            endPoint = new Point(ActualWidth, 0);
+            startPoint = new(0, 0);
+            endPoint = new(ActualWidth, 0);
 
             for (int i = 0; i < HorizontalLines; i++)
             {

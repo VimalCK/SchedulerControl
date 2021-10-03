@@ -12,6 +12,7 @@ using System.Collections;
 using System.ComponentModel;
 using System.Collections.Specialized;
 using Scheduler.Types;
+using System.Threading;
 
 namespace Scheduler
 {
@@ -165,18 +166,105 @@ namespace Scheduler
             }
 
             control.appointmentStore = new Dictionary<Guid, GroupResource>();
-            await control.SyncAppointmentStore(e.NewValue as IEnumerable, e.OldValue as IEnumerable);
-        }
-
-        private static void ScheduleControl_PropertyChanged(object sender, EventArgs e)
-        {
-
+            await control.SyncGroupsInAppointmentStore((IEnumerable<GroupResource>)e.NewValue, null);
+            await control.SyncAppointmentsInAppointmentsStore(control.AppointmentSource, null);
+            //validate
+            // control.InvalidateChildControlsToReRender();
         }
 
         private async void GroupByCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            await SyncAppointmentStore(e.NewItems, e.OldItems);
-            InvalidateChildControlsToReRender();
+            await SyncGroupsInAppointmentStore(e.NewItems?.OfType<GroupResource>().ToList(), e.OldItems?.OfType<GroupResource>().ToList());
+            //validate
+            //InvalidateChildControlsToReRender();
+        }
+
+        private async static void OnAppointmentSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is ScheduleControl control)
+            {
+                if (e.OldValue is ObservableCollection<Appointment> oldAppointments)
+                {
+                    CollectionChangedEventManager.RemoveHandler(oldAppointments, control.AppointmentSource_CollectionChanged);
+                }
+
+                if (e.NewValue is ObservableCollection<Appointment> newAppointments)
+                {
+                    CollectionChangedEventManager.AddHandler(newAppointments, control.AppointmentSource_CollectionChanged);
+                }
+
+                await control.ClearAppointmentsFromAppointmentStore();
+                await control.SyncAppointmentsInAppointmentsStore((IEnumerable<Appointment>)e.NewValue, null);
+                //validate
+                // control.InvalidateChildControlsToReRender();
+            }
+        }
+        private async void AppointmentSource_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            await SyncAppointmentsInAppointmentsStore((IEnumerable<Appointment>)e.NewItems, (IEnumerable<Appointment>)e.OldItems);
+        }
+
+        private async ValueTask SyncAppointmentsInAppointmentsStore(IEnumerable<Appointment> newItems, IEnumerable<Appointment> oldItems)
+        {
+            if (!oldItems.IsNullOrEmpty())
+            {
+                await Parallel.ForEachAsync(oldItems, new ParallelOptions { MaxDegreeOfParallelism = 2 },
+                    (appointment, token) =>
+                    {
+                        if (appointmentStore.TryGetValue(appointment.Group.Id, out GroupResource group))
+                        {
+                            group.Appointments.Remove(appointment);
+                        }
+
+                        return ValueTask.CompletedTask;
+                    });
+            }
+
+            if (!newItems.IsNullOrEmpty())
+            {
+                await Parallel.ForEachAsync(newItems, new ParallelOptions { MaxDegreeOfParallelism = 2 },
+                    (appointment, token) =>
+                    {
+                        if (appointmentStore.TryGetValue(appointment.Group.Id, out GroupResource group))
+                        {
+                            group.Appointments.Add(appointment);
+                        }
+
+                        return ValueTask.CompletedTask;
+                    });
+            }
+        }
+
+        private async ValueTask ClearAppointmentsFromAppointmentStore()
+        {
+            await Parallel.ForEachAsync(appointmentStore, (group, token) =>
+            {
+                group.Value.Appointments.Clear();
+                return ValueTask.CompletedTask;
+            });
+        }
+
+        private async ValueTask SyncGroupsInAppointmentStore(IEnumerable<GroupResource> newItems, IEnumerable<GroupResource> oldItems)
+        {
+            if (!oldItems.IsNullOrEmpty())
+            {
+                await Parallel.ForEachAsync(oldItems, new ParallelOptions { MaxDegreeOfParallelism = 2 },
+                    (group, token) =>
+                    {
+                        appointmentStore.Remove(group.Id);
+                        return ValueTask.CompletedTask;
+                    });
+            }
+
+            if (!newItems.IsNullOrEmpty())
+            {
+                await Parallel.ForEachAsync(newItems, new ParallelOptions { MaxDegreeOfParallelism = 2 },
+                    (group, token) =>
+                    {
+                        appointmentStore.Add(group.Id, group);
+                        return ValueTask.CompletedTask;
+                    });
+            }
         }
 
         private static void OnExtendedModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -234,53 +322,6 @@ namespace Scheduler
             }
         }
 
-        private async static void OnAppointmentSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            if (d is ScheduleControl control)
-            {
-                if (e.OldValue is ObservableCollection<Appointment> oldAppointments)
-                {
-                    CollectionChangedEventManager.RemoveHandler(oldAppointments, control.AppointmentSource_CollectionChanged);
-                }
-
-                if (e.NewValue is ObservableCollection<Appointment> newAppointments)
-                {
-                    CollectionChangedEventManager.AddHandler(newAppointments, control.AppointmentSource_CollectionChanged);
-                }
-
-                //if (await control.SyncAppointmentStore((IEnumerable<IAppointment>)e.NewValue))
-                //{
-                //}
-
-                //  control.InvalidateChildControlsToReRender();
-            }
-        }
-
-
-        private async void AppointmentSource_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            //bool isAdded = false;
-            //bool isRemoved = false;
-            //var control = sender as ScheduleControl;
-            //if (!e.NewItems.Count.Equals(0))
-            //{
-            //    isAdded = await control.AddGroupResources((IEnumerable<IAppointment>)e.NewItems);
-            //}
-
-            //if (!e.OldItems.Count.Equals(0))
-            //{
-            //    foreach (IAppointment item in e.NewItems)
-            //    {
-            //        isRemoved = await control.RemoveAppointmentsAndNotifyIfGroupChanged((IEnumerable<IAppointment>)e.OldItems);
-            //    }
-            //}
-
-            //if (isRemoved || isAdded)
-            //{
-            //    control.groupHeader.Items.Refresh();
-            //}
-        }
-
         ~ScheduleControl() => UnHandleEvents();
 
         public override void OnApplyTemplate()
@@ -297,55 +338,6 @@ namespace Scheduler
             headerSection = GetTemplateChild("PART_HeaderSection") as Grid;
 
             HandleEvents();
-        }
-
-        private async ValueTask SyncAppointmentStore(IEnumerable newItems, IEnumerable oldItems)
-        {
-            if (oldItems is not null && appointmentStore.Any())
-            {
-                await Task.Run(() =>
-                {
-                    foreach (GroupResource item in oldItems)
-                    {
-                        appointmentStore.Remove(item.Id);
-                    }
-                });
-            }
-
-            if (newItems is not null)
-            {
-                await Task.Run(() =>
-                {
-                    foreach (GroupResource item in newItems)
-                    {
-                        appointmentStore.Add(item.Id, item);
-                    }
-                });
-            }
-        }
-
-        private async ValueTask<bool> RemoveAppointmentsAndNotifyIfGroupChanged(IEnumerable<Appointment> source)
-        {
-            //return await Task<bool>.Run(() =>
-            //{
-            //    bool isRemoved = false;
-            //    foreach (IAppointment appointment in source)
-            //    {
-            //        var group = groupValueLambda(appointment);
-            //        if (appointments.ContainsKey(group))
-            //        {
-            //            appointments[group].Remove(appointment);
-
-            //        }
-
-            //        if (!isRemoved && appointments[group].Count.Equals(0))
-            //        {
-            //            isRemoved = true;
-            //        }
-            //    }
-            //});
-
-            return false;
         }
 
         private void PrepareScheduleControl()

@@ -5,7 +5,7 @@ namespace Scheduler
 {
     internal sealed class RulerGrid : RulerBase
     {
-        private DrawingGroup backingStore = new DrawingGroup();
+        private DrawingGroup backingStore = new();
 
         public RulerGrid() => DefaultStyleKey = typeof(RulerGrid);
 
