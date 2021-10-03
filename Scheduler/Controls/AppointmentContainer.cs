@@ -7,10 +7,10 @@ using System.Windows.Media;
 
 namespace Scheduler
 {
-    internal class Scheduler : ListBox
+    internal class AppointmentContainer : ListBox
     {
         private ScheduleControl parent;
-        public Scheduler()
+        public AppointmentContainer()
         {
             this.DefaultStyleKey = typeof(ListBox);
         }

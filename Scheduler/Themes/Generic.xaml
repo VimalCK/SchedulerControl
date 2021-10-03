@@ -105,7 +105,7 @@
                 Value="False" />
     </Style>
 
-    <Style TargetType="{x:Type local:Scheduler}">
+    <Style TargetType="{x:Type local:AppointmentContainer}">
         <Setter Property="UseLayoutRounding"
                 Value="True" />
         <Setter Property="Background"
@@ -115,7 +115,7 @@
         <Setter Property="ItemsPanel">
             <Setter.Value>
                 <ItemsPanelTemplate>
-                    <Canvas x:Name="PART_SchedulerCanvas" />
+                    <local:AppointmentRenderingCanvas />
                 </ItemsPanelTemplate>
             </Setter.Value>
         </Setter>
@@ -140,7 +140,7 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <ListBox x:Name="PART_GroupHeader" 
+                        <ListBox x:Name="PART_GroupContainer" 
                                  Grid.Row="1" 
                                  ItemsSource="{TemplateBinding GroupBy}"
                                  Style="{StaticResource GroupHeaderStyle}"
@@ -190,10 +190,10 @@
                             <Grid x:Name="PART_ContentSection"
                                   Style="{StaticResource ScheduleGridStyle}">
                                 <local:RulerGrid x:Name="PART_RulerGrid" />
-                                <local:Scheduler x:Name="PART_Scheduler"
-                                                 ItemsSource="{Binding RelativeSource={RelativeSource 
-                                                                       Mode=TemplatedParent}, 
-                                                                       Path=AppointmentSource}" />
+                                <local:AppointmentContainer x:Name="PART_AppointmentContainer"
+                                                            ItemsSource="{Binding RelativeSource={RelativeSource 
+                                                                                  Mode=TemplatedParent}, 
+                                                                                  Path=AppointmentSource}" />
                                 <local:TimeRulerPanel x:Name="PART_TimeRulerPanel" />
                             </Grid>
                         </ScrollViewer>

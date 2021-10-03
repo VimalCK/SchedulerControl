@@ -22,26 +22,30 @@ namespace Scheduler
     [TemplatePart(Name = "PART_DateHeader", Type = typeof(DateHeader))]
     [TemplatePart(Name = "PART_TimeRulerPanel", Type = typeof(TimeRulerPanel))]
     [TemplatePart(Name = "PART_TimeLineHeader", Type = typeof(TimeLineHeader))]
-    [TemplatePart(Name = "PART_GroupHeader", Type = typeof(ListBox))]
+    [TemplatePart(Name = "PART_GroupContainer", Type = typeof(ListBox))]
     [TemplatePart(Name = "PART_HeaderSection", Type = typeof(Grid))]
+    //[TemplatePart(Name = "PART_AppointmentRenderingCanvas", Type = typeof(Canvas))]
+    //[TemplatePart(Name = "PART_AppointmentContainer", Type = typeof(ListBox))]
     public class ScheduleControl : Control
     {
         public event ScrollChangedEventHandler ScrollChanged;
 
-        private ListBox groupHeaderList;
-        private Dictionary<Guid, GroupResource> appointmentStore;
-        //private Func<IAppointment, string> groupValueLambda;
-        private double scrollBarSpace;
-        private Size viewPortArea;
         private Size requiredArea;
+        private Size viewPortArea;
+        private double scrollBarSpace;
+        private Dictionary<Guid, GroupResource> appointmentStore;
+        private ListBox groupByContainer;
+        //private Func<IAppointment, string> groupValueLambda;
         private Grid contentSection;
         private RulerGrid rulerGrid;
         private DateHeader dateHeader;
         private TimeRulerPanel timerulerPanel;
         private TimeLineHeader timeLineHeader;
         private ScrollViewer schedulerScrollViewer;
-        private ScrollViewer groupHeaderScrollViewer;
+        private ScrollViewer groupContainerScrollViewer;
         private Grid headerSection;
+        //private Canvas appointmentRenderingCanvas;
+        //private ListBox appointmentContainer;
 
 
 
@@ -209,29 +213,29 @@ namespace Scheduler
             if (!oldItems.IsNullOrEmpty())
             {
                 await Parallel.ForEachAsync(oldItems, new ParallelOptions { MaxDegreeOfParallelism = 2 },
-                    (appointment, token) =>
+                (appointment, token) =>
+                {
+                    if (appointmentStore.TryGetValue(appointment.Group.Id, out GroupResource group))
                     {
-                        if (appointmentStore.TryGetValue(appointment.Group.Id, out GroupResource group))
-                        {
-                            group.Appointments.Remove(appointment);
-                        }
+                        group.Appointments.Remove(appointment);
+                    }
 
-                        return ValueTask.CompletedTask;
-                    });
+                    return ValueTask.CompletedTask;
+                });
             }
 
             if (!newItems.IsNullOrEmpty())
             {
                 await Parallel.ForEachAsync(newItems, new ParallelOptions { MaxDegreeOfParallelism = 2 },
-                    (appointment, token) =>
+                (appointment, token) =>
+                {
+                    if (appointmentStore.TryGetValue(appointment.Group.Id, out GroupResource group))
                     {
-                        if (appointmentStore.TryGetValue(appointment.Group.Id, out GroupResource group))
-                        {
-                            group.Appointments.Add(appointment);
-                        }
+                        group.Appointments.Add(appointment);
+                    }
 
-                        return ValueTask.CompletedTask;
-                    });
+                    return ValueTask.CompletedTask;
+                });
             }
         }
 
@@ -239,7 +243,7 @@ namespace Scheduler
         {
             await Parallel.ForEachAsync(appointmentStore, (group, token) =>
             {
-                group.Value.Appointments.Clear();
+                group.Value?.Appointments.Clear();
                 return ValueTask.CompletedTask;
             });
         }
@@ -248,22 +252,22 @@ namespace Scheduler
         {
             if (!oldItems.IsNullOrEmpty())
             {
-                await Parallel.ForEachAsync(oldItems, new ParallelOptions { MaxDegreeOfParallelism = 2 },
-                    (group, token) =>
-                    {
-                        appointmentStore.Remove(group.Id);
-                        return ValueTask.CompletedTask;
-                    });
+                await Parallel.ForEachAsync(oldItems, new ParallelOptions { MaxDegreeOfParallelism = 1 },
+                (group, token) =>
+                {
+                    appointmentStore.Remove(group.Id);
+                    return ValueTask.CompletedTask;
+                });
             }
 
             if (!newItems.IsNullOrEmpty())
             {
-                await Parallel.ForEachAsync(newItems, new ParallelOptions { MaxDegreeOfParallelism = 2 },
-                    (group, token) =>
-                    {
-                        appointmentStore.Add(group.Id, group);
-                        return ValueTask.CompletedTask;
-                    });
+                await Parallel.ForEachAsync(newItems, new ParallelOptions { MaxDegreeOfParallelism = 1 },
+                (group, token) =>
+                {
+                    appointmentStore.Add(group.Id, group);
+                    return ValueTask.CompletedTask;
+                });
             }
         }
 
@@ -334,9 +338,10 @@ namespace Scheduler
             dateHeader = GetTemplateChild("PART_DateHeader") as DateHeader;
             timerulerPanel = GetTemplateChild("PART_TimeRulerPanel") as TimeRulerPanel;
             timeLineHeader = GetTemplateChild("PART_TimeLineHeader") as TimeLineHeader;
-            groupHeaderList = GetTemplateChild("PART_GroupHeader") as ListBox;
+            groupByContainer = GetTemplateChild("PART_GroupContainer") as ListBox;
             headerSection = GetTemplateChild("PART_HeaderSection") as Grid;
-
+            //appointmentContainer = GetTemplateChild("PART_AppointmentContainer") as ListBox;
+            //appointmentContainer.Loaded += AppointmentContainer_Loaded;
             HandleEvents();
         }
 
@@ -362,7 +367,7 @@ namespace Scheduler
             }
         }
 
-        private void ScrollGroupHeaderVertically(double offset) => groupHeaderScrollViewer?.ScrollToVerticalOffset(offset);
+        private void ScrollGroupHeaderVertically(double offset) => groupContainerScrollViewer?.ScrollToVerticalOffset(offset);
         private void ScheduleControl_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             if (IsLoaded)
@@ -375,14 +380,18 @@ namespace Scheduler
         {
             WeakEventManager<ScheduleControl, RoutedEventArgs>.RemoveHandler(this, nameof(Loaded), ScheduleControl_Loaded);
 
-            var scrollbars = new List<ScrollBar>();
-            groupHeaderScrollViewer = groupHeaderList.GetChildOfType<ScrollViewer>();
-            schedulerScrollViewer.GetChildOfType<ScrollBar>(ref scrollbars, level: 2);
-            scrollBarSpace = scrollbars.ElementAt(0).ActualWidth;
-
+            FindTemplateChild();
             PrepareScheduleControl();
             InvalidateChildControlsToReRender();
             dateHeader.ReArrangeHeaders();
+        }
+
+        private void FindTemplateChild()
+        {
+            var scrollbars = new List<ScrollBar>();
+            groupContainerScrollViewer = groupByContainer.GetChildOfType<ScrollViewer>();
+            schedulerScrollViewer.GetChildOfType<ScrollBar>(ref scrollbars, level: 2);
+            scrollBarSpace = scrollbars.ElementAt(0).ActualWidth;
         }
 
         private void UnHandleEvents()
