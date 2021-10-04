@@ -17,7 +17,7 @@ namespace Scheduler
             DefaultStyleKey = typeof(DateHeader);
             transform = new();
             RenderTransform = transform;
-            WeakEventManager<DateHeader, RoutedEventArgs>.AddHandler(this, nameof(Loaded), DateHeader_Loaded);
+            Loaded += DateHeaderLoaded;
         }
 
         ~DateHeader() => RemoveHandlers();
@@ -26,7 +26,7 @@ namespace Scheduler
         {
             base.OnInitialized(e);
             templatedParent = (ScheduleControl)TemplatedParent;
-            WeakEventManager<ScheduleControl, ScrollChangedEventArgs>.AddHandler(templatedParent, nameof(templatedParent.ScrollChanged), ScrollViewer_ScrollChanged);
+            templatedParent.ScrollChanged += ScrollViewerScrollChanged;
         }
 
         internal void ReArrangeHeaders()
@@ -67,10 +67,9 @@ namespace Scheduler
             }
         }
 
-        private void DateHeader_Loaded(object sender, RoutedEventArgs e) =>
-            WeakEventManager<DateHeader, RoutedEventArgs>.RemoveHandler(this, nameof(Loaded), DateHeader_Loaded);
+        private void DateHeaderLoaded(object sender, RoutedEventArgs e) => Loaded -= DateHeaderLoaded;
 
-        private void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        private void ScrollViewerScrollChanged(object sender, ScrollChangedEventArgs e)
         {
             var currentIndex = (short)(e.HorizontalOffset / templatedParent.RequiredArea.Width);
             var change = (templatedParent.RequiredArea.Width + e.HorizontalOffset) - (templatedParent.RequiredArea.Width * (currentIndex + 1));
@@ -104,8 +103,6 @@ namespace Scheduler
             e.HorizontalOffset.Equals(0) || offsetChange.Equals(0) || offsetChange > templatedParent.RequiredArea.Width;
 
 
-        private void RemoveHandlers() =>
-            WeakEventManager<ScheduleControl, ScrollChangedEventArgs>.RemoveHandler(templatedParent,
-                nameof(templatedParent.ScrollChanged), ScrollViewer_ScrollChanged);
+        private void RemoveHandlers() => templatedParent.ScrollChanged -= ScrollViewerScrollChanged;
     }
 }

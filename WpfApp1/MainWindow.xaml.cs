@@ -210,12 +210,9 @@ namespace WpfApp1
                 {
                     startDate = startDate.AddHours(hour.Next(0, 3));
                     var endDate = startDate.AddHours(hour.Next(1, 3));
-                    flightLegs.Add(new Appointment
+                    flightLegs.Add(new Appointment(startDate, endDate, group)
                     {
-                        Description = $"FL-{group.ToString()}-{i + 1}",
-                        Group = group,
-                        StartDate = startDate,
-                        EndDate = endDate
+                        Description = $"FL-{group.ToString()}-{i + 1}"
                     });
 
                     startDate = endDate;

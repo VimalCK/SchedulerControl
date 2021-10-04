@@ -35,8 +35,8 @@ namespace Scheduler
             if (element is AppointmentItem appointmentItem)
             {
                 appointmentItem.Height = (int)parent.ExtendedMode;
-                appointmentItem.Width = 100;
-                appointmentItem.Background = Brushes.Red;
+                //appointmentItem.Width = 100;
+                //appointmentItem.Background = Brushes.Red;
             }
         }
     }

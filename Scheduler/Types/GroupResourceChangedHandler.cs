@@ -6,16 +6,10 @@ namespace Scheduler.Types
 
     public sealed class GroupResourceChangedEventArgs : EventArgs
     {
-        private readonly GroupResource oldValue;
-        private readonly GroupResource newValue;
-
-        public GroupResource OldValue => oldValue;
-        public GroupResource NewValue => newValue;
+        public GroupResource OldValue { get; init; }
+        public GroupResource NewValue { get; init; }
 
         public GroupResourceChangedEventArgs(GroupResource oldValue, GroupResource newValue)
-        {
-            this.oldValue = oldValue;
-            this.newValue = newValue;
-        }
+            => (OldValue, NewValue) = (oldValue, newValue);
     }
 }

@@ -17,18 +17,16 @@ namespace Scheduler
             this.RenderTransform = transform;
         }
 
-        ~TimeLineHeader()
-        {
-            WeakEventManager<ScheduleControl, ScrollChangedEventArgs>.RemoveHandler(parent, nameof(parent.ScrollChanged), Parent_ScrollChanged);
-        }
+        ~TimeLineHeader() => parent.ScrollChanged -= ParentScrollChanged;
+
         protected override void OnInitialized(EventArgs e)
         {
             base.OnInitialized(e);
             parent = (ScheduleControl)TemplatedParent;
-            WeakEventManager<ScheduleControl, ScrollChangedEventArgs>.AddHandler(parent, nameof(parent.ScrollChanged), Parent_ScrollChanged);
+            parent.ScrollChanged += ParentScrollChanged;
         }
 
-        private void Parent_ScrollChanged(object sender, System.Windows.Controls.ScrollChangedEventArgs e)
+        private void ParentScrollChanged(object sender, System.Windows.Controls.ScrollChangedEventArgs e)
         {
             if (e.HorizontalChange != 0)
             {

@@ -7,7 +7,8 @@ namespace Scheduler.Types
     public class Appointment : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
-        public static event GroupResourceChangedEventHandler GroupResourceChanged;
+        internal static event GroupResourceChangedEventHandler GroupResourceChanged;
+        internal static event AppointmentTimeChangedEventHandler AppointmentTimeChanged;
 
         private DateTime startDate;
         private DateTime endDate;
@@ -22,7 +23,10 @@ namespace Scheduler.Types
                 var oldValue = group;
                 group = value;
                 OnPropertyChanged();
-                //OnGroupResourceChanged(oldValue, group);
+                if (oldValue != value)
+                {
+                    OnGroupResourceChanged(oldValue, group);
+                }
             }
         }
 
@@ -31,8 +35,13 @@ namespace Scheduler.Types
             get => startDate;
             set
             {
+                var oldValue = startDate;
                 startDate = value;
                 OnPropertyChanged();
+                if (oldValue != value)
+                {
+                    OnAppointmentDateChanged(oldValue, value);
+                }
             }
         }
 
@@ -41,8 +50,13 @@ namespace Scheduler.Types
             get => endDate;
             set
             {
+                var oldValue = endDate;
                 endDate = value;
                 OnPropertyChanged();
+                if (oldValue != value)
+                {
+                    OnAppointmentDateChanged(oldValue, value);
+                }
             }
         }
 
@@ -56,11 +70,20 @@ namespace Scheduler.Types
             }
         }
 
+        public Appointment(DateTime startDate, DateTime endDate, GroupResource group)
+        {
+            this.startDate = startDate;
+            this.endDate = endDate;
+            this.group = group;
+        }
+
         public void OnPropertyChanged([CallerMemberName] string propertyName = "") =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         private void OnGroupResourceChanged(GroupResource oldValue, GroupResource newValue) =>
            GroupResourceChanged?.Invoke(this, new GroupResourceChangedEventArgs(oldValue, newValue));
 
+        private void OnAppointmentDateChanged(DateTime oldValue, DateTime newValue) =>
+            AppointmentTimeChanged?.Invoke(this, new AppointmentTimeChangedEventArgs(oldValue, newValue));
     }
 }

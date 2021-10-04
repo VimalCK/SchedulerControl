@@ -161,13 +161,14 @@ namespace Scheduler
             var control = (ScheduleControl)d;
             if (e.OldValue is INotifyCollectionChanged oldCollection)
             {
-                CollectionChangedEventManager.RemoveHandler(oldCollection, control.GroupByCollectionChanged);
+                oldCollection.CollectionChanged -= control.GroupByCollectionChanged;
             }
 
             if (e.NewValue is INotifyCollectionChanged newCollection)
             {
-                CollectionChangedEventManager.AddHandler(newCollection, control.GroupByCollectionChanged);
+                newCollection.CollectionChanged += control.GroupByCollectionChanged;
             }
+
 
             control.appointmentStore = new Dictionary<Guid, GroupResource>();
             await control.SyncGroupsInAppointmentStore((IEnumerable<GroupResource>)e.NewValue, null);
@@ -189,12 +190,12 @@ namespace Scheduler
             {
                 if (e.OldValue is ObservableCollection<Appointment> oldAppointments)
                 {
-                    CollectionChangedEventManager.RemoveHandler(oldAppointments, control.AppointmentSource_CollectionChanged);
+                    oldAppointments.CollectionChanged -= control.AppointmentSourceCollectionChanged;
                 }
 
                 if (e.NewValue is ObservableCollection<Appointment> newAppointments)
                 {
-                    CollectionChangedEventManager.AddHandler(newAppointments, control.AppointmentSource_CollectionChanged);
+                    newAppointments.CollectionChanged += control.AppointmentSourceCollectionChanged;
                 }
 
                 await control.ClearAppointmentsFromAppointmentStore();
@@ -203,16 +204,15 @@ namespace Scheduler
                 // control.InvalidateChildControlsToReRender();
             }
         }
-        private async void AppointmentSource_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
+
+        private async void AppointmentSourceCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) =>
             await SyncAppointmentsInAppointmentsStore((IEnumerable<Appointment>)e.NewItems, (IEnumerable<Appointment>)e.OldItems);
-        }
 
         private async ValueTask SyncAppointmentsInAppointmentsStore(IEnumerable<Appointment> newItems, IEnumerable<Appointment> oldItems)
         {
             if (!oldItems.IsNullOrEmpty())
             {
-                await Parallel.ForEachAsync(oldItems, new ParallelOptions { MaxDegreeOfParallelism = 2 },
+                await Parallel.ForEachAsync(oldItems, new ParallelOptions { MaxDegreeOfParallelism = 1 },
                 (appointment, token) =>
                 {
                     if (appointmentStore.TryGetValue(appointment.Group.Id, out GroupResource group))
@@ -226,7 +226,7 @@ namespace Scheduler
 
             if (!newItems.IsNullOrEmpty())
             {
-                await Parallel.ForEachAsync(newItems, new ParallelOptions { MaxDegreeOfParallelism = 2 },
+                await Parallel.ForEachAsync(newItems, new ParallelOptions { MaxDegreeOfParallelism = 1 },
                 (appointment, token) =>
                 {
                     if (appointmentStore.TryGetValue(appointment.Group.Id, out GroupResource group))
@@ -270,6 +270,19 @@ namespace Scheduler
                 });
             }
         }
+        private void OnGroupChanged(object sender, GroupResourceChangedEventArgs e)
+        {
+            var appointment = (Appointment)sender;
+            if (e.OldValue is not null && appointmentStore.TryGetValue(e.OldValue.Id, out GroupResource group))
+            {
+                group.Appointments.Remove(appointment);
+            }
+
+            if (e.NewValue is not null && appointmentStore.TryGetValue(e.NewValue.Id, out group))
+            {
+                group.Appointments.Add(appointment);
+            }
+        }
 
         private static void OnExtendedModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -303,12 +316,12 @@ namespace Scheduler
             var control = (ScheduleControl)d;
             if (e.OldValue is INotifyCollectionChanged oldCollection)
             {
-                CollectionChangedEventManager.RemoveHandler(oldCollection, control.TimeLineProvidersCollectionChanged);
+                oldCollection.CollectionChanged -= control.TimeLineProvidersCollectionChanged;
             }
 
             if (e.NewValue is INotifyCollectionChanged newCollection)
             {
-                CollectionChangedEventManager.AddHandler(newCollection, control.TimeLineProvidersCollectionChanged);
+                newCollection.CollectionChanged += control.TimeLineProvidersCollectionChanged;
             }
 
             control.timerulerPanel?.Render();
@@ -353,9 +366,9 @@ namespace Scheduler
 
         private void HandleEvents()
         {
-            WeakEventManager<ScheduleControl, RoutedEventArgs>.AddHandler(this, nameof(Loaded), ScheduleControl_Loaded);
-            WeakEventManager<ScheduleControl, SizeChangedEventArgs>.AddHandler(this, nameof(SizeChanged), ScheduleControl_SizeChanged);
-            WeakEventManager<ScrollViewer, ScrollChangedEventArgs>.AddHandler(schedulerScrollViewer, nameof(ScrollChanged), ScrollViewer_ScrollChanged);
+            Loaded += ScheduleControl_Loaded;
+            SizeChanged += ScheduleControl_SizeChanged;
+            schedulerScrollViewer.ScrollChanged += ScrollViewer_ScrollChanged;
         }
 
         private void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
@@ -378,7 +391,7 @@ namespace Scheduler
 
         private void ScheduleControl_Loaded(object sender, RoutedEventArgs e)
         {
-            WeakEventManager<ScheduleControl, RoutedEventArgs>.RemoveHandler(this, nameof(Loaded), ScheduleControl_Loaded);
+            Loaded -= ScheduleControl_Loaded;
 
             FindTemplateChild();
             PrepareScheduleControl();
@@ -396,16 +409,16 @@ namespace Scheduler
 
         private void UnHandleEvents()
         {
-            CollectionChangedEventManager.RemoveHandler(AppointmentSource, AppointmentSource_CollectionChanged);
-            WeakEventManager<ScrollViewer, ScrollChangedEventArgs>.RemoveHandler(schedulerScrollViewer, nameof(ScrollChanged), ScrollViewer_ScrollChanged);
+            AppointmentSource.CollectionChanged -= AppointmentSourceCollectionChanged;
+            schedulerScrollViewer.ScrollChanged -= ScrollViewer_ScrollChanged;
             if (GroupBy is not null)
             {
-                CollectionChangedEventManager.RemoveHandler(GroupBy, GroupByCollectionChanged);
+                GroupBy.CollectionChanged -= GroupByCollectionChanged;
             }
 
             if (TimeLineProviders is not null)
             {
-                CollectionChangedEventManager.RemoveHandler(TimeLineProviders, TimeLineProvidersCollectionChanged);
+                TimeLineProviders.CollectionChanged -= TimeLineProvidersCollectionChanged;
             }
         }
 
