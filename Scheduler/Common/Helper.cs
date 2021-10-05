@@ -58,7 +58,6 @@ namespace Scheduler
                 }
                 else
                 {
-
                     items.Add(result);
                 }
             }
@@ -82,13 +81,27 @@ namespace Scheduler
                     foundControl = (T)child;
                     break;
                 }
-                else
-                {
-                    foundControl = GetChildOfType<T>(child);
-                }
+
+                foundControl = GetChildOfType<T>(child);
             }
 
             return foundControl;
+        }
+
+        public static T GetParentOfType<T>(this DependencyObject element) where T : DependencyObject
+        {
+            if (element is null)
+            {
+                return default;
+            }
+
+            if (element is T)
+            {
+                return (T)element;
+            }
+
+            var foundParent = GetParentOfType<T>((element as FrameworkElement)?.TemplatedParent);
+            return foundParent;
         }
 
         public static double GetPixelsPerDpi(Visual visual)

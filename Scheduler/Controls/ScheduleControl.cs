@@ -1,18 +1,14 @@
-﻿using System;
+﻿using Scheduler.Types;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
+using System.Collections.Specialized;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Collections;
-using System.ComponentModel;
-using System.Collections.Specialized;
-using Scheduler.Types;
-using System.Threading;
 
 namespace Scheduler
 {
@@ -156,6 +152,23 @@ namespace Scheduler
             //groupValueLambda = CommonFunctions.GetPropertyValue<IAppointment, string>(nameof(IAppointment.Group));
         }
 
+        public override void OnApplyTemplate()
+        {
+            base.OnApplyTemplate();
+
+            contentSection = GetTemplateChild("PART_ContentSection") as Grid;
+            rulerGrid = GetTemplateChild("PART_RulerGrid") as RulerGrid;
+            schedulerScrollViewer = GetTemplateChild("PART_ScrollViewer") as ScrollViewer;
+            dateHeader = GetTemplateChild("PART_DateHeader") as DateHeader;
+            timerulerPanel = GetTemplateChild("PART_TimeRulerPanel") as TimeRulerPanel;
+            timeLineHeader = GetTemplateChild("PART_TimeLineHeader") as TimeLineHeader;
+            groupByContainer = GetTemplateChild("PART_GroupContainer") as ListBox;
+            headerSection = GetTemplateChild("PART_HeaderSection") as Grid;
+            //appointmentContainer = GetTemplateChild("PART_AppointmentContainer") as ListBox;
+            //appointmentContainer.Loaded += AppointmentContainer_Loaded;
+            HandleEvents();
+        }
+
         private async static void OnGroupByChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
@@ -210,33 +223,30 @@ namespace Scheduler
 
         private async ValueTask SyncAppointmentsInAppointmentsStore(IEnumerable<Appointment> newItems, IEnumerable<Appointment> oldItems)
         {
-            if (!oldItems.IsNullOrEmpty())
+            await Task.Run(() =>
             {
-                await Parallel.ForEachAsync(oldItems, new ParallelOptions { MaxDegreeOfParallelism = 1 },
-                (appointment, token) =>
+                if (!oldItems.IsNullOrEmpty())
                 {
-                    if (appointmentStore.TryGetValue(appointment.Group.Id, out GroupResource group))
+                    foreach (var appointment in oldItems)
                     {
-                        group.Appointments.Remove(appointment);
+                        if (appointmentStore.TryGetValue(appointment.Group.Id, out GroupResource group))
+                        {
+                            group.Appointments.Remove(appointment);
+                        }
                     }
+                }
 
-                    return ValueTask.CompletedTask;
-                });
-            }
-
-            if (!newItems.IsNullOrEmpty())
-            {
-                await Parallel.ForEachAsync(newItems, new ParallelOptions { MaxDegreeOfParallelism = 1 },
-                (appointment, token) =>
+                if (!newItems.IsNullOrEmpty())
                 {
-                    if (appointmentStore.TryGetValue(appointment.Group.Id, out GroupResource group))
+                    foreach (var appointment in newItems)
                     {
-                        group.Appointments.Add(appointment);
+                        if (appointmentStore.TryGetValue(appointment.Group.Id, out GroupResource group))
+                        {
+                            group.Appointments.Add(appointment);
+                        }
                     }
-
-                    return ValueTask.CompletedTask;
-                });
-            }
+                }
+            });
         }
 
         private async ValueTask ClearAppointmentsFromAppointmentStore()
@@ -250,26 +260,39 @@ namespace Scheduler
 
         private async ValueTask SyncGroupsInAppointmentStore(IEnumerable<GroupResource> newItems, IEnumerable<GroupResource> oldItems)
         {
-            if (!oldItems.IsNullOrEmpty())
+            await Task.Run(() =>
             {
-                await Parallel.ForEachAsync(oldItems, new ParallelOptions { MaxDegreeOfParallelism = 1 },
-                (group, token) =>
+                int lowerBound = appointmentStore.Any() ? appointmentStore.Count - 1 : 0;
+                if (!oldItems.IsNullOrEmpty())
                 {
-                    appointmentStore.Remove(group.Id);
-                    return ValueTask.CompletedTask;
-                });
-            }
+                    foreach (var group in oldItems)
+                    {
+                        appointmentStore.Remove(group.Id);
+                        if (lowerBound > group.Order)
+                        {
+                            lowerBound = group.Order;
+                        }
+                    }
+                }
 
-            if (!newItems.IsNullOrEmpty())
-            {
-                await Parallel.ForEachAsync(newItems, new ParallelOptions { MaxDegreeOfParallelism = 1 },
-                (group, token) =>
+                int oldUpperBound = appointmentStore.Any() ? appointmentStore.Count() - 1 : 0;
+                int upperBound = oldUpperBound;
+                if (!newItems.IsNullOrEmpty())
                 {
-                    appointmentStore.Add(group.Id, group);
-                    return ValueTask.CompletedTask;
-                });
-            }
+                    foreach (var group in newItems)
+                    {
+                        group.Order = ++upperBound;
+                        appointmentStore.Add(group.Id, group);
+                    }
+                }
+
+                for (int order = lowerBound; order < oldUpperBound; order++)
+                {
+                    appointmentStore.ElementAt(order).Value.Order = order;
+                }
+            });
         }
+
         private void OnGroupChanged(object sender, GroupResourceChangedEventArgs e)
         {
             var appointment = (Appointment)sender;
@@ -340,23 +363,6 @@ namespace Scheduler
         }
 
         ~ScheduleControl() => UnHandleEvents();
-
-        public override void OnApplyTemplate()
-        {
-            base.OnApplyTemplate();
-
-            contentSection = GetTemplateChild("PART_ContentSection") as Grid;
-            rulerGrid = GetTemplateChild("PART_RulerGrid") as RulerGrid;
-            schedulerScrollViewer = GetTemplateChild("PART_ScrollViewer") as ScrollViewer;
-            dateHeader = GetTemplateChild("PART_DateHeader") as DateHeader;
-            timerulerPanel = GetTemplateChild("PART_TimeRulerPanel") as TimeRulerPanel;
-            timeLineHeader = GetTemplateChild("PART_TimeLineHeader") as TimeLineHeader;
-            groupByContainer = GetTemplateChild("PART_GroupContainer") as ListBox;
-            headerSection = GetTemplateChild("PART_HeaderSection") as Grid;
-            //appointmentContainer = GetTemplateChild("PART_AppointmentContainer") as ListBox;
-            //appointmentContainer.Loaded += AppointmentContainer_Loaded;
-            HandleEvents();
-        }
 
         private void PrepareScheduleControl()
         {

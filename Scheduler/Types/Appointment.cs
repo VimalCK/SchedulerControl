@@ -10,8 +10,8 @@ namespace Scheduler.Types
         internal static event GroupResourceChangedEventHandler GroupResourceChanged;
         internal static event AppointmentTimeChangedEventHandler AppointmentTimeChanged;
 
-        private DateTime startDate;
-        private DateTime endDate;
+        private DateTime startDateTime;
+        private DateTime endDateTime;
         private string description;
         private GroupResource group;
 
@@ -30,13 +30,13 @@ namespace Scheduler.Types
             }
         }
 
-        public DateTime StartDate
+        public DateTime StartDateTime
         {
-            get => startDate;
+            get => startDateTime;
             set
             {
-                var oldValue = startDate;
-                startDate = value;
+                var oldValue = startDateTime;
+                startDateTime = value;
                 OnPropertyChanged();
                 if (oldValue != value)
                 {
@@ -45,13 +45,13 @@ namespace Scheduler.Types
             }
         }
 
-        public DateTime EndDate
+        public DateTime EndDateTime
         {
-            get => endDate;
+            get => endDateTime;
             set
             {
-                var oldValue = endDate;
-                endDate = value;
+                var oldValue = endDateTime;
+                endDateTime = value;
                 OnPropertyChanged();
                 if (oldValue != value)
                 {
@@ -70,10 +70,10 @@ namespace Scheduler.Types
             }
         }
 
-        public Appointment(DateTime startDate, DateTime endDate, GroupResource group)
+        public Appointment(DateTime startDateTime, DateTime endDateTime, GroupResource group)
         {
-            this.startDate = startDate;
-            this.endDate = endDate;
+            this.startDateTime = startDateTime;
+            this.endDateTime = endDateTime;
             this.group = group;
         }
 

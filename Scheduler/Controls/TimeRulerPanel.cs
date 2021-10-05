@@ -43,16 +43,11 @@ namespace Scheduler
                 if (parent.ViewPortArea.Width > 0)
                 {
                     var drawingContext = backingStore.Open();
-                    var hourGap = parent.ViewPortArea.Width / (int)parent.TimeLineZoom;
-                    var minuteGap = hourGap / 60;
-                    var noOfDays = (DateTime.Now.Date - parent.StartDate.Date).Days;
-
-                    var currentTimePosition = hourGap * (noOfDays * 24);
-                    currentTimePosition += ((hourGap * DateTime.Now.Hour) + (minuteGap * DateTime.Now.Minute));
-
+                    var minuteGap = (parent.ViewPortArea.Width / (int)parent.TimeLineZoom) / 60;
+                    var currentTimePosition = (DateTime.Now - parent.StartDate).TotalMinutes * minuteGap;
                     foreach (var ruler in parent.TimeLineProviders)
                     {
-                        var xAxis = currentTimePosition + (hourGap * ruler.Hour) + (minuteGap * ruler.Minute);
+                        var xAxis = currentTimePosition + (ruler.Time.TotalMinutes * minuteGap);
                         if (xAxis > 0 && xAxis <= ActualWidth)
                         {
                             var pen = new Pen(ruler.Color, ruler.Thickness);

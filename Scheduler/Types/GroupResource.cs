@@ -27,6 +27,8 @@ namespace Scheduler
             }
         }
 
+        internal int Order { get; set; }
+
         public abstract override string ToString();
         public abstract override int GetHashCode();
         public void OnPropertyChanged([CallerMemberName] string propertyName = "") =>

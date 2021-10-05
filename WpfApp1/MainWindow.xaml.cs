@@ -234,8 +234,8 @@ namespace WpfApp1
         {
             timelineProviders = new ObservableCollection<TimeRuler>();
             timelineProviders.Add(new TimeRuler { Color = Brushes.Red, Thickness = 2 });
-            timelineProviders.Add(new TimeRuler { Color = Brushes.Purple, Thickness = 1, Time = "-02:00" });
-            timelineProviders.Add(new TimeRuler { Color = Brushes.Green, Thickness = 2, Time = "23:00" });
+            timelineProviders.Add(new TimeRuler { Color = Brushes.Purple, Thickness = 1, Time = new TimeSpan(-2, 0, 0) });
+            timelineProviders.Add(new TimeRuler { Color = Brushes.Green, Thickness = 2, Time = new TimeSpan(23, 0, 0) });
         }
 
         private void RemoveTimeline(object obj)
@@ -245,7 +245,7 @@ namespace WpfApp1
 
         private void AddTimeline(object obj)
         {
-            TimelineProviders.Add(new TimeRuler { Color = Brushes.Brown, Thickness = 1.5, Time = $"0{TimelineProviders.Count}:00" });
+            TimelineProviders.Add(new TimeRuler { Color = Brushes.Brown, Thickness = 1.5, Time = new TimeSpan(TimelineProviders.Count, 0, 0) });
         }
 
         private void AddGroupHeaders(object obj)
