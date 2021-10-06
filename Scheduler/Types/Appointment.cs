@@ -77,6 +77,11 @@ namespace Scheduler.Types
             this.group = group;
         }
 
+        public override string ToString()
+        {
+            return Description;
+        }
+
         public void OnPropertyChanged([CallerMemberName] string propertyName = "") =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 

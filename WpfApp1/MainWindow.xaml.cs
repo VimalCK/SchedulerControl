@@ -200,19 +200,21 @@ namespace WpfApp1
 
         private void LoadAppointments()
         {
+            int index = 0;
             var flightLegs = new List<Appointment>();
             foreach (var group in GroupResources)
             {
                 var startDate = DateTime.Today;
-                var noOfFlights = new Random().Next(3, 8);
+                var endDate = DateTime.Today;
+                var noOfFlights = new Random().Next(4, 8);
                 var hour = new Random();
                 for (int i = 0; i <= noOfFlights; i++)
                 {
-                    startDate = startDate.AddHours(hour.Next(0, 3));
-                    var endDate = startDate.AddHours(hour.Next(1, 3));
+                    startDate = startDate.AddHours(hour.Next(1, 3));
+                    endDate = startDate.AddHours(hour.Next(2, 4));
                     flightLegs.Add(new Appointment(startDate, endDate, group)
                     {
-                        Description = $"FL-{group.ToString()}-{i + 1}"
+                        Description = $"FL-{group.ToString()}-{i + 1}\n {startDate.ToString("hh:mm")}-{endDate.ToString("hh:mm")}"
                     });
 
                     startDate = endDate;
@@ -224,6 +226,12 @@ namespace WpfApp1
                     {
                         startDate = startDate.AddHours(1);
                     }
+                }
+
+                index++;
+                if (index == 1)
+                {
+                    break;
                 }
             }
 

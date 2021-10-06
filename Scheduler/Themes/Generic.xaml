@@ -1,6 +1,21 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:Scheduler">
+    <Style TargetType="local:AppointmentItem">
+        <Setter Property="Background"
+                Value="Green"/>
+        <!--<Setter Property="FontSize"
+                Value="9"/>-->
+        <!--<Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:AppointmentItem">
+                    <Border Background="{TemplateBinding Background}">
+                        <ContentPresenter/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>-->
+    </Style>
 
     <Style x:Key="GroupHeaderStyle" 
            TargetType="ListBox">

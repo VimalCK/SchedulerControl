@@ -281,7 +281,7 @@ namespace Scheduler
                 {
                     foreach (var group in newItems)
                     {
-                        group.Order = ++upperBound;
+                        group.Order = upperBound++;
                         appointmentStore.Add(group.Id, group);
                     }
                 }

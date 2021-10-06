@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Scheduler.Types;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows;
@@ -32,12 +33,15 @@ namespace Scheduler
         }
         protected override void PrepareContainerForItemOverride(DependencyObject element, object item)
         {
-            if (element is AppointmentItem appointmentItem)
-            {
-                appointmentItem.Height = (int)parent.ExtendedMode;
-                //appointmentItem.Width = 100;
-                //appointmentItem.Background = Brushes.Red;
-            }
+            //int timelineZoom = (int)parent.TimeLineZoom;
+            //var minuteGap = (618 / timelineZoom);
+            //base.PrepareContainerForItemOverride(element, item);
+            //var control = element as Border;
+            //Canvas.SetLeft(control, 0);
+            //Canvas.SetTop(control, 0);
+            //control.Height = 30;
+            //control.Width = 2 * minuteGap;
+            //control.Background = Brushes.Green;
         }
     }
 }
