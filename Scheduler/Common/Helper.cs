@@ -65,27 +65,28 @@ namespace Scheduler
             return items.Count > 0;
         }
 
-        public static T GetChildOfType<T>(this DependencyObject control) where T : DependencyObject
+        public static T GetChildOfType<T>(this DependencyObject element) where T : DependencyObject
         {
-            if (control == null)
+            if (element == null)
             {
                 return default;
             }
 
-            T foundControl = default(T);
-            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(control); i++)
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(element); i++)
             {
-                var child = VisualTreeHelper.GetChild(control, i);
-                if (child is T)
+                var child = VisualTreeHelper.GetChild(element, i);
+                if (child is not T)
                 {
-                    foundControl = (T)child;
-                    break;
+                    child = GetChildOfType<T>(child);
                 }
 
-                foundControl = GetChildOfType<T>(child);
+                if (child is T)
+                {
+                    return (T)child;
+                }
             }
 
-            return foundControl;
+            return default;
         }
 
         public static T GetParentOfType<T>(this DependencyObject element) where T : DependencyObject

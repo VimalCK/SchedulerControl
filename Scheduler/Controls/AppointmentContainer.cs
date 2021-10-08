@@ -11,9 +11,13 @@ namespace Scheduler
     internal class AppointmentContainer : ListBox
     {
         private ScheduleControl parent;
-        public AppointmentContainer()
+        public AppointmentContainer() => this.DefaultStyleKey = typeof(ListBox);
+
+        public override void OnApplyTemplate()
         {
-            this.DefaultStyleKey = typeof(ListBox);
+            var border = (Border)GetVisualChild(0);
+            border.Padding = new(0);
+
         }
 
         protected override void OnInitialized(EventArgs e)
@@ -22,15 +26,8 @@ namespace Scheduler
             parent = (ScheduleControl)TemplatedParent;
         }
 
-        protected override DependencyObject GetContainerForItemOverride()
-        {
-            return new AppointmentItem();
-        }
-
-        protected override bool IsItemItsOwnContainerOverride(object item)
-        {
-            return item is AppointmentItem;
-        }
+        protected override DependencyObject GetContainerForItemOverride() => new AppointmentItem();
+        protected override bool IsItemItsOwnContainerOverride(object item) => item is AppointmentItem;
         protected override void PrepareContainerForItemOverride(DependencyObject element, object item)
         {
             //int timelineZoom = (int)parent.TimeLineZoom;

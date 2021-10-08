@@ -2,59 +2,63 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:Scheduler">
     <Style TargetType="local:AppointmentItem">
+        <Setter Property="SnapsToDevicePixels"
+                Value="True" />
         <Setter Property="Background"
-                Value="Green"/>
-        <!--<Setter Property="FontSize"
-                Value="9"/>-->
-        <!--<Setter Property="Template">
+                Value="Green" />
+        <Setter Property="FontSize"
+                Value="9" />
+        <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="local:AppointmentItem">
                     <Border Background="{TemplateBinding Background}">
-                        <ContentPresenter/>
+                        <ContentPresenter Content="{Binding}" />
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
-        </Setter>-->
+        </Setter>
     </Style>
 
-    <Style x:Key="GroupHeaderStyle" 
+    <Style x:Key="GroupHeaderStyle"
            TargetType="ListBox">
+        <Setter Property="SnapsToDevicePixels"
+                Value="True" />
         <Setter Property="Margin"
-                Value="0,-1,0,0"/>
-        <Setter Property="BorderBrush" 
-                Value="Transparent"/>
-        <Setter Property="BorderThickness" 
-                Value="1"/>
+                Value="0,-1,0,0" />
+        <Setter Property="BorderBrush"
+                Value="Transparent" />
+        <Setter Property="BorderThickness"
+                Value="1" />
         <Setter Property="ScrollViewer.HorizontalScrollBarVisibility"
-                Value="Hidden"/>
+                Value="Hidden" />
         <Setter Property="ScrollViewer.VerticalScrollBarVisibility"
-                Value="Hidden"/>
+                Value="Hidden" />
         <Setter Property="ScrollViewer.CanContentScroll"
-                Value="False"/>
+                Value="False" />
         <Setter Property="ItemContainerStyle">
             <Setter.Value>
                 <Style TargetType="ListBoxItem">
                     <Setter Property="Visibility"
-                            Value="{Binding Visibility, Mode=OneWay}"/>
+                            Value="{Binding Visibility, Mode=OneWay}" />
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="ListBoxItem">
                                 <ContentPresenter HorizontalAlignment="Stretch"
-                                                  VerticalAlignment="Stretch" 
+                                                  VerticalAlignment="Stretch"
                                                   Height="{Binding RelativeSource={RelativeSource 
                                                                    AncestorType=local:ScheduleControl}, 
                                                                    Path=ExtendedMode, 
-                                                                   Converter={local:EnumToValueConverter}}"/>
+                                                                   Converter={local:EnumToValueConverter}}" />
                             </ControlTemplate>
                         </Setter.Value>
                     </Setter>
                 </Style>
             </Setter.Value>
         </Setter>
-        <Setter Property="ItemTemplate" 
+        <Setter Property="ItemTemplate"
                 Value="{Binding RelativeSource={RelativeSource 
                                 AncestorType=local:ScheduleControl}, 
-                                Path=GroupHeaderContentTemplate}"/>
+                                Path=GroupHeaderContentTemplate}" />
         <Style.Triggers>
             <DataTrigger Binding="{Binding RelativeSource={RelativeSource 
                                            AncestorType=local:ScheduleControl}, 
@@ -63,8 +67,8 @@
                 <Setter Property="ItemTemplate">
                     <Setter.Value>
                         <DataTemplate>
-                            <Button HorizontalAlignment="Stretch" 
-                                    VerticalAlignment="Stretch" 
+                            <Button HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"
                                     Content="{Binding}" />
                         </DataTemplate>
                     </Setter.Value>
@@ -75,6 +79,8 @@
 
     <Style x:Key="ScheduleGridStyle"
            TargetType="Grid">
+        <Setter Property="SnapsToDevicePixels"
+                Value="True" />
         <Setter Property="VerticalAlignment"
                 Value="Top" />
         <Setter Property="HorizontalAlignment"
@@ -82,7 +88,7 @@
     </Style>
 
     <Style TargetType="{x:Type local:DateHeader}">
-        <Setter Property="UseLayoutRounding"
+        <Setter Property="SnapsToDevicePixels"
                 Value="True" />
         <Setter Property="SnapsToDevicePixels"
                 Value="True" />
@@ -91,37 +97,37 @@
     </Style>
 
     <Style TargetType="{x:Type local:ContentTransformLabel}">
-        <Setter Property="UseLayoutRounding"
-                Value="True"/>
+        <Setter Property="SnapsToDevicePixels"
+                Value="True" />
         <Setter Property="BorderThickness"
-                Value="1,1,0,1"/>
+                Value="1,1,0,1" />
         <Setter Property="Background"
-                Value="White"/>
+                Value="White" />
         <Setter Property="BorderBrush"
                 Value="{Binding RelativeSource={RelativeSource 
                                 AncestorType=local:ScheduleControl}, 
-                                Path=TimeLineColor}"/>
+                                Path=TimeLineColor}" />
     </Style>
 
     <Style TargetType="{x:Type local:TimeLineHeader}">
-        <Setter Property="UseLayoutRounding"
-                Value="True"/>
+        <Setter Property="SnapsToDevicePixels"
+                Value="True" />
     </Style>
 
     <Style TargetType="{x:Type local:RulerGrid}">
-        <Setter Property="UseLayoutRounding"
+        <Setter Property="SnapsToDevicePixels"
                 Value="True" />
     </Style>
 
     <Style TargetType="{x:Type local:TimeRulerPanel}">
-        <Setter Property="UseLayoutRounding"
+        <Setter Property="SnapsToDevicePixels"
                 Value="True" />
         <Setter Property="IsHitTestVisible"
                 Value="False" />
     </Style>
 
     <Style TargetType="{x:Type local:AppointmentContainer}">
-        <Setter Property="UseLayoutRounding"
+        <Setter Property="SnapsToDevicePixels"
                 Value="True" />
         <Setter Property="Background"
                 Value="Transparent" />
@@ -130,7 +136,7 @@
         <Setter Property="ItemsPanel">
             <Setter.Value>
                 <ItemsPanelTemplate>
-                    <local:AppointmentRenderingCanvas />
+                    <local:AppointmentRenderingCanvas x:Name="PART_AppointmentRenderingCanvas" />
                 </ItemsPanelTemplate>
             </Setter.Value>
         </Setter>
@@ -144,57 +150,56 @@
                 <ControlTemplate TargetType="{x:Type local:ScheduleControl}">
                     <Grid ClipToBounds="True">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" 
-                                              MinWidth="150"/>
+                            <ColumnDefinition Width="Auto"
+                                              MinWidth="150" />
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
 
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="50"/>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="50" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <ListBox x:Name="PART_GroupContainer" 
-                                 Grid.Row="1" 
+                        <ListBox x:Name="PART_GroupContainer"
+                                 Grid.Row="1"
                                  ItemsSource="{TemplateBinding GroupBy}"
                                  Style="{StaticResource GroupHeaderStyle}"
                                  BorderBrush="{Binding RelativeSource={RelativeSource 
                                                        AncestorType=local:ScheduleControl}, 
-                                                       Path=TimeLineColor}"/>
+                                                       Path=TimeLineColor}" />
 
-                        <Grid x:Name="PART_HeaderSection" 
-                              Grid.Column="1" 
+                        <Grid x:Name="PART_HeaderSection"
+                              Grid.Column="1"
                               HorizontalAlignment="Left"
                               VerticalAlignment="Stretch">
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
                             <local:DateHeader x:Name="PART_DateHeader" />
                             <local:TimeLineHeader x:Name="PART_TimeLineHeader"
-                                                  Grid.Row="1"
-                                                  Margin="0,0,0,1"/>
+                                                  Grid.Row="1" />
                         </Grid>
 
-                        <Border x:Name="PART_GroupHeaderTopGapMask" 
+                        <Border x:Name="PART_GroupHeaderTopGapMask"
                                 BorderBrush="{TemplateBinding TimeLineColor}"
-                                BorderThickness="0,0,1,.5"/>
+                                BorderThickness="0,0,1,.5" />
 
-                        <Border x:Name="PART_HeaderSectionRightGapMask" 
+                        <Border x:Name="PART_HeaderSectionRightGapMask"
                                 Grid.RowSpan="1"
                                 Grid.Column="1"
                                 Background="White"
                                 BorderBrush="{TemplateBinding TimeLineColor}"
                                 BorderThickness="1,0,0,0"
-                                HorizontalAlignment="Right"/>
+                                HorizontalAlignment="Right" />
 
-                        <Border x:Name="PART_HeaderSectionBottomGapMask" 
+                        <Border x:Name="PART_HeaderSectionBottomGapMask"
                                 BorderBrush="{TemplateBinding TimeLineColor}"
                                 BorderThickness="0,1,0,0"
                                 Background="White"
                                 Grid.Row="2"
-                                VerticalAlignment="Bottom"/>
+                                VerticalAlignment="Bottom" />
 
                         <ScrollViewer x:Name="PART_ScrollViewer"
                                       HorizontalScrollBarVisibility="Visible"

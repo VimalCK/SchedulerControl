@@ -1,67 +1,84 @@
 ﻿using Scheduler.Types;
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace Scheduler
 {
     internal sealed class AppointmentRenderingCanvas : Canvas
     {
         private ScheduleControl parent;
+        private bool inPorgress = false;
+        private readonly DispatcherTimer dispatcherTimer = new();
+        private Queue<AppointmentItem> queue = new();
+
         public AppointmentRenderingCanvas()
         {
             DefaultStyleKey = typeof(AppointmentRenderingCanvas);
             Appointment.AppointmentTimeChanged += OnAppointmentTimeChanged;
-            Loaded += AppointmentRenderingCanvasLoaded;
         }
 
         ~AppointmentRenderingCanvas()
         {
             Appointment.AppointmentTimeChanged -= OnAppointmentTimeChanged;
-            Loaded -= AppointmentRenderingCanvasLoaded;
+        }
+
+        internal void Process(IEnumerable<AppointmentItem> appointments, ScheduleControl appointmentContainer)
+        {
+            if (!appointments.IsNullOrEmpty())
+            {
+                foreach (var item in appointments)
+                {
+                    queue.Enqueue(item);
+                }
+
+                if (!inPorgress)
+                {
+                    dispatcherTimer.Tick += DispatcherTimerTick;
+                    dispatcherTimer.Start();
+                }
+            }
         }
 
         protected override void OnInitialized(EventArgs e) => parent = this.GetParentOfType<ScheduleControl>();
+        protected override void OnVisualChildrenChanged(DependencyObject visualAdded, DependencyObject visualRemoved)
+        {
+            if (IsLoaded)
+            {
+                var appointment = (AppointmentItem)visualAdded;
+                Process(new List<AppointmentItem>() { appointment }, parent);
+            }
+        }
+
+        private void DispatcherTimerTick(object sender, EventArgs e)
+        {
+            dispatcherTimer.Tick -= DispatcherTimerTick;
+            dispatcherTimer.Stop();
+            inPorgress = true;
+
+            while (queue.TryDequeue(out AppointmentItem appointment))
+            {
+                var dataContext = (Appointment)appointment.DataContext;
+                if (dataContext.StartDateTime.Date >= parent.StartDate.Date &&
+                    dataContext.EndDateTime.Date <= parent.EndDate.Date)
+                {
+                    int timelineZoom = (int)parent.TimeLineZoom;
+                    var minuteGap = (parent.ViewPortArea.Width / timelineZoom) / 60;
+                    appointment.Height = (int)parent.ExtendedMode;
+                    appointment.Width = (dataContext.EndDateTime - dataContext.StartDateTime).TotalMinutes * minuteGap;
+                    Canvas.SetLeft(appointment, (dataContext.StartDateTime - parent.StartDate.Date).TotalMinutes * minuteGap);
+                    Canvas.SetTop(appointment, appointment.Height * dataContext.Group.Order);
+                }
+            }
+
+            inPorgress = false;
+        }
 
         private void OnAppointmentTimeChanged(object sender, AppointmentTimeChangedEventArgs e)
         {
 
         }
-        private void AppointmentRenderingCanvasLoaded(object sender, RoutedEventArgs e)
-        {
-            foreach (AppointmentItem appointment in Children)
-            {
-                RenderAppointment(appointment);
-            }
-        }
-        protected override void OnVisualChildrenChanged(DependencyObject visualAdded, DependencyObject visualRemoved)
-        {
-            base.OnVisualChildrenChanged(visualAdded, visualRemoved);
-            if (IsLoaded)
-            {
-                var appointment = (AppointmentItem)visualAdded;
-                RenderAppointment(appointment);
-            }
-        }
-
-        private void RenderAppointment(AppointmentItem appointment)
-        {
-            var dataContext = (Appointment)appointment.DataContext;
-
-            if (dataContext.StartDateTime.Date >= parent.StartDate.Date && dataContext.EndDateTime.Date <= parent.EndDate.Date)
-            {
-                int timelineZoom = (int)parent.TimeLineZoom;
-                var minuteGap = Math.Round((parent.ViewPortArea.Width / timelineZoom) / 60, 2);
-                var left = (dataContext.StartDateTime - parent.StartDate.Date).TotalMinutes * minuteGap;
-                var top = dataContext.Group.Order * timelineZoom;
-                appointment.Height = (int)parent.ExtendedMode;
-                appointment.Width = (dataContext.EndDateTime - dataContext.StartDateTime).TotalMinutes * minuteGap;
-                Canvas.SetLeft(appointment, (int)left);
-                Canvas.SetTop(appointment, (int)top);
-            }
-        }
-
-
     }
 }

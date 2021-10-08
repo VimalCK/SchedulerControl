@@ -206,15 +206,15 @@ namespace WpfApp1
             {
                 var startDate = DateTime.Today;
                 var endDate = DateTime.Today;
-                var noOfFlights = new Random().Next(4, 8);
+                var noOfFlights = new Random().Next(4, 20);
                 var hour = new Random();
                 for (int i = 0; i <= noOfFlights; i++)
                 {
-                    startDate = startDate.AddHours(hour.Next(1, 3));
-                    endDate = startDate.AddHours(hour.Next(2, 4));
+                    startDate = startDate.AddHours(hour.Next(1, 8));
+                    endDate = startDate.AddHours(hour.Next(2, 5));
                     flightLegs.Add(new Appointment(startDate, endDate, group)
                     {
-                        Description = $"FL-{group.ToString()}-{i + 1}\n {startDate.ToString("hh:mm")}-{endDate.ToString("hh:mm")}"
+                        Description = $"FL-{group.ToString()}-{i + 1}\n {startDate.ToString("HH:mm")}-{endDate.ToString("HH:mm")}"
                     });
 
                     startDate = endDate;
@@ -229,10 +229,6 @@ namespace WpfApp1
                 }
 
                 index++;
-                if (index == 1)
-                {
-                    break;
-                }
             }
 
             Appointments = new ObservableCollection<Appointment>(flightLegs);

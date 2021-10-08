@@ -7,7 +7,7 @@ using System.Windows.Media;
 
 namespace Scheduler
 {
-    internal sealed class AppointmentItem : Border
+    internal sealed class AppointmentItem : ContentControl
     {
         public AppointmentItem()
         {
