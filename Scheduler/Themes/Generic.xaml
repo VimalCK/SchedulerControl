@@ -7,12 +7,22 @@
         <Setter Property="Background"
                 Value="Green" />
         <Setter Property="FontSize"
-                Value="9" />
+                Value="7" />
+        <Setter Property="Height"
+                Value="{Binding RenderedHeight, Mode=OneWay}" />
+        <Setter Property="Width"
+                Value="{Binding RenderedWidth, Mode=OneWay}" />
+        <Setter Property="Canvas.Left"
+                Value="{Binding Located.X, Mode=OneWay}" />
+        <Setter Property="Canvas.Top"
+                Value="{Binding Located.Y, Mode=OneWay}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="local:AppointmentItem">
                     <Border Background="{TemplateBinding Background}">
-                        <ContentPresenter Content="{Binding}" />
+                        <ContentPresenter Content="{Binding}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
                     </Border>
                 </ControlTemplate>
             </Setter.Value>

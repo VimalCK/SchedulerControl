@@ -1,5 +1,6 @@
 ﻿using Scheduler.Types;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -213,23 +214,29 @@ namespace Scheduler
                     newAppointments.CollectionChanged += control.AppointmentSourceCollectionChanged;
                 }
 
+                var appointments = (IList)e.NewValue;
                 await control.ClearAppointmentsFromAppointmentStore();
-                await control.SyncAppointmentsInAppointmentsStore((IEnumerable<Appointment>)e.NewValue, null);
-                //validate
-                // control.InvalidateChildControlsToReRender();
+                await control.SyncAppointmentsInAppointmentsStore(appointments, null);
+                await control.appointmentRenderingCanvas.RenderAsync(appointments.OfType<Appointment>().ToArray());
             }
         }
 
-        private async void AppointmentSourceCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) =>
-            await SyncAppointmentsInAppointmentsStore((IEnumerable<Appointment>)e.NewItems, (IEnumerable<Appointment>)e.OldItems);
+        private async void AppointmentSourceCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            await SyncAppointmentsInAppointmentsStore(e.NewItems, e.OldItems);
+            if (e.NewItems is not null)
+            {
+                await appointmentRenderingCanvas.RenderAsync((Appointment)e.NewItems[0]);
+            }
+        }
 
-        private async ValueTask SyncAppointmentsInAppointmentsStore(IEnumerable<Appointment> newItems, IEnumerable<Appointment> oldItems)
+        private async ValueTask SyncAppointmentsInAppointmentsStore(IList newItems, IList oldItems)
         {
             await Task.Run(() =>
             {
                 if (!oldItems.IsNullOrEmpty())
                 {
-                    foreach (var appointment in oldItems)
+                    foreach (Appointment appointment in oldItems)
                     {
                         if (appointmentStore.TryGetValue(appointment.Group.Id, out GroupResource group))
                         {
@@ -240,7 +247,7 @@ namespace Scheduler
 
                 if (!newItems.IsNullOrEmpty())
                 {
-                    foreach (var appointment in newItems)
+                    foreach (Appointment appointment in newItems)
                     {
                         if (appointmentStore.TryGetValue(appointment.Group.Id, out GroupResource group))
                         {
@@ -397,6 +404,7 @@ namespace Scheduler
             PrepareScheduleControl();
             InvalidateChildControlsArea();
             dateHeader.ReArrangeHeaders();
+            //appointmentRenderingCanvas.RenderAsync(AppointmentSource.ToArray());
         }
 
         private void GetScrollbarSize()

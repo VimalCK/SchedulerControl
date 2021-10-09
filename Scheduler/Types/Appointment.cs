@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows;
 
 namespace Scheduler.Types
 {
@@ -14,6 +15,39 @@ namespace Scheduler.Types
         private DateTime endDateTime;
         private string description;
         private GroupResource group;
+        private double renderedHeight;
+        private double renderedWidth;
+        private Point located;
+
+        public Point Located
+        {
+            get { return located; }
+            internal set
+            {
+                located = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public double RenderedWidth
+        {
+            get { return renderedWidth; }
+            internal set
+            {
+                renderedWidth = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public double RenderedHeight
+        {
+            get { return renderedHeight; }
+            internal set
+            {
+                renderedHeight = value;
+                OnPropertyChanged();
+            }
+        }
 
         public GroupResource Group
         {

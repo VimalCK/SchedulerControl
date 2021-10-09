@@ -12,15 +12,16 @@
         Width="800"
         WindowState="Maximized">
     <Window.DataContext>
-        <local:MainViewModel/>
+        <local:MainViewModel />
     </Window.DataContext>
     <Grid>
         <Grid.Resources>
             <DataTemplate x:Key="GroupHeaderTemplate">
-                <Border BorderBrush="AliceBlue" BorderThickness="1">
-                    <Button HorizontalAlignment="Stretch" 
-                            VerticalAlignment="Stretch" 
-                            Content="{Binding Header}"/>
+                <Border BorderBrush="AliceBlue"
+                        BorderThickness="1">
+                    <Button HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            Content="{Binding Header}" />
                 </Border>
             </DataTemplate>
         </Grid.Resources>
@@ -48,19 +49,30 @@
         </control:ScheduleControl>
         <WrapPanel Orientation="Horizontal"
                    Grid.Row="1">
-            <DatePicker x:Name="sdt" SelectedDate="{Binding StartDate}" />
-            <DatePicker x:Name="edt" SelectedDate="{Binding EndDate}" />
-            <Button Content="Timeline Color" Command="{Binding TimeLineColorCommand}" />
-            <Button Content="Extended Mode" Command="{Binding ExtendedModeCommand}"/>
-            <Button Content="TimeLine Zoom" Command="{Binding TimeLineZoomCommand}"/>
-            <Button Content="Add Group Headers" Command="{Binding AddGroupHeadersCommand}"/>
-            <Button Content="Remove Group Headers" Command="{Binding RemoveGroupHeadersCommand}"/>
-            <Button Content="Add TimeLine" Command="{Binding AddTimelineCommand}" />
-            <Button Content="Remove TimeLine" Command="{Binding RemoveTimelineCommand}"/>
+            <DatePicker x:Name="sdt"
+                        SelectedDate="{Binding StartDate}" />
+            <DatePicker x:Name="edt"
+                        SelectedDate="{Binding EndDate}" />
+            <Button Content="Timeline Color"
+                    Command="{Binding TimeLineColorCommand}" />
+            <Button Content="Extended Mode"
+                    Command="{Binding ExtendedModeCommand}" />
+            <Button Content="TimeLine Zoom"
+                    Command="{Binding TimeLineZoomCommand}" />
+            <Button Content="Add Group Headers"
+                    Command="{Binding AddGroupHeadersCommand}" />
+            <Button Content="Remove Group Headers"
+                    Command="{Binding RemoveGroupHeadersCommand}" />
+            <Button Content="Add TimeLine"
+                    Command="{Binding AddTimelineCommand}" />
+            <Button Content="Remove TimeLine"
+                    Command="{Binding RemoveTimelineCommand}" />
             <Button Content="Load Appointments"
-                    Click="Button_Click_5" />
+                    Command="{Binding LoadAppointmentsCommand}" />
             <Button Content="Add Appointment"
-                    Click="Button_Click_6" />
+                    Command="{Binding AddAppointmentCommand}" />
+            <Button Content="Remove Appointment"
+                    Command="{Binding RemoveAppointmentCommand}" />
         </WrapPanel>
     </Grid>
 </Window>

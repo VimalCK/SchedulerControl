@@ -99,6 +99,9 @@ namespace WpfApp1
         public ICommand RemoveGroupHeadersCommand { get; set; }
         public ICommand AddTimelineCommand { get; set; }
         public ICommand RemoveTimelineCommand { get; set; }
+        public ICommand LoadAppointmentsCommand { get; set; }
+        public ICommand AddAppointmentCommand { get; set; }
+        public ICommand RemoveAppointmentCommand { get; set; }
 
         public ObservableCollection<Appointment> Appointments
         {
@@ -193,12 +196,49 @@ namespace WpfApp1
             RemoveGroupHeadersCommand = new RelayCommand(RemoveGroupHeaders);
             AddTimelineCommand = new RelayCommand(AddTimeline);
             RemoveTimelineCommand = new RelayCommand(RemoveTimeline);
+            LoadAppointmentsCommand = new RelayCommand(LoadAppointments);
+            AddAppointmentCommand = new RelayCommand(AddAppointments);
+            RemoveAppointmentCommand = new RelayCommand(RemoveAppointments);
             LoadGroupResources();
             LoadTimelineProviders();
-            LoadAppointments();
+            LoadAppointments(null);
         }
 
-        private void LoadAppointments()
+        private void RemoveAppointments(object obj)
+        {
+            var appointments = Appointments.ToList();
+            foreach (var item in appointments)
+            {
+                Appointments.Remove(item);
+            }
+        }
+
+        private void AddAppointments(object obj)
+        {
+            int index = 0;
+            foreach (var group in GroupResources)
+            {
+                var startDate = DateTime.Today.AddDays(7);
+                var endDate = DateTime.Today.AddDays(7);
+                var noOfFlights = new Random().Next(4, 6);
+                var hour = new Random();
+                for (int i = 0; i <= noOfFlights; i++)
+                {
+                    startDate = startDate.AddHours(hour.Next(1, 3));
+                    endDate = startDate.AddHours(hour.Next(2, 4));
+                    Appointments.Add(new Appointment(startDate, endDate, group)
+                    {
+                        Description = $"FL-{group.ToString()}-{i + 1} : {startDate.ToString("HH:mm")}-{endDate.ToString("HH:mm")}"
+                    });
+
+                    startDate = endDate;
+                }
+
+                index++;
+            }
+        }
+
+        private void LoadAppointments(object value)
         {
             int index = 0;
             var flightLegs = new List<Appointment>();
@@ -214,7 +254,7 @@ namespace WpfApp1
                     endDate = startDate.AddHours(hour.Next(2, 5));
                     flightLegs.Add(new Appointment(startDate, endDate, group)
                     {
-                        Description = $"FL-{group.ToString()}-{i + 1}\n {startDate.ToString("HH:mm")}-{endDate.ToString("HH:mm")}"
+                        Description = $"FL-{group.ToString()}-{i + 1} : {startDate.ToString("HH:mm")}-{endDate.ToString("HH:mm")}"
                     });
 
                     startDate = endDate;
