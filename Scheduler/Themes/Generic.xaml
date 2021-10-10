@@ -50,6 +50,12 @@
                 <Style TargetType="ListBoxItem">
                     <Setter Property="Visibility"
                             Value="{Binding Visibility, Mode=OneWay}" />
+                    <Setter Property="Padding"
+                            Value="0" />
+                    <Setter Property="ContentTemplate"
+                            Value="{Binding RelativeSource={RelativeSource 
+                                            AncestorType=local:ScheduleControl}, 
+                                            Path=GroupHeaderContentTemplate}" />
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="ListBoxItem">
@@ -62,29 +68,26 @@
                             </ControlTemplate>
                         </Setter.Value>
                     </Setter>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource 
+                            AncestorType=local:ScheduleControl},
+                            Path=GroupHeaderContentTemplate}"
+                                     Value="{x:Null}">
+                            <Setter Property="ContentTemplate">
+                                <Setter.Value>
+                                    <DataTemplate>
+                                        <Button HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Stretch"
+                                                Content="{Binding Header}"
+                                                Margin="1" />
+                                    </DataTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                    </Style.Triggers>
                 </Style>
             </Setter.Value>
         </Setter>
-        <Setter Property="ItemTemplate"
-                Value="{Binding RelativeSource={RelativeSource 
-                                AncestorType=local:ScheduleControl}, 
-                                Path=GroupHeaderContentTemplate}" />
-        <Style.Triggers>
-            <DataTrigger Binding="{Binding RelativeSource={RelativeSource 
-                                           AncestorType=local:ScheduleControl}, 
-                                           Path=GroupHeaderContentTemplate}"
-                         Value="{x:Null}">
-                <Setter Property="ItemTemplate">
-                    <Setter.Value>
-                        <DataTemplate>
-                            <Button HorizontalAlignment="Stretch"
-                                    VerticalAlignment="Stretch"
-                                    Content="{Binding}" />
-                        </DataTemplate>
-                    </Setter.Value>
-                </Setter>
-            </DataTrigger>
-        </Style.Triggers>
     </Style>
 
     <Style x:Key="ScheduleGridStyle"

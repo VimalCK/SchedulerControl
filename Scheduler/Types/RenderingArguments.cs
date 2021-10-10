@@ -2,5 +2,5 @@
 
 namespace Scheduler.Types
 {
-    internal record RenderingArguments(DateTime SchedulerStartDate, DateTime SchedulerEndDate, int ExtendedMode, int TimelineZoom, double ViewPortAreaWidth);
+    internal record RenderingArguments(DateTime SchedulerStartDate = default, DateTime SchedulerEndDate = default, int ExtendedMode = default);
 }

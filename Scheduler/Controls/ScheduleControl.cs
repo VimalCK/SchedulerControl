@@ -339,7 +339,7 @@ namespace Scheduler
                     control.rulerGrid.Render();
                 }
          
-                await control.appointmentRenderingCanvas.RenderAsync(control.AppointmentSource.ToArray());
+                await control.appointmentRenderingCanvas.MeasureHeightAsync(control.AppointmentSource.ToArray());
             }
         }
 
@@ -349,7 +349,7 @@ namespace Scheduler
             if (control.IsLoaded)
             {
                 control.InvalidateChildControlsArea();
-                await control.appointmentRenderingCanvas.RenderAsync(control.AppointmentSource.ToArray());
+                await control.appointmentRenderingCanvas.MeasureWidthAsync(control.AppointmentSource.ToArray());
             }
         }
         private static void OnScheduleDateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

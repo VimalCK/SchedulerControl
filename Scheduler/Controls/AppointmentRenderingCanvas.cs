@@ -25,12 +25,18 @@ namespace Scheduler
         {
             if (!appointments.IsNullOrEmpty())
             {
-                RenderingArguments arg = new(parent.StartDate, parent.EndDate, (int)parent.ExtendedMode, (int)parent.TimeLineZoom, parent.ViewPortArea.Width);
+                RenderingArguments arg = new
+                    (
+                        parent.StartDate,
+                        parent.EndDate,
+                        (int)parent.ExtendedMode
+                    );
+
+                var minuteGap = (parent.ViewPortArea.Width / (int)parent.TimeLineZoom) / 60;
                 await Parallel.ForEachAsync(appointments, (appointment, token) =>
                 {
                     if (appointment is not null)
                     {
-                        var minuteGap = (arg.ViewPortAreaWidth / arg.TimelineZoom) / 60;
                         if (appointment.StartDateTime.Date >= arg.SchedulerStartDate.Date &&
                             appointment.EndDateTime.Date <= arg.SchedulerEndDate.Date)
                         {
@@ -43,6 +49,56 @@ namespace Scheduler
                             };
                         }
                     }
+
+                    return ValueTask.CompletedTask;
+                });
+            }
+        }
+
+        internal async ValueTask MeasureWidthAsync(params Appointment[] appointments)
+        {
+            if (!appointments.IsNullOrEmpty())
+            {
+                RenderingArguments arg = new
+                    (
+                        SchedulerStartDate: parent.StartDate,
+                        ExtendedMode: (int)parent.ExtendedMode
+                    );
+
+                var minuteGap = (parent.ViewPortArea.Width / (int)parent.TimeLineZoom) / 60;
+                await Parallel.ForEachAsync(appointments, (appointment, token) =>
+                {
+                    appointment.RenderedWidth = (appointment.EndDateTime - appointment.StartDateTime).TotalMinutes * minuteGap;
+                    appointment.Located = new Point
+                    {
+                        X = (appointment.StartDateTime - arg.SchedulerStartDate.Date).TotalMinutes * minuteGap,
+                        Y = arg.ExtendedMode * appointment.Group.Order
+                    };
+
+                    return ValueTask.CompletedTask;
+                });
+            }
+        }
+
+        internal async ValueTask MeasureHeightAsync(params Appointment[] appointments)
+        {
+            if (!appointments.IsNullOrEmpty())
+            {
+                RenderingArguments arg = new
+                    (
+                        SchedulerStartDate: parent.StartDate,
+                        ExtendedMode: (int)parent.ExtendedMode
+                    );
+
+                var minuteGap = (parent.ViewPortArea.Width / (int)parent.TimeLineZoom) / 60;
+                await Parallel.ForEachAsync(appointments, (appointment, token) =>
+                {
+                    appointment.RenderedHeight = arg.ExtendedMode / 2;
+                    appointment.Located = new Point
+                    {
+                        X = (appointment.StartDateTime - arg.SchedulerStartDate.Date).TotalMinutes * minuteGap,
+                        Y = arg.ExtendedMode * appointment.Group.Order
+                    };
 
                     return ValueTask.CompletedTask;
                 });

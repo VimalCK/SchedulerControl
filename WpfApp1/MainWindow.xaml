@@ -37,8 +37,8 @@
                                  TimeLineZoom="{Binding TimeLineZoom}"
                                  TimeLineColor="{Binding TimelineColor, Mode=TwoWay}"
                                  GroupHeader="Group"
-                                 GroupHeaderContentTemplate="{StaticResource GroupHeaderTemplate}"
                                  GroupBy="{Binding GroupResources}"
+                                 GroupHeaderContentTemplate="{StaticResource GroupHeaderTemplate}"
                                  TimeLineProviders="{Binding TimelineProviders}"
                                  AppointmentSource="{Binding Appointments}">
             <!--<control:ScheduleControl.TimeLineProviders>
