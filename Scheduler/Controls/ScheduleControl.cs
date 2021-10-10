@@ -329,21 +329,27 @@ namespace Scheduler
             }
         }
 
-        private static void OnExtendedModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private async static void OnExtendedModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
-            if (control.IsLoaded && !control.InvalidateChildControlsArea())
+            if (control.IsLoaded)
             {
-                control.rulerGrid.Render();
+                if (!control.InvalidateChildControlsArea())
+                {
+                    control.rulerGrid.Render();
+                }
+         
+                await control.appointmentRenderingCanvas.RenderAsync(control.AppointmentSource.ToArray());
             }
         }
 
-        private static void OnTimeLineZoomChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private async static void OnTimeLineZoomChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
             if (control.IsLoaded)
             {
                 control.InvalidateChildControlsArea();
+                await control.appointmentRenderingCanvas.RenderAsync(control.AppointmentSource.ToArray());
             }
         }
         private static void OnScheduleDateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
