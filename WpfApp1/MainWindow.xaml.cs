@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -102,6 +103,8 @@ namespace WpfApp1
         public ICommand LoadAppointmentsCommand { get; set; }
         public ICommand AddAppointmentCommand { get; set; }
         public ICommand RemoveAppointmentCommand { get; set; }
+        public ICommand ChangeAppointmentTimeCommand { get; set; }
+        public ICommand ChangeGroupCommand { get; set; }
 
         public ObservableCollection<Appointment> Appointments
         {
@@ -199,17 +202,47 @@ namespace WpfApp1
             LoadAppointmentsCommand = new RelayCommand(LoadAppointments);
             AddAppointmentCommand = new RelayCommand(AddAppointments);
             RemoveAppointmentCommand = new RelayCommand(RemoveAppointments);
+            ChangeAppointmentTimeCommand = new RelayCommand(ChangeAppointmentTime);
+            ChangeGroupCommand = new RelayCommand(ChangeGroup);
             LoadGroupResources();
             LoadTimelineProviders();
             LoadAppointments(null);
         }
 
-        private void RemoveAppointments(object obj)
+        private async void ChangeGroup(object obj)
+        {
+            bool value = false;
+            foreach (Appointment item in Appointments.Where(a => (a.Group as CustomGroup).Header == "AAA"))
+            {
+                item.Group = value ? GroupResources.OfType<CustomGroup>().First(g => g.Header == "AAH") :
+                    GroupResources.OfType<CustomGroup>().First(g => g.Header == "AAI");
+                value = !value;
+                await Task.Delay(50);
+            }
+        }
+
+        private void ChangeAppointmentTime(object obj)
+        {
+            foreach (var item in Appointments.ToList())
+            {
+                if ((item.EndDateTime - item.StartDateTime).Hours > 3)
+                {
+                    item.EndDateTime = item.EndDateTime.AddHours(-2);
+                }
+                if ((item.EndDateTime - item.StartDateTime).Hours < 3)
+                {
+                    item.EndDateTime = item.EndDateTime.AddHours(3);
+                }
+            }
+        }
+
+        private async void RemoveAppointments(object obj)
         {
             var appointments = Appointments.ToList();
-            foreach (var item in appointments)
+            foreach (var item in Appointments.ToList())
             {
                 Appointments.Remove(item);
+                await Task.Delay(50);
             }
         }
 
@@ -242,8 +275,13 @@ namespace WpfApp1
         {
             int index = 0;
             var flightLegs = new List<Appointment>();
-            foreach (var group in GroupResources)
+            foreach (CustomGroup group in GroupResources)
             {
+                if (group.Header == "AAH" || group.Header == "AAI")
+                {
+                    continue;
+                }
+
                 var startDate = DateTime.Today;
                 var endDate = DateTime.Today;
                 var noOfFlights = new Random().Next(4, 20);

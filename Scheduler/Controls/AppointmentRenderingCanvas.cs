@@ -28,17 +28,20 @@ namespace Scheduler
                 RenderingArguments arg = new(parent.StartDate, parent.EndDate, (int)parent.ExtendedMode, (int)parent.TimeLineZoom, parent.ViewPortArea.Width);
                 await Parallel.ForEachAsync(appointments, (appointment, token) =>
                 {
-                    var minuteGap = (arg.ViewPortAreaWidth / arg.TimelineZoom) / 60;
-                    if (appointment.StartDateTime.Date >= arg.SchedulerStartDate.Date &&
-                        appointment.EndDateTime.Date <= arg.SchedulerEndDate.Date)
+                    if (appointment is not null)
                     {
-                        appointment.RenderedHeight = arg.ExtendedMode / 2;
-                        appointment.RenderedWidth = (appointment.EndDateTime - appointment.StartDateTime).TotalMinutes * minuteGap;
-                        appointment.Located = new Point
+                        var minuteGap = (arg.ViewPortAreaWidth / arg.TimelineZoom) / 60;
+                        if (appointment.StartDateTime.Date >= arg.SchedulerStartDate.Date &&
+                            appointment.EndDateTime.Date <= arg.SchedulerEndDate.Date)
                         {
-                            X = (appointment.StartDateTime - arg.SchedulerStartDate.Date).TotalMinutes * minuteGap,
-                            Y = arg.ExtendedMode * appointment.Group.Order
-                        };
+                            appointment.RenderedHeight = arg.ExtendedMode / 2;
+                            appointment.RenderedWidth = (appointment.EndDateTime - appointment.StartDateTime).TotalMinutes * minuteGap;
+                            appointment.Located = new Point
+                            {
+                                X = (appointment.StartDateTime - arg.SchedulerStartDate.Date).TotalMinutes * minuteGap,
+                                Y = arg.ExtendedMode * appointment.Group.Order
+                            };
+                        }
                     }
 
                     return ValueTask.CompletedTask;
@@ -48,9 +51,9 @@ namespace Scheduler
 
         protected override void OnInitialized(EventArgs e) => parent = this.GetParentOfType<ScheduleControl>();
 
-        private void OnAppointmentTimeChanged(object sender, AppointmentTimeChangedEventArgs e)
+        private async void OnAppointmentTimeChanged(object sender, AppointmentTimeChangedEventArgs e)
         {
-
+            await RenderAsync((Appointment)sender);
         }
     }
 }

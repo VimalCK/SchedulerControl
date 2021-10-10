@@ -187,7 +187,7 @@ namespace Scheduler
 
 
             control.appointmentStore = new Dictionary<Guid, GroupResource>();
-            await control.SyncGroupsInAppointmentStore((IEnumerable<GroupResource>)e.NewValue, null);
+            await control.SyncGroupsInAppointmentStore(e.NewValue as IEnumerable, null);
             await control.SyncAppointmentsInAppointmentsStore(control.AppointmentSource, null);
             //validate
             // control.InvalidateChildControlsToReRender();
@@ -195,7 +195,7 @@ namespace Scheduler
 
         private async void GroupByCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            await SyncGroupsInAppointmentStore(e.NewItems?.OfType<GroupResource>().ToList(), e.OldItems?.OfType<GroupResource>().ToList());
+            await SyncGroupsInAppointmentStore(e.NewItems, e.OldItems);
             //validate
             //InvalidateChildControlsToReRender();
         }
@@ -214,20 +214,17 @@ namespace Scheduler
                     newAppointments.CollectionChanged += control.AppointmentSourceCollectionChanged;
                 }
 
-                var appointments = (IList)e.NewValue;
+                var appointments = (IList<Appointment>)e.NewValue;
                 await control.ClearAppointmentsFromAppointmentStore();
-                await control.SyncAppointmentsInAppointmentsStore(appointments, null);
-                await control.appointmentRenderingCanvas.RenderAsync(appointments.OfType<Appointment>().ToArray());
+                await control.SyncAppointmentsInAppointmentsStore(appointments.ToList(), null);
+                await control.appointmentRenderingCanvas.RenderAsync(appointments.ToArray());
             }
         }
 
         private async void AppointmentSourceCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             await SyncAppointmentsInAppointmentsStore(e.NewItems, e.OldItems);
-            if (e.NewItems is not null)
-            {
-                await appointmentRenderingCanvas.RenderAsync((Appointment)e.NewItems[0]);
-            }
+            await appointmentRenderingCanvas.RenderAsync(e.NewItems?[0] as Appointment);
         }
 
         private async ValueTask SyncAppointmentsInAppointmentsStore(IList newItems, IList oldItems)
@@ -267,14 +264,14 @@ namespace Scheduler
             });
         }
 
-        private async ValueTask SyncGroupsInAppointmentStore(IEnumerable<GroupResource> newItems, IEnumerable<GroupResource> oldItems)
+        private async ValueTask SyncGroupsInAppointmentStore(IEnumerable newItems, IEnumerable oldItems)
         {
             await Task.Run(() =>
             {
                 int lowerBound = appointmentStore.Any() ? appointmentStore.Count - 1 : 0;
                 if (!oldItems.IsNullOrEmpty())
                 {
-                    foreach (var group in oldItems)
+                    foreach (GroupResource group in oldItems)
                     {
                         appointmentStore.Remove(group.Id);
                         if (lowerBound > group.Order)
@@ -288,7 +285,7 @@ namespace Scheduler
                 int upperBound = oldUpperBound;
                 if (!newItems.IsNullOrEmpty())
                 {
-                    foreach (var group in newItems)
+                    foreach (GroupResource group in newItems)
                     {
                         group.Order = upperBound++;
                         appointmentStore.Add(group.Id, group);
@@ -300,6 +297,22 @@ namespace Scheduler
                     appointmentStore.ElementAt(order).Value.Order = order;
                 }
             });
+        }
+
+        private async void AppointmentGroupResourceChanged(object sender, GroupResourceChangedEventArgs e)
+        {
+            var appointment = (Appointment)sender;
+            if (appointmentStore.TryGetValue(e.OldValue.Id, out GroupResource oldGroup))
+            {
+                oldGroup.Appointments.Remove(appointment);
+            }
+
+            if (appointmentStore.TryGetValue(e.NewValue.Id, out GroupResource newGroup))
+            {
+                newGroup.Appointments.Add(appointment);
+            }
+
+            await appointmentRenderingCanvas.RenderAsync(appointment);
         }
 
         private void OnGroupChanged(object sender, GroupResourceChangedEventArgs e)
@@ -422,6 +435,7 @@ namespace Scheduler
             Loaded += ScheduleControlLoaded;
             SizeChanged += ScheduleControlSizeChanged;
             schedulerScrollViewer.ScrollChanged += ScrollViewerScrollChanged;
+            Appointment.GroupResourceChanged += AppointmentGroupResourceChanged;
         }
 
         private void UnHandleEvents()

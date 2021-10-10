@@ -73,6 +73,10 @@
                     Command="{Binding AddAppointmentCommand}" />
             <Button Content="Remove Appointment"
                     Command="{Binding RemoveAppointmentCommand}" />
+            <Button Content="Change Appointment Time"
+                    Command="{Binding ChangeAppointmentTimeCommand}" />
+            <Button Content="Change Group"
+                    Command="{Binding ChangeGroupCommand}" />
         </WrapPanel>
     </Grid>
 </Window>
