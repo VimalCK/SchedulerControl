@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace Scheduler.Types
@@ -18,6 +19,9 @@ namespace Scheduler.Types
         private double renderedHeight;
         private double renderedWidth;
         private Point located;
+        private Visibility visibility = Visibility.Visible;
+
+        public Visibility Visibility => visibility;
 
         public Point Located
         {
@@ -104,12 +108,15 @@ namespace Scheduler.Types
             }
         }
 
-        public Appointment(DateTime startDateTime, DateTime endDateTime, GroupResource group)
+        public Appointment(DateTime startDateTime, DateTime endDateTime, GroupResource group) =>
+            (this.startDateTime, this.endDateTime, this.group) = (startDateTime, endDateTime, group);
+
+        internal void SetVisibility(Visibility value)
         {
-            this.startDateTime = startDateTime;
-            this.endDateTime = endDateTime;
-            this.group = group;
+            visibility = value;
+            OnPropertyChanged(nameof(Visibility));
         }
+
 
         public override string ToString()
         {

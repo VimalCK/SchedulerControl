@@ -150,6 +150,7 @@ namespace Scheduler
         public ScheduleControl()
         {
             DefaultStyleKey = typeof(ScheduleControl);
+            appointmentStore = new();
             //groupValueLambda = CommonFunctions.GetPropertyValue<IAppointment, string>(nameof(IAppointment.Group));
         }
 
@@ -175,6 +176,7 @@ namespace Scheduler
         private async static void OnGroupByChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
+            control.appointmentStore.Clear();
             if (e.OldValue is INotifyCollectionChanged oldCollection)
             {
                 oldCollection.CollectionChanged -= control.GroupByCollectionChanged;
@@ -183,14 +185,16 @@ namespace Scheduler
             if (e.NewValue is INotifyCollectionChanged newCollection)
             {
                 newCollection.CollectionChanged += control.GroupByCollectionChanged;
+                if ((newCollection as IList).Count is not 0)
+                {
+                    await control.SyncGroupsInAppointmentStore(e.NewValue as IEnumerable, null);
+                    await control.SyncAppointmentsInAppointmentsStore(control.AppointmentSource, null);
+                }
             }
-
-
-            control.appointmentStore = new Dictionary<Guid, GroupResource>();
-            await control.SyncGroupsInAppointmentStore(e.NewValue as IEnumerable, null);
-            await control.SyncAppointmentsInAppointmentsStore(control.AppointmentSource, null);
-            //validate
-            // control.InvalidateChildControlsToReRender();
+            else
+            {
+                control.AppointmentSource.AsParallel().ForAll(a => a.SetVisibility(Visibility.Collapsed));
+            }
         }
 
         private async void GroupByCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -338,7 +342,7 @@ namespace Scheduler
                 {
                     control.rulerGrid.Render();
                 }
-         
+
                 await control.appointmentRenderingCanvas.MeasureHeightAsync(control.AppointmentSource.ToArray());
             }
         }

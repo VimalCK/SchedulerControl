@@ -273,6 +273,8 @@ namespace WpfApp1
 
         private void LoadAppointments(object value)
         {
+            if (groupResources.IsNullOrEmpty()) {  return; }
+
             int index = 0;
             var flightLegs = new List<Appointment>();
             foreach (CustomGroup group in GroupResources)
@@ -332,29 +334,30 @@ namespace WpfApp1
 
         private void AddGroupHeaders(object obj)
         {
-            var chars = new List<char>();
-            for (char c = 'A'; c <= 'Z'; c++)
-            {
-                chars.Add(c);
-            }
+            GroupResources = null;
+            //var chars = new List<char>();
+            //for (char c = 'A'; c <= 'Z'; c++)
+            //{
+            //    chars.Add(c);
+            //}
 
-            do
-            {
-                var random = new Random();
-                var group = new CustomGroup
-                {
-                    Header = chars[random.Next(0, 25)].ToString() +
-                    chars[random.Next(0, 25)].ToString() +
-                    chars[random.Next(0, 25)].ToString()
-                };
+            //do
+            //{
+            //    var random = new Random();
+            //    var group = new CustomGroup
+            //    {
+            //        Header = chars[random.Next(0, 25)].ToString() +
+            //        chars[random.Next(0, 25)].ToString() +
+            //        chars[random.Next(0, 25)].ToString()
+            //    };
 
-                if (!GroupResources.Contains(group))
-                {
-                    GroupResources.Add(group);
-                    break;
-                }
+            //    if (!GroupResources.Contains(group))
+            //    {
+            //        GroupResources.Add(group);
+            //        break;
+            //    }
 
-            } while (true);
+            //} while (true);
         }
 
         private void RemoveGroupHeaders(object obj)
