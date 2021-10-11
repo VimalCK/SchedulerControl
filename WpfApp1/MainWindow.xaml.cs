@@ -396,9 +396,13 @@ namespace WpfApp1
             {
                 TimelineColor = Brushes.Black;
             }
-            else
+            else if (TimelineColor == Brushes.Black)
             {
                 TimelineColor = Brushes.LightGray;
+            }
+            else
+            {
+                TimelineColor = Brushes.Red;
             }
         }
 
@@ -416,7 +420,7 @@ namespace WpfApp1
                     TimeLineZoom = Scheduler.TimeLineZoom.Twelve;
                     break;
                 default:
-                    TimeLineZoom = Scheduler.TimeLineZoom.TwentyFour;
+                    TimeLineZoom = Scheduler.TimeLineZoom.FortyEight;
                     break;
             }
         }
