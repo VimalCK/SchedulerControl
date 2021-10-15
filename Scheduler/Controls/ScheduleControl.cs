@@ -27,7 +27,7 @@ namespace Scheduler
     {
         public event ScrollChangedEventHandler ScrollChanged;
 
-        private Size requiredViewArea;
+        private Size requiredViewPortArea;
         private Size viewPortArea;
         private double scrollBarSpace;
         private Dictionary<Guid, GroupResource> appointmentStore;
@@ -144,7 +144,7 @@ namespace Scheduler
         }
 
         public Size ViewPortArea => viewPortArea;
-        public Size RequiredViewArea => requiredViewArea;
+        public Size RequiredViewPortArea => requiredViewPortArea;
         internal int ViewRange => (EndDate.Date - StartDate.Date).Days + 1;
 
         public ScheduleControl()
@@ -176,7 +176,7 @@ namespace Scheduler
         private async static void OnGroupByChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
-            control.appointmentStore.Clear();
+            control.appointmentStore = new();
             if (e.OldValue is INotifyCollectionChanged oldCollection)
             {
                 oldCollection.CollectionChanged -= control.GroupByCollectionChanged;
@@ -185,7 +185,7 @@ namespace Scheduler
             if (e.NewValue is INotifyCollectionChanged newCollection)
             {
                 newCollection.CollectionChanged += control.GroupByCollectionChanged;
-                if ((newCollection as IList).Count is not 0)
+                if (newCollection is IList list && list.Count is not 0)
                 {
                     await control.SyncGroupsInAppointmentStore(e.NewValue as IEnumerable, null);
                     await control.SyncAppointmentsInAppointmentsStore(control.AppointmentSource, null);
@@ -195,13 +195,15 @@ namespace Scheduler
             {
                 control.AppointmentSource.AsParallel().ForAll(a => a.SetVisibility(Visibility.Collapsed));
             }
+
+            control.InvalidateChildControlsArea();
         }
 
         private async void GroupByCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
+            // continue
             await SyncGroupsInAppointmentStore(e.NewItems, e.OldItems);
-            //validate
-            //InvalidateChildControlsToReRender();
+            InvalidateChildControlsArea();
         }
 
         private async static void OnAppointmentSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -233,9 +235,9 @@ namespace Scheduler
 
         private async ValueTask SyncAppointmentsInAppointmentsStore(IList newItems, IList oldItems)
         {
-            await Task.Run(() =>
+            if (!oldItems.IsNullOrEmpty())
             {
-                if (!oldItems.IsNullOrEmpty())
+                await Task.Run(() =>
                 {
                     foreach (Appointment appointment in oldItems)
                     {
@@ -244,19 +246,23 @@ namespace Scheduler
                             group.Appointments.Remove(appointment);
                         }
                     }
-                }
+                });
+            }
 
-                if (!newItems.IsNullOrEmpty())
+            if (!newItems.IsNullOrEmpty())
+            {
+                await Task.Run(() =>
                 {
                     foreach (Appointment appointment in newItems)
                     {
                         if (appointmentStore.TryGetValue(appointment.Group.Id, out GroupResource group))
                         {
+                            appointment.SetVisibility(Visibility.Visible);
                             group.Appointments.Add(appointment);
                         }
                     }
-                }
-            });
+                });
+            }
         }
 
         private async ValueTask ClearAppointmentsFromAppointmentStore()
@@ -270,11 +276,11 @@ namespace Scheduler
 
         private async ValueTask SyncGroupsInAppointmentStore(IEnumerable newItems, IEnumerable oldItems)
         {
-            await Task.Run(() =>
+            if (!oldItems.IsNullOrEmpty())
             {
-                int lowerBound = appointmentStore.Any() ? appointmentStore.Count - 1 : 0;
-                if (!oldItems.IsNullOrEmpty())
+                await Task.Run(() =>
                 {
+                    int lowerBound = appointmentStore.LastOrDefault().Value?.Order ?? 0;
                     foreach (GroupResource group in oldItems)
                     {
                         appointmentStore.Remove(group.Id);
@@ -283,24 +289,27 @@ namespace Scheduler
                             lowerBound = group.Order;
                         }
                     }
-                }
 
-                int oldUpperBound = appointmentStore.Any() ? appointmentStore.Count() - 1 : 0;
-                int upperBound = oldUpperBound;
-                if (!newItems.IsNullOrEmpty())
+                    int upperBound = appointmentStore.LastOrDefault().Value?.Order ?? 0;
+                    for (int order = lowerBound; order < upperBound; order++)
+                    {
+                        appointmentStore.ElementAt(order).Value.Order = order;
+                    }
+                });
+            }
+
+            if (!newItems.IsNullOrEmpty())
+            {
+                await Task.Run(() =>
                 {
+                    int upperBound = appointmentStore.LastOrDefault().Value?.Order ?? 0;
                     foreach (GroupResource group in newItems)
                     {
                         group.Order = upperBound++;
                         appointmentStore.Add(group.Id, group);
                     }
-                }
-
-                for (int order = lowerBound; order < oldUpperBound; order++)
-                {
-                    appointmentStore.ElementAt(order).Value.Order = order;
-                }
-            });
+                });
+            }
         }
 
         private async void AppointmentGroupResourceChanged(object sender, GroupResourceChangedEventArgs e)
@@ -472,12 +481,11 @@ namespace Scheduler
         {
             CalculateViewPortSize();
             CalculateRequiredAreaSize();
-            var width = requiredViewArea.Width * ViewRange;
-            if (!contentSection.Width.Equals(width) || !contentSection.Height.Equals(requiredViewArea.Height))
+            if (contentSection.RenderSize != requiredViewPortArea)
             {
-                contentSection.Width = width;
-                headerSection.Width = width;
-                contentSection.Height = requiredViewArea.Height;
+                contentSection.Width = requiredViewPortArea.Width;
+                headerSection.Width = requiredViewPortArea.Width;
+                contentSection.Height = requiredViewPortArea.Height;
                 return true;
             }
 
@@ -492,29 +500,21 @@ namespace Scheduler
 
         private void CalculateRequiredAreaSize()
         {
-            var requiredHeight = GroupBy.Count(g => g.Visibility == Visibility.Visible) * (int)this.ExtendedMode;
-            requiredViewArea.Height = requiredHeight < viewPortArea.Height ? viewPortArea.Height : requiredHeight;
-
-            switch (TimeLineZoom)
+            if (TimeLineZoom.Equals(TimeLineZoom.FortyEight) && ViewRange is 1)
             {
-                case TimeLineZoom.Twelve:
-                    requiredViewArea.Width = viewPortArea.Width * 2;
-                    break;
-                case TimeLineZoom.TwentyFour:
-                    requiredViewArea.Width = viewPortArea.Width;
-                    break;
-                case TimeLineZoom.FortyEight:
-                    if (ViewRange.Equals(1))
-                    {
-                        TimeLineZoom = TimeLineZoom.TwentyFour;
-                        break;
-                    }
-
-                    requiredViewArea.Width = viewPortArea.Width / 2;
-                    break;
-                default:
-                    break;
+                TimeLineZoom = TimeLineZoom.TwentyFour;
+                return;
             }
+
+            var requiredHeight = (GroupBy?.Count(g => g.Visibility == Visibility.Visible) ?? 0) * (int)this.ExtendedMode;
+            requiredViewPortArea.Height = requiredHeight < viewPortArea.Height ? viewPortArea.Height : requiredHeight;
+            requiredViewPortArea.Width = (TimeLineZoom switch
+            {
+                TimeLineZoom.Twelve => viewPortArea.Width * 2,
+                TimeLineZoom.TwentyFour => viewPortArea.Width,
+                TimeLineZoom.FortyEight => viewPortArea.Width / 2,
+                _ => throw new NotImplementedException(),
+            }) * ViewRange;
         }
     }
 }

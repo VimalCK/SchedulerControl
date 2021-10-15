@@ -27,7 +27,7 @@ namespace Scheduler
                 {
                     var drawingContext = backingStore.Open();
                     HorizontalGap = (int)control.ExtendedMode;
-                    HorizontalLines = (int)Math.Round(control.RequiredViewArea.Height / HorizontalGap);
+                    HorizontalLines = (int)Math.Round(control.RequiredViewPortArea.Height / HorizontalGap);
                     VerticalGap = control.ViewPortArea.Width / (int)control.TimeLineZoom;
                     RulerColor = control.TimeLineColor;
                     base.OnRender(drawingContext);

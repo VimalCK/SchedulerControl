@@ -71,9 +71,10 @@ namespace Scheduler
 
         private void ScrollViewerScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            var currentIndex = (short)(e.HorizontalOffset / templatedParent.RequiredViewArea.Width);
-            var change = (templatedParent.RequiredViewArea.Width + e.HorizontalOffset) - (templatedParent.RequiredViewArea.Width * (currentIndex + 1));
-            var previousIndex = (short)((e.HorizontalOffset - e.HorizontalChange) / templatedParent.RequiredViewArea.Width);
+            var width = templatedParent.RequiredViewPortArea.Width / templatedParent.ViewRange;
+            var currentIndex = (short)(e.HorizontalOffset / width);
+            var change = (width + e.HorizontalOffset) - (width * (currentIndex + 1));
+            var previousIndex = (short)((e.HorizontalOffset - e.HorizontalChange) / width);
             transform.X = -e.HorizontalOffset;
             if (change.Equals(0))
             {
@@ -100,7 +101,7 @@ namespace Scheduler
         }
 
         private bool RestrictTransition(ScrollChangedEventArgs e, double offsetChange) =>
-            e.HorizontalOffset.Equals(0) || offsetChange.Equals(0) || offsetChange > templatedParent.RequiredViewArea.Width;
+            e.HorizontalOffset.Equals(0) || offsetChange.Equals(0) || offsetChange > templatedParent.RequiredViewPortArea.Width/templatedParent.ViewRange;
 
 
         private void RemoveHandlers() => templatedParent.ScrollChanged -= ScrollViewerScrollChanged;

@@ -6,18 +6,10 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace WpfApp1
 {
@@ -35,47 +27,6 @@ namespace WpfApp1
         public MainWindow()
         {
             InitializeComponent();
-        }
-
-        private void Button_Click_3(object sender, RoutedEventArgs e)
-        {
-            // TimeLineProviders.Add(new TimeRuler { Color = Brushes.Blue, Time = "-01:00" });
-        }
-
-        private void Button_Click_4(object sender, RoutedEventArgs e)
-        {
-            //  TimeLineProviders.RemoveAt(TimeLineProviders.Count - 1);
-        }
-
-        private void Button_Click_5(object sender, RoutedEventArgs e)
-        {
-            var chars = new List<char>();
-            for (char c = 'A'; c <= 'Z'; c++)
-            {
-                chars.Add(c);
-            }
-
-            var list = new List<string>();
-            for (int index = 0, iteration = 0; index < 5; index++)
-            {
-                list.Add(chars[iteration].ToString() + chars[iteration].ToString() + chars[index].ToString());
-            }
-
-
-        }
-
-        private void Button_Click_6(object sender, RoutedEventArgs e)
-        {
-            //for (int i = 0; i < 20; i++)
-            //{
-            //    AppointmentSource.Add(new Appointment()
-            //    {
-            //        StartDate = DateTime.Now,
-            //        EndDate = DateTime.Now,
-            //        Description = "Appointment " + i,
-            //        Group = $"AAA{i}"
-            //    });
-            //}
         }
     }
 
@@ -96,8 +47,9 @@ namespace WpfApp1
         public ICommand ExtendedModeCommand { get; set; }
         public ICommand TimeLineZoomCommand { get; set; }
         public ICommand TimeLineColorCommand { get; set; }
-        public ICommand AddGroupHeadersCommand { get; set; }
-        public ICommand RemoveGroupHeadersCommand { get; set; }
+        public ICommand LoadClearGroupResourcesCommand { get; set; }
+        public ICommand AddGroupResourceCommand { get; set; }
+        public ICommand RemoveGroupResourceCommand { get; set; }
         public ICommand AddTimelineCommand { get; set; }
         public ICommand RemoveTimelineCommand { get; set; }
         public ICommand LoadAppointmentsCommand { get; set; }
@@ -191,12 +143,14 @@ namespace WpfApp1
         {
             StartDate = DateTime.Now;
             EndDate = DateTime.Now.AddDays(7);
+            TimeLineZoom = TimeLineZoom.FortyEight;
 
             ExtendedModeCommand = new RelayCommand(ChangeExtendedMode);
             TimeLineZoomCommand = new RelayCommand(ChangeTimeLine);
             TimeLineColorCommand = new RelayCommand(ChangeTimeLineColor);
-            AddGroupHeadersCommand = new RelayCommand(AddGroupHeaders);
-            RemoveGroupHeadersCommand = new RelayCommand(RemoveGroupHeaders);
+            LoadClearGroupResourcesCommand = new RelayCommand(LoadClearGroupResources);
+            AddGroupResourceCommand = new RelayCommand(AddGroupResource);
+            RemoveGroupResourceCommand = new RelayCommand(RemoveGroupResource);
             AddTimelineCommand = new RelayCommand(AddTimeline);
             RemoveTimelineCommand = new RelayCommand(RemoveTimeline);
             LoadAppointmentsCommand = new RelayCommand(LoadAppointments);
@@ -204,9 +158,8 @@ namespace WpfApp1
             RemoveAppointmentCommand = new RelayCommand(RemoveAppointments);
             ChangeAppointmentTimeCommand = new RelayCommand(ChangeAppointmentTime);
             ChangeGroupCommand = new RelayCommand(ChangeGroup);
-            LoadGroupResources();
+            LoadClearGroupResources(null);
             LoadTimelineProviders();
-            LoadAppointments(null);
         }
 
         private async void ChangeGroup(object obj)
@@ -273,7 +226,7 @@ namespace WpfApp1
 
         private void LoadAppointments(object value)
         {
-            if (groupResources.IsNullOrEmpty()) {  return; }
+            if (groupResources.IsNullOrEmpty()) { return; }
 
             int index = 0;
             var flightLegs = new List<Appointment>();
@@ -332,40 +285,9 @@ namespace WpfApp1
             TimelineProviders.Add(new TimeRuler { Color = Brushes.Brown, Thickness = 1.5, Time = new TimeSpan(TimelineProviders.Count, 0, 0) });
         }
 
-        private void AddGroupHeaders(object obj)
-        {
-            GroupResources = null;
-            //var chars = new List<char>();
-            //for (char c = 'A'; c <= 'Z'; c++)
-            //{
-            //    chars.Add(c);
-            //}
 
-            //do
-            //{
-            //    var random = new Random();
-            //    var group = new CustomGroup
-            //    {
-            //        Header = chars[random.Next(0, 25)].ToString() +
-            //        chars[random.Next(0, 25)].ToString() +
-            //        chars[random.Next(0, 25)].ToString()
-            //    };
 
-            //    if (!GroupResources.Contains(group))
-            //    {
-            //        GroupResources.Add(group);
-            //        break;
-            //    }
-
-            //} while (true);
-        }
-
-        private void RemoveGroupHeaders(object obj)
-        {
-            groupResources.RemoveAt(new Random().Next(0, GroupResources.Count - 1));
-        }
-
-        private void LoadGroupResources()
+        private void AddGroupResource(object obj)
         {
             var chars = new List<char>();
             for (char c = 'A'; c <= 'Z'; c++)
@@ -373,59 +295,89 @@ namespace WpfApp1
                 chars.Add(c);
             }
 
-            var list = new List<GroupResource>();
-            for (int index = 0, iteration = 0; index < 26; index++)
+            do
             {
-                list.Add(new CustomGroup
+                var random = new Random();
+                var group = new CustomGroup
                 {
-                    Header = chars[iteration].ToString() + chars[iteration].ToString() + chars[index].ToString()
-                });
-            }
+                    Header = chars[random.Next(0, 25)].ToString() +
+                    chars[random.Next(0, 25)].ToString() +
+                    chars[random.Next(0, 25)].ToString()
+                };
 
-            GroupResources = new ObservableCollection<GroupResource>(list);
+                if (!GroupResources.Contains(group))
+                {
+                    GroupResources.Insert(random.Next(0, GroupResources.Count - 1), group);
+                    break;
+                }
+
+            } while (true);
+        }
+
+        private void RemoveGroupResource(object obj)
+        {
+            groupResources.RemoveAt(new Random().Next(0, GroupResources.Count - 1));
+        }
+
+        private void LoadClearGroupResources(object value)
+        {
+            if (GroupResources is null)
+            {
+                var chars = new List<char>();
+                for (char c = 'A'; c <= 'Z'; c++)
+                {
+                    chars.Add(c);
+                }
+
+                var list = new List<GroupResource>();
+                for (int index = 0, iteration = 0; index < 26; index++)
+                {
+                    list.Add(new CustomGroup
+                    {
+                        Header = "SPR" + chars[iteration].ToString() + chars[index].ToString()
+                    });
+
+                    if (index == 25)
+                    {
+                        index = 0;
+                        iteration++;
+                        if (iteration == 10)
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                GroupResources = new ObservableCollection<GroupResource>(list);
+                LoadAppointments(value);
+            }
+            else
+            {
+                GroupResources = null;
+            }
         }
 
         private void ChangeTimeLineColor(object obj)
         {
-            if (TimelineColor == Brushes.LightGray)
+            TimelineColor = timelineColor switch
             {
-                TimelineColor = Brushes.Red;
-            }
-            else if (TimelineColor == Brushes.Red)
-            {
-                TimelineColor = Brushes.Green;
-            }
-            else if (TimelineColor == Brushes.Green)
-            {
-                TimelineColor = Brushes.Black;
-            }
-            else if (TimelineColor == Brushes.Black)
-            {
-                TimelineColor = Brushes.LightGray;
-            }
-            else
-            {
-                TimelineColor = Brushes.Red;
-            }
+                var b when b == Brushes.LightGray => Brushes.Red,
+                var b when b == Brushes.Red => Brushes.Green,
+                var b when b == Brushes.Green => Brushes.Black,
+                var b when b == Brushes.Black => Brushes.LightGray,
+                _ => Brushes.Red,
+            };
         }
 
         private void ChangeTimeLine(object obj)
         {
-            switch (TimeLineZoom)
+            TimeLineZoom = timeLineZoom switch
             {
-                case Scheduler.TimeLineZoom.Twelve:
-                    TimeLineZoom = Scheduler.TimeLineZoom.TwentyFour;
-                    break;
-                case Scheduler.TimeLineZoom.TwentyFour:
-                    TimeLineZoom = Scheduler.TimeLineZoom.FortyEight;
-                    break;
-                case Scheduler.TimeLineZoom.FortyEight:
-                    TimeLineZoom = Scheduler.TimeLineZoom.Twelve;
-                    break;
-                default:
-                    TimeLineZoom = Scheduler.TimeLineZoom.FortyEight;
-                    break;
-            }
+                Scheduler.TimeLineZoom.Twelve => Scheduler.TimeLineZoom.TwentyFour,
+                Scheduler.TimeLineZoom.TwentyFour => Scheduler.TimeLineZoom.FortyEight,
+                Scheduler.TimeLineZoom.FortyEight => Scheduler.TimeLineZoom.Twelve,
+                _ => throw new Exception(),
+            };
         }
 
         private void ChangeExtendedMode(object obj)
