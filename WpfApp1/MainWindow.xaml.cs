@@ -232,7 +232,7 @@ namespace WpfApp1
             var flightLegs = new List<Appointment>();
             foreach (CustomGroup group in GroupResources)
             {
-                if (group.Header == "AAH" || group.Header == "AAI")
+                if (group.Header == "SPRAA" || group.Header == "SPRAE")
                 {
                     continue;
                 }
@@ -247,7 +247,7 @@ namespace WpfApp1
                     endDate = startDate.AddHours(hour.Next(2, 5));
                     flightLegs.Add(new Appointment(startDate, endDate, group)
                     {
-                        Description = $"FL-{group.ToString()}-{i + 1} : {startDate.ToString("HH:mm")}-{endDate.ToString("HH:mm")}"
+                        Description = $"FL-{group.ToString()}-{startDate.Day} : {startDate.ToString("HH:mm")}-{endDate.ToString("HH:mm")}"
                     });
 
                     startDate = endDate;

@@ -17,7 +17,7 @@
         <Setter Property="Canvas.Top"
                 Value="{Binding Located.Y, Mode=OneWay}" />
         <Setter Property="Visibility"
-                Value="{Binding Visibility}" />
+                Value="{Binding Visibility, Mode=OneWay}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="local:AppointmentItem">
