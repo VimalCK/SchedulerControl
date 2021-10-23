@@ -19,7 +19,7 @@ namespace Scheduler.Types
         private double renderedHeight;
         private double renderedWidth;
         private Point located;
-        private Visibility visibility = Visibility.Visible;
+        private Visibility visibility = Visibility.Collapsed;
 
         public Visibility Visibility => visibility;
 
@@ -111,9 +111,15 @@ namespace Scheduler.Types
         public Appointment(DateTime startDateTime, DateTime endDateTime, GroupResource group) =>
             (this.startDateTime, this.endDateTime, this.group) = (startDateTime, endDateTime, group);
 
-        internal void SetVisibility(Visibility value)
+        internal void Show()
         {
-            visibility = value;
+            visibility = Visibility.Visible;
+            OnPropertyChanged(nameof(Visibility));
+        }
+
+        internal void Hide()
+        {
+            visibility = Visibility.Collapsed;
             OnPropertyChanged(nameof(Visibility));
         }
 

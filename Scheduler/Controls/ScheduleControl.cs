@@ -30,7 +30,7 @@ namespace Scheduler
         private Size requiredViewPortArea;
         private Size viewPortArea;
         private double scrollBarSpace;
-        private Dictionary<Guid, GroupResource> appointmentStore;
+        private OrderedDictionary<Guid, GroupResource> appointmentStore;
         private ListBox groupByContainer;
         //private Func<IAppointment, string> groupValueLambda;
         private Grid contentSection;
@@ -176,159 +176,81 @@ namespace Scheduler
         private async static void OnGroupByChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
-            control.appointmentStore = new();
-            if (e.OldValue is INotifyCollectionChanged oldCollection)
+            if (control.IsLoaded)
             {
-                oldCollection.CollectionChanged -= control.GroupByCollectionChanged;
-            }
+                control.InvalidateChildControlsArea();
+                control.appointmentStore = new();
+                control.AppointmentSource.AsParallel().ForAll(appointment => appointment.Hide());
 
-            if (e.NewValue is INotifyCollectionChanged newCollection)
-            {
-                newCollection.CollectionChanged += control.GroupByCollectionChanged;
-                if (newCollection is IList list && list.Count is not 0)
+                if (e.OldValue is INotifyCollectionChanged oldCollection)
                 {
-                    await control.SyncGroupsInAppointmentStore(e.NewValue as IEnumerable, null);
-                    await control.SyncAppointmentsInAppointmentsStore(control.AppointmentSource, null);
+                    oldCollection.CollectionChanged -= control.GroupByCollectionChanged;
+                }
+
+                if (e.NewValue is INotifyCollectionChanged newCollection)
+                {
+                    newCollection.CollectionChanged += control.GroupByCollectionChanged;
+                    if (newCollection is IList list && list.Count is not 0)
+                    {
+                        await control.SyncGroupsInAppointmentStore(e.NewValue as IEnumerable);
+                        await control.SyncAndRenderAppointments();
+                    }
                 }
             }
-            else
-            {
-                control.AppointmentSource.AsParallel().ForAll(a => a.SetVisibility(Visibility.Collapsed));
-            }
-
-            control.InvalidateChildControlsArea();
         }
 
         private async void GroupByCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            // continue
-            await SyncGroupsInAppointmentStore(e.NewItems, e.OldItems);
-            InvalidateChildControlsArea();
+            if (IsLoaded)
+            {
+                InvalidateChildControlsArea();
+                if (e.Action.Equals(NotifyCollectionChangedAction.Add))
+                {
+                    var groupResource = (GroupResource)e.NewItems[0];
+                    appointmentStore.Insert(e.NewStartingIndex, groupResource.Id, groupResource);
+                    await SyncAppointmentsInAppointmentsStore(AppointmentSource.Where(a => a.Group.Id == groupResource.Id));
+                    await appointmentRenderingCanvas.RenderAsync(AppointmentSource.Where(a => a.Group.Order >= e.NewStartingIndex));
+                }
+                else if (e.Action.Equals(NotifyCollectionChangedAction.Remove))
+                {
+                    var groupResource = (GroupResource)e.OldItems[0];
+                    groupResource.Appointments.AsParallel().ForAll(appointment => appointment.Hide());
+                    appointmentStore.RemoveAt(e.OldStartingIndex);
+                }
+            }
         }
 
         private async static void OnAppointmentSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is ScheduleControl control)
+            var control = (ScheduleControl)d;
+            if (control.IsLoaded)
             {
-                if (e.OldValue is ObservableCollection<Appointment> oldAppointments)
+                if (e.OldValue is INotifyCollectionChanged oldAppointments)
                 {
                     oldAppointments.CollectionChanged -= control.AppointmentSourceCollectionChanged;
+                    await control.ClearAppointmentsFromAppointmentStore();
                 }
 
-                if (e.NewValue is ObservableCollection<Appointment> newAppointments)
+                if (e.NewValue is INotifyCollectionChanged newAppointments)
                 {
                     newAppointments.CollectionChanged += control.AppointmentSourceCollectionChanged;
+                    await control.SyncAndRenderAppointments();
                 }
-
-                var appointments = (IList<Appointment>)e.NewValue;
-                await control.ClearAppointmentsFromAppointmentStore();
-                await control.SyncAppointmentsInAppointmentsStore(appointments.ToList(), null);
-                await control.appointmentRenderingCanvas.RenderAsync(appointments.ToArray());
             }
         }
 
         private async void AppointmentSourceCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            await SyncAppointmentsInAppointmentsStore(e.NewItems, e.OldItems);
-            await appointmentRenderingCanvas.RenderAsync(e.NewItems?[0] as Appointment);
-        }
-
-        private async ValueTask SyncAppointmentsInAppointmentsStore(IList newItems, IList oldItems)
-        {
-            if (!oldItems.IsNullOrEmpty())
+            if (IsLoaded)
             {
-                await Task.Run(() =>
-                {
-                    foreach (Appointment appointment in oldItems)
-                    {
-                        if (appointmentStore.TryGetValue(appointment.Group.Id, out GroupResource group))
-                        {
-                            group.Appointments.Remove(appointment);
-                        }
-                    }
-                });
-            }
-
-            if (!newItems.IsNullOrEmpty())
-            {
-                await Task.Run(() =>
-                {
-                    foreach (Appointment appointment in newItems)
-                    {
-                        if (appointmentStore.TryGetValue(appointment.Group.Id, out GroupResource group))
-                        {
-                            appointment.SetVisibility(Visibility.Visible);
-                            group.Appointments.Add(appointment);
-                        }
-                    }
-                });
-            }
-        }
-
-        private async ValueTask ClearAppointmentsFromAppointmentStore()
-        {
-            await Parallel.ForEachAsync(appointmentStore, (group, token) =>
-            {
-                group.Value?.Appointments.Clear();
-                return ValueTask.CompletedTask;
-            });
-        }
-
-        private async ValueTask SyncGroupsInAppointmentStore(IEnumerable newItems, IEnumerable oldItems)
-        {
-            if (!oldItems.IsNullOrEmpty())
-            {
-                await Task.Run(() =>
-                {
-                    int lowerBound = appointmentStore.LastOrDefault().Value?.Order ?? 0;
-                    foreach (GroupResource group in oldItems)
-                    {
-                        appointmentStore.Remove(group.Id);
-                        if (lowerBound > group.Order)
-                        {
-                            lowerBound = group.Order;
-                        }
-                    }
-
-                    int upperBound = appointmentStore.LastOrDefault().Value?.Order ?? 0;
-                    for (int order = lowerBound; order < upperBound; order++)
-                    {
-                        appointmentStore.ElementAt(order).Value.Order = order;
-                    }
-                });
-            }
-
-            if (!newItems.IsNullOrEmpty())
-            {
-                await Task.Run(() =>
-                {
-                    int upperBound = appointmentStore.LastOrDefault().Value?.Order ?? 0;
-                    foreach (GroupResource group in newItems)
-                    {
-                        group.Order = upperBound++;
-                        appointmentStore.Add(group.Id, group);
-                    }
-                });
+                var newItems = (IEnumerable<Appointment>)e.NewItems;
+                await ClearAppointmentsFromAppointmentStore((IEnumerable<Appointment>)e.OldItems);
+                await SyncAppointmentsInAppointmentsStore(newItems);
+                await appointmentRenderingCanvas.RenderAsync(newItems);
             }
         }
 
         private async void AppointmentGroupResourceChanged(object sender, GroupResourceChangedEventArgs e)
-        {
-            var appointment = (Appointment)sender;
-            if (appointmentStore.TryGetValue(e.OldValue.Id, out GroupResource oldGroup))
-            {
-                oldGroup.Appointments.Remove(appointment);
-            }
-
-            if (appointmentStore.TryGetValue(e.NewValue.Id, out GroupResource newGroup))
-            {
-                newGroup.Appointments.Add(appointment);
-            }
-
-            await appointmentRenderingCanvas.RenderAsync(appointment);
-        }
-
-        private void OnGroupChanged(object sender, GroupResourceChangedEventArgs e)
         {
             var appointment = (Appointment)sender;
             if (e.OldValue is not null && appointmentStore.TryGetValue(e.OldValue.Id, out GroupResource group))
@@ -336,23 +258,26 @@ namespace Scheduler
                 group.Appointments.Remove(appointment);
             }
 
-            if (e.NewValue is not null && appointmentStore.TryGetValue(e.NewValue.Id, out group))
+            if (e.NewValue is null)
+            {
+                appointment.Hide();
+            }
+            else if (appointmentStore.TryGetValue(e.NewValue.Id, out group))
             {
                 group.Appointments.Add(appointment);
+                await appointmentRenderingCanvas.MeasureHeightAsync(new[] { appointment });
             }
+
         }
 
         private async static void OnExtendedModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
-            if (control.IsLoaded)
+            if (control.IsLoaded && control.InvalidateChildControlsArea())
             {
-                if (!control.InvalidateChildControlsArea())
-                {
-                    control.rulerGrid.Render();
-                }
-
-                await control.appointmentRenderingCanvas.MeasureHeightAsync(control.AppointmentSource.ToArray());
+                control.rulerGrid.Render();
+                await control.appointmentRenderingCanvas.MeasureHeightAsync(control.AppointmentSource);
+                Console.WriteLine("sdf");
             }
         }
 
@@ -362,9 +287,10 @@ namespace Scheduler
             if (control.IsLoaded)
             {
                 control.InvalidateChildControlsArea();
-                await control.appointmentRenderingCanvas.MeasureWidthAsync(control.AppointmentSource.ToArray());
+                await control.appointmentRenderingCanvas.MeasureWidthAsync(control.AppointmentSource);
             }
         }
+
         private static void OnScheduleDateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
@@ -378,17 +304,19 @@ namespace Scheduler
         private static void OnTimeLineProvidersChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
-            if (e.OldValue is INotifyCollectionChanged oldCollection)
+            if (control.IsLoaded)
             {
-                oldCollection.CollectionChanged -= control.TimeLineProvidersCollectionChanged;
-            }
+                if (e.OldValue is INotifyCollectionChanged oldCollection)
+                {
+                    oldCollection.CollectionChanged -= control.TimeLineProvidersCollectionChanged;
+                }
 
-            if (e.NewValue is INotifyCollectionChanged newCollection)
-            {
-                newCollection.CollectionChanged += control.TimeLineProvidersCollectionChanged;
+                if (e.NewValue is INotifyCollectionChanged newCollection)
+                {
+                    newCollection.CollectionChanged += control.TimeLineProvidersCollectionChanged;
+                    control.timerulerPanel.Render();
+                }
             }
-
-            control.timerulerPanel?.Render();
         }
 
         private void TimeLineProvidersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) => timerulerPanel?.Render();
@@ -398,27 +326,19 @@ namespace Scheduler
             var control = (ScheduleControl)d;
             if (control.IsLoaded)
             {
-                control.rulerGrid?.Render();
-                control.timeLineHeader?.Render();
+                control.rulerGrid.Render();
+                control.timeLineHeader.Render();
             }
         }
-
-        private void PrepareScheduleControl()
-        {
-            (GetTemplateChild("PART_HeaderSectionRightGapMask") as Border).Width = scrollBarSpace;
-            (GetTemplateChild("PART_HeaderSectionBottomGapMask") as Border).Height = scrollBarSpace;
-        }
-
         private void ScrollViewerScrollChanged(object sender, ScrollChangedEventArgs e)
         {
             if (IsLoaded && e.Source is ScrollViewer)
             {
                 ScrollChanged?.Invoke(this, e);
-                ScrollGroupHeaderVertically(e.VerticalOffset);
+                groupContainerScrollViewer?.ScrollToVerticalOffset(e.VerticalOffset);
             }
         }
 
-        private void ScrollGroupHeaderVertically(double offset) => groupContainerScrollViewer?.ScrollToVerticalOffset(offset);
         private void ScheduleControlSizeChanged(object sender, SizeChangedEventArgs e)
         {
             if (IsLoaded)
@@ -427,16 +347,80 @@ namespace Scheduler
             }
         }
 
-        private void ScheduleControlLoaded(object sender, RoutedEventArgs e)
+        private async void ScheduleControlLoaded(object sender, RoutedEventArgs e)
         {
             Loaded -= ScheduleControlLoaded;
 
+            PrepareScheduleControl();
+            await SyncGroupsInAppointmentStore(GroupBy);
+            await SyncAndRenderAppointments();
+        }
+
+        private async ValueTask SyncAndRenderAppointments()
+        {
+            await SyncAppointmentsInAppointmentsStore(AppointmentSource);
+            await appointmentRenderingCanvas.RenderAsync(AppointmentSource);
+        }
+        private void PrepareScheduleControl()
+        {
+            (GetTemplateChild("PART_HeaderSectionRightGapMask") as Border).Width = scrollBarSpace;
+            (GetTemplateChild("PART_HeaderSectionBottomGapMask") as Border).Height = scrollBarSpace;
+
             GetScrollbarSize();
             FindAppointmentRenderingCanvas();
-            PrepareScheduleControl();
             InvalidateChildControlsArea();
             dateHeader.ReArrangeHeaders();
-            //appointmentRenderingCanvas.RenderAsync(AppointmentSource.ToArray());
+        }
+
+        private async ValueTask SyncAppointmentsInAppointmentsStore(IEnumerable<Appointment> newItems)
+        {
+            if (!newItems.IsNullOrEmpty())
+            {
+                await Parallel.ForEachAsync(newItems.GroupBy(a => a.Group.Id), (g, t) =>
+                {
+                    if (appointmentStore.TryGetValue(g.Key, out GroupResource group))
+                    {
+                        group.Appointments.AddRange(g);
+                    }
+                    return ValueTask.CompletedTask;
+                });
+            }
+        }
+
+        private async ValueTask ClearAppointmentsFromAppointmentStore()
+        {
+            await Parallel.ForEachAsync(appointmentStore, (group, token) =>
+            {
+                group.Value.Appointments.Clear();
+                return ValueTask.CompletedTask;
+            });
+        }
+        private async ValueTask ClearAppointmentsFromAppointmentStore(IEnumerable<Appointment> appointments)
+        {
+            await Parallel.ForEachAsync(appointments.GroupBy(a => a.Group.Id), (g, token) =>
+            {
+                if (appointmentStore.TryGetValue(g.Key, out GroupResource group))
+                {
+                    group.Appointments.Clear();
+                }
+                return ValueTask.CompletedTask;
+            });
+        }
+
+        private async ValueTask SyncGroupsInAppointmentStore(IEnumerable groups)
+        {
+            if (!groups.IsNullOrEmpty())
+            {
+                await Task.Run(() =>
+                {
+                    int order = 0;
+                    foreach (GroupResource group in groups)
+                    {
+                        group.Order = order++;
+                        appointmentStore.Add(group.Id, group);
+                    }
+                });
+            }
         }
 
         private void GetScrollbarSize()

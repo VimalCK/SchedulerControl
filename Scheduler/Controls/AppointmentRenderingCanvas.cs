@@ -1,5 +1,6 @@
 ﻿using Scheduler.Types;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,7 +22,7 @@ namespace Scheduler
             Appointment.AppointmentTimeChanged -= OnAppointmentTimeChanged;
         }
 
-        internal async ValueTask RenderAsync(params Appointment[] appointments)
+        internal async ValueTask RenderAsync(IEnumerable<Appointment> appointments)
         {
             if (!appointments.IsNullOrEmpty())
             {
@@ -47,6 +48,8 @@ namespace Scheduler
                                 X = (appointment.StartDateTime - arg.SchedulerStartDate.Date).TotalMinutes * minuteGap,
                                 Y = arg.ExtendedMode * appointment.Group.Order
                             };
+
+                            appointment.Show();
                         }
                     }
 
@@ -55,7 +58,7 @@ namespace Scheduler
             }
         }
 
-        internal async ValueTask MeasureWidthAsync(params Appointment[] appointments)
+        internal async ValueTask MeasureWidthAsync(IEnumerable<Appointment> appointments)
         {
             if (!appointments.IsNullOrEmpty())
             {
@@ -80,7 +83,7 @@ namespace Scheduler
             }
         }
 
-        internal async ValueTask MeasureHeightAsync(params Appointment[] appointments)
+        internal async ValueTask MeasureHeightAsync(IEnumerable<Appointment> appointments)
         {
             if (!appointments.IsNullOrEmpty())
             {
@@ -109,7 +112,7 @@ namespace Scheduler
 
         private async void OnAppointmentTimeChanged(object sender, AppointmentTimeChangedEventArgs e)
         {
-            await RenderAsync((Appointment)sender);
+            await RenderAsync(new[] { (Appointment)sender });
         }
     }
 }

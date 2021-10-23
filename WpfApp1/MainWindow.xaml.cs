@@ -300,9 +300,7 @@ namespace WpfApp1
                 var random = new Random();
                 var group = new CustomGroup
                 {
-                    Header = chars[random.Next(0, 25)].ToString() +
-                    chars[random.Next(0, 25)].ToString() +
-                    chars[random.Next(0, 25)].ToString()
+                    Header = "SPK" + chars[random.Next(0, 25)].ToString() + chars[random.Next(0, 25)].ToString()
                 };
 
                 if (!GroupResources.Contains(group))

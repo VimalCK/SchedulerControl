@@ -15,7 +15,7 @@ namespace Scheduler
         private Visibility visibility = Visibility.Visible;
 
         public Guid Id => id;
-        public IList<Appointment> Appointments { get; internal set; } = new List<Appointment>();
+        public List<Appointment> Appointments { get; internal set; } = new List<Appointment>();
 
         public Visibility Visibility
         {
