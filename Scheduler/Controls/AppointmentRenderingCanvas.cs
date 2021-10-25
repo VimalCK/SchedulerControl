@@ -36,21 +36,22 @@ namespace Scheduler
                 var minuteGap = (parent.ViewPortArea.Width / (int)parent.TimeLineZoom) / 60;
                 await Parallel.ForEachAsync(appointments, (appointment, token) =>
                 {
-                    if (appointment is not null)
+                    if (appointment.StartDateTime.Date >= arg.SchedulerStartDate.Date &&
+                        appointment.EndDateTime.Date <= arg.SchedulerEndDate.Date)
                     {
-                        if (appointment.StartDateTime.Date >= arg.SchedulerStartDate.Date &&
-                            appointment.EndDateTime.Date <= arg.SchedulerEndDate.Date)
+                        appointment.RenderedHeight = arg.ExtendedMode / 2;
+                        appointment.RenderedWidth = (appointment.EndDateTime - appointment.StartDateTime).TotalMinutes * minuteGap;
+                        appointment.Located = new Point
                         {
-                            appointment.RenderedHeight = arg.ExtendedMode / 2;
-                            appointment.RenderedWidth = (appointment.EndDateTime - appointment.StartDateTime).TotalMinutes * minuteGap;
-                            appointment.Located = new Point
-                            {
-                                X = (appointment.StartDateTime - arg.SchedulerStartDate.Date).TotalMinutes * minuteGap,
-                                Y = arg.ExtendedMode * appointment.Group.Order
-                            };
+                            X = (appointment.StartDateTime - arg.SchedulerStartDate.Date).TotalMinutes * minuteGap,
+                            Y = arg.ExtendedMode * appointment.Group.Order
+                        };
 
-                            appointment.Show();
-                        }
+                        appointment.Show();
+                    }
+                    else
+                    {
+                        appointment.Hide();
                     }
 
                     return ValueTask.CompletedTask;
