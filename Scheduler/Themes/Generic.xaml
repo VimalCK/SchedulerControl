@@ -115,7 +115,7 @@
         <Setter Property="SnapsToDevicePixels"
                 Value="True" />
         <Setter Property="BorderThickness"
-                Value="1,1,0,1" />
+                Value="1" />
         <Setter Property="Background"
                 Value="White" />
         <Setter Property="BorderBrush"

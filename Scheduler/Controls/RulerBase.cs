@@ -60,6 +60,7 @@ namespace Scheduler
         protected override void OnRender(DrawingContext drawingContext)
         {
             Pen pen = new(RulerColor, .5);
+            Pen thickPen = new(RulerColor, 1.2);
             Point startPoint = new(0, 0);
             Point endPoint = new(0, ActualHeight);
 
@@ -67,16 +68,16 @@ namespace Scheduler
 
             for (int i = 0; i <= VerticalLines; i++)
             {
-                drawingContext.DrawLine(pen, startPoint, endPoint);
-                endPoint.X = startPoint.X = i * VerticalGap;
+                startPoint.X = endPoint.X = i * VerticalGap;
+                drawingContext.DrawLine(!(i % 24).Equals(0) ? pen : thickPen, startPoint, endPoint);
             }
 
             startPoint = new(0, 0);
             endPoint = new(ActualWidth, 0);
 
-            for (int i = 0; i < HorizontalLines; i++)
+            for (int i = 0; i <= HorizontalLines; i++)
             {
-                startPoint.Y = endPoint.Y = i * HorizontalGap;
+                endPoint.Y = startPoint.Y = i * HorizontalGap;
                 drawingContext.DrawLine(pen, startPoint, endPoint);
             }
         }

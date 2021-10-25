@@ -51,12 +51,10 @@ namespace Scheduler
             (d, value) => value ?? Brushes.LightGray));
 
         public static readonly DependencyProperty StartDateProperty = DependencyProperty.Register(
-            "StartDate", typeof(DateTime), typeof(ScheduleControl), new PropertyMetadata(DateTime.Now, OnScheduleDateChanged,
-            (d, value) => value.Equals(default(DateTime)) ? DateTime.Now : value));
+            "StartDate", typeof(DateTime), typeof(ScheduleControl), new PropertyMetadata(DateTime.Now, OnScheduleDateChanged, CoerceScheduleDates));
 
         public static readonly DependencyProperty EndDateProperty = DependencyProperty.Register(
-            "EndDate", typeof(DateTime), typeof(ScheduleControl), new PropertyMetadata(DateTime.Now, OnScheduleDateChanged,
-            (d, value) => value.Equals(default(DateTime)) ? DateTime.Now : value));
+            "EndDate", typeof(DateTime), typeof(ScheduleControl), new PropertyMetadata(DateTime.Now, OnScheduleDateChanged, CoerceScheduleDates));
 
         public static readonly DependencyProperty TimeLineZoomProperty = DependencyProperty.Register(
             "TimeLineZoom", typeof(TimeLineZoom), typeof(ScheduleControl), new PropertyMetadata(TimeLineZoom.TwentyFour, OnTimeLineZoomChanged,
@@ -293,30 +291,16 @@ namespace Scheduler
             var control = (ScheduleControl)d;
             if (control.IsLoaded)
             {
+                if (control.ViewRange <= 0)
+                {
+                    d.CoerceValue(StartDateProperty);
+                    d.CoerceValue(EndDateProperty);
+                    return;
+                }
+
                 control.InvalidateChildControlsArea();
                 control.dateHeader.ReArrangeHeaders();
-
-                var appointments = control.AppointmentSource.ToList();
-                var param = new
-                {
-                    StartDate = control.StartDate,
-                    EndDate = control.EndDate.Date.AddDays(1).AddSeconds(-1)
-                };
-
-                await Parallel.ForEachAsync(appointments, (appointment, token) =>
-                {
-                    if (appointment.StartDateTime >= param.StartDate.Date && appointment.EndDateTime <= param.EndDate)
-                    {
-                        appointment.Show();
-                    }
-                    else if ((appointment.StartDateTime < param.StartDate.Date && appointment.EndDateTime > param.StartDate.Date) ||
-                    (appointment.StartDateTime < param.EndDate && appointment.EndDateTime > param.EndDate))
-                    {
-                        appointment.Hide();
-                    }
-
-                    return ValueTask.CompletedTask;
-                });
+                await control.appointmentRenderingCanvas.RenderAsync(control.AppointmentSource.ToList());
             }
         }
 
@@ -373,6 +357,13 @@ namespace Scheduler
             PrepareScheduleControl();
             await SyncGroupsInAppointmentStore(GroupBy);
             await SyncAndRenderAppointments();
+        }
+
+        private static object CoerceScheduleDates(DependencyObject d, object baseValue)
+        {
+            var control = (ScheduleControl)d;
+            var date = (DateTime)baseValue;
+            return date.Equals(default(DateTime)) || control.EndDate < control.StartDate ? control.StartDate : date;
         }
 
         private async ValueTask SyncAndRenderAppointments()
@@ -503,12 +494,6 @@ namespace Scheduler
 
         private void CalculateRequiredAreaSize()
         {
-            if (TimeLineZoom.Equals(TimeLineZoom.FortyEight) && ViewRange is 1)
-            {
-                TimeLineZoom = TimeLineZoom.TwentyFour;
-                return;
-            }
-
             var requiredHeight = (GroupBy?.Count(g => g.Visibility == Visibility.Visible) ?? 0) * (int)this.ExtendedMode;
             requiredViewPortArea.Height = requiredHeight < viewPortArea.Height ? viewPortArea.Height : requiredHeight;
             requiredViewPortArea.Width = (TimeLineZoom switch

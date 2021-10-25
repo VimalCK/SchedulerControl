@@ -44,7 +44,7 @@ namespace Scheduler
         {
             if (TemplatedParent is ScheduleControl control && control.ActualWidth != 0)
             {
-                VerticalLines = 25 * control.ViewRange;
+                VerticalLines = 24 * control.ViewRange;
 
                 if (VerticalLines > 0)
                 {
