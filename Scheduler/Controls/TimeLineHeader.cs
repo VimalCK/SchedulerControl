@@ -53,7 +53,7 @@ namespace Scheduler
                     Point renderPoint = new(0, ActualHeight / 3);
                     var headerText = 0;
 
-                    HorizontalLines = 2;
+                    HorizontalLines = 1;
                     HorizontalGap = ActualHeight;
                     RulerColor = control.TimeLineColor;
                     VerticalGap = control.ViewPortArea.Width / (int)control.TimeLineZoom;

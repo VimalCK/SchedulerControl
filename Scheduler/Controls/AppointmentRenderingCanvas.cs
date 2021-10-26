@@ -24,7 +24,7 @@ namespace Scheduler
 
         internal async ValueTask RenderAsync(IEnumerable<Appointment> appointments)
         {
-            if (!appointments.IsNullOrEmpty())
+            if (!appointments.IsNullOrEmpty() && !parent.GroupBy.IsNullOrEmpty())
             {
                 RenderingArguments arg = new
                     (
@@ -61,7 +61,7 @@ namespace Scheduler
 
         internal async ValueTask MeasureWidthAsync(IEnumerable<Appointment> appointments)
         {
-            if (!appointments.IsNullOrEmpty())
+            if (!appointments.IsNullOrEmpty() && !parent.GroupBy.IsNullOrEmpty())
             {
                 RenderingArguments arg = new
                     (
@@ -86,7 +86,7 @@ namespace Scheduler
 
         internal async ValueTask MeasureHeightAsync(IEnumerable<Appointment> appointments)
         {
-            if (!appointments.IsNullOrEmpty())
+            if (!appointments.IsNullOrEmpty() && !parent.GroupBy.IsNullOrEmpty())
             {
                 RenderingArguments arg = new
                     (
