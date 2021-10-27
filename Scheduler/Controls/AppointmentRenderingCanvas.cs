@@ -22,22 +22,22 @@ namespace Scheduler
             Appointment.AppointmentTimeChanged -= OnAppointmentTimeChanged;
         }
 
-        internal async ValueTask RenderAsync(IEnumerable<Appointment> appointments)
+        internal void Render(IEnumerable<Appointment> appointments)
         {
             if (!appointments.IsNullOrEmpty() && !parent.GroupBy.IsNullOrEmpty())
             {
                 RenderingArguments arg = new
-                    (
-                        parent.StartDate,
-                        parent.EndDate,
-                        (int)parent.ExtendedMode
-                    );
+                                     (
+                                         parent.StartDate,
+                                         parent.EndDate,
+                                         (int)parent.ExtendedMode
+                                     );
 
                 var minuteGap = (parent.ViewPortArea.Width / (int)parent.TimeLineZoom) / 60;
-                await Parallel.ForEachAsync(appointments, (appointment, token) =>
+                foreach (var appointment in appointments)
                 {
                     if (appointment.StartDateTime.Date >= arg.SchedulerStartDate.Date &&
-                        appointment.EndDateTime.Date <= arg.SchedulerEndDate.Date)
+                                           appointment.EndDateTime.Date <= arg.SchedulerEndDate.Date)
                     {
                         appointment.RenderedHeight = arg.ExtendedMode / 2;
                         appointment.RenderedWidth = (appointment.EndDateTime - appointment.StartDateTime).TotalMinutes * minuteGap;
@@ -53,13 +53,11 @@ namespace Scheduler
                     {
                         appointment.Hide();
                     }
-
-                    return ValueTask.CompletedTask;
-                });
+                }
             }
         }
 
-        internal async ValueTask MeasureWidthAsync(IEnumerable<Appointment> appointments)
+        internal void MeasureWidth(IEnumerable<Appointment> appointments)
         {
             if (!appointments.IsNullOrEmpty() && !parent.GroupBy.IsNullOrEmpty())
             {
@@ -70,7 +68,7 @@ namespace Scheduler
                     );
 
                 var minuteGap = (parent.ViewPortArea.Width / (int)parent.TimeLineZoom) / 60;
-                await Parallel.ForEachAsync(appointments, (appointment, token) =>
+                foreach (var appointment in appointments)
                 {
                     appointment.RenderedWidth = (appointment.EndDateTime - appointment.StartDateTime).TotalMinutes * minuteGap;
                     appointment.Located = new Point
@@ -78,13 +76,11 @@ namespace Scheduler
                         X = (appointment.StartDateTime - arg.SchedulerStartDate.Date).TotalMinutes * minuteGap,
                         Y = arg.ExtendedMode * appointment.Group.Order
                     };
-
-                    return ValueTask.CompletedTask;
-                });
+                }
             }
         }
 
-        internal async ValueTask MeasureHeightAsync(IEnumerable<Appointment> appointments)
+        internal void MeasureHeight(IEnumerable<Appointment> appointments)
         {
             if (!appointments.IsNullOrEmpty() && !parent.GroupBy.IsNullOrEmpty())
             {
@@ -95,7 +91,7 @@ namespace Scheduler
                     );
 
                 var minuteGap = (parent.ViewPortArea.Width / (int)parent.TimeLineZoom) / 60;
-                await Parallel.ForEachAsync(appointments, (appointment, token) =>
+                foreach (var appointment in appointments)
                 {
                     appointment.RenderedHeight = arg.ExtendedMode / 2;
                     appointment.Located = new Point
@@ -103,17 +99,15 @@ namespace Scheduler
                         X = (appointment.StartDateTime - arg.SchedulerStartDate.Date).TotalMinutes * minuteGap,
                         Y = arg.ExtendedMode * appointment.Group.Order
                     };
-
-                    return ValueTask.CompletedTask;
-                });
+                }
             }
         }
 
         protected override void OnInitialized(EventArgs e) => parent = this.GetParentOfType<ScheduleControl>();
 
-        private async void OnAppointmentTimeChanged(object sender, AppointmentTimeChangedEventArgs e)
+        private void OnAppointmentTimeChanged(object sender, AppointmentTimeChangedEventArgs e)
         {
-            await RenderAsync(new[] { (Appointment)sender });
+            Render(new[] { (Appointment)sender });
         }
     }
 }

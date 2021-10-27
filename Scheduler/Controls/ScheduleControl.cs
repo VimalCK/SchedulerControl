@@ -171,7 +171,7 @@ namespace Scheduler
             HandleEvents();
         }
 
-        private async static void OnGroupByChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnGroupByChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
             if (control.IsLoaded)
@@ -186,8 +186,8 @@ namespace Scheduler
                 if (e.NewValue is INotifyCollectionChanged newCollection)
                 {
                     newCollection.CollectionChanged += control.GroupByCollectionChanged;
-                    await control.SyncGroupsInAppointmentStore(e.NewValue as IEnumerable);
-                    await control.SyncAndRenderAppointments();
+                    control.SyncGroupsInAppointmentStore(e.NewValue as IEnumerable);
+                    control.SyncAndRenderAppointments();
                 }
                 else
                 {
@@ -196,7 +196,7 @@ namespace Scheduler
             }
         }
 
-        private async void GroupByCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void GroupByCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (IsLoaded)
             {
@@ -205,8 +205,8 @@ namespace Scheduler
                 {
                     var groupResource = (GroupResource)e.NewItems[0];
                     appointmentStore.Insert(e.NewStartingIndex, groupResource.Id, groupResource);
-                    await SyncAppointmentsInAppointmentsStore(AppointmentSource.Where(a => a.Group.Id == groupResource.Id));
-                    await appointmentRenderingCanvas.RenderAsync(AppointmentSource.Where(a => a.Group.Order >= e.NewStartingIndex));
+                    SyncAppointmentsInAppointmentsStore(AppointmentSource.Where(a => a.Group.Id == groupResource.Id));
+                    appointmentRenderingCanvas.Render(AppointmentSource.Where(a => a.Group.Order >= e.NewStartingIndex));
                 }
                 else if (e.Action.Equals(NotifyCollectionChangedAction.Remove))
                 {
@@ -217,7 +217,7 @@ namespace Scheduler
             }
         }
 
-        private async static void OnAppointmentSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnAppointmentSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
             if (control.IsLoaded)
@@ -225,29 +225,29 @@ namespace Scheduler
                 if (e.OldValue is INotifyCollectionChanged oldAppointments)
                 {
                     oldAppointments.CollectionChanged -= control.AppointmentSourceCollectionChanged;
-                    await control.ClearAppointmentsFromAppointmentStore();
+                    control.ClearAppointmentsFromAppointmentStore();
                 }
 
                 if (e.NewValue is INotifyCollectionChanged newAppointments)
                 {
                     newAppointments.CollectionChanged += control.AppointmentSourceCollectionChanged;
-                    await control.SyncAndRenderAppointments();
+                    control.SyncAndRenderAppointments();
                 }
             }
         }
 
-        private async void AppointmentSourceCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void AppointmentSourceCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (IsLoaded)
             {
                 var newItems = (IEnumerable<Appointment>)e.NewItems;
-                await ClearAppointmentsFromAppointmentStore((IEnumerable<Appointment>)e.OldItems);
-                await SyncAppointmentsInAppointmentsStore(newItems);
-                await appointmentRenderingCanvas.RenderAsync(newItems);
+                ClearAppointmentsFromAppointmentStore((IEnumerable<Appointment>)e.OldItems);
+                SyncAppointmentsInAppointmentsStore(newItems);
+                appointmentRenderingCanvas.Render(newItems);
             }
         }
 
-        private async void AppointmentGroupResourceChanged(object sender, GroupResourceChangedEventArgs e)
+        private void AppointmentGroupResourceChanged(object sender, GroupResourceChangedEventArgs e)
         {
             var appointment = (Appointment)sender;
             if (e.OldValue is not null && appointmentStore.TryGetValue(e.OldValue.Id, out GroupResource group))
@@ -258,7 +258,7 @@ namespace Scheduler
             if (appointmentStore.TryGetValue(e.NewValue.Id, out group))
             {
                 group.Appointments.Add(appointment);
-                await appointmentRenderingCanvas.MeasureHeightAsync(new[] { appointment });
+                appointmentRenderingCanvas.MeasureHeight(new[] { appointment });
             }
             else
             {
@@ -266,27 +266,27 @@ namespace Scheduler
             }
         }
 
-        private async static void OnExtendedModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnExtendedModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
             if (control.IsLoaded && control.InvalidateChildControlsArea())
             {
                 control.rulerGrid.Render();
-                await control.appointmentRenderingCanvas.MeasureHeightAsync(control.AppointmentSource);
+                control.appointmentRenderingCanvas.MeasureHeight(control.AppointmentSource);
             }
         }
 
-        private async static void OnTimeLineZoomChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnTimeLineZoomChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
             if (control.IsLoaded)
             {
                 control.InvalidateChildControlsArea();
-                await control.appointmentRenderingCanvas.MeasureWidthAsync(control.AppointmentSource);
+                control.appointmentRenderingCanvas.MeasureWidth(control.AppointmentSource);
             }
         }
 
-        private async static void OnScheduleDateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnScheduleDateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
             if (control.IsLoaded)
@@ -300,7 +300,7 @@ namespace Scheduler
 
                 control.InvalidateChildControlsArea();
                 control.dateHeader.ReArrangeHeaders();
-                await control.appointmentRenderingCanvas.RenderAsync(control.AppointmentSource.ToList());
+                control.appointmentRenderingCanvas.Render(control.AppointmentSource.ToList());
             }
         }
 
@@ -350,13 +350,13 @@ namespace Scheduler
             }
         }
 
-        private async void ScheduleControlLoaded(object sender, RoutedEventArgs e)
+        private void ScheduleControlLoaded(object sender, RoutedEventArgs e)
         {
             Loaded -= ScheduleControlLoaded;
 
             PrepareScheduleControl();
-            await SyncGroupsInAppointmentStore(GroupBy);
-            await SyncAndRenderAppointments();
+            SyncGroupsInAppointmentStore(GroupBy);
+            SyncAndRenderAppointments();
         }
 
         private static object CoerceScheduleDates(DependencyObject d, object baseValue)
@@ -366,10 +366,10 @@ namespace Scheduler
             return date.Equals(default(DateTime)) || control.EndDate < control.StartDate ? control.StartDate : date;
         }
 
-        private async ValueTask SyncAndRenderAppointments()
+        private void SyncAndRenderAppointments()
         {
-            await SyncAppointmentsInAppointmentsStore(AppointmentSource);
-            await appointmentRenderingCanvas.RenderAsync(AppointmentSource);
+            SyncAppointmentsInAppointmentsStore(AppointmentSource);
+            appointmentRenderingCanvas.Render(AppointmentSource);
         }
         private void PrepareScheduleControl()
         {
@@ -382,54 +382,49 @@ namespace Scheduler
             (GetTemplateChild("PART_HeaderSectionBottomGapMask") as Border).Height = scrollBarSpace;
         }
 
-        private async ValueTask SyncAppointmentsInAppointmentsStore(IEnumerable<Appointment> newItems)
+        private void SyncAppointmentsInAppointmentsStore(IEnumerable<Appointment> newItems)
         {
             if (!newItems.IsNullOrEmpty())
             {
-                await Parallel.ForEachAsync(newItems.GroupBy(a => a.Group.Id), (g, t) =>
+                foreach (var item in newItems.GroupBy(a => a.Group.Id))
                 {
-                    if (appointmentStore.TryGetValue(g.Key, out GroupResource group))
+                    if (appointmentStore.TryGetValue(item.Key, out GroupResource group))
                     {
-                        group.Appointments.AddRange(g);
+                        group.Appointments.AddRange(item);
                     }
-                    return ValueTask.CompletedTask;
-                });
+                }
             }
         }
 
-        private async ValueTask ClearAppointmentsFromAppointmentStore()
+        private void ClearAppointmentsFromAppointmentStore()
         {
-            await Parallel.ForEachAsync(appointmentStore, (group, token) =>
+            foreach (var group in appointmentStore)
             {
                 group.Value.Appointments.Clear();
-                return ValueTask.CompletedTask;
-            });
+            }
         }
-        private async ValueTask ClearAppointmentsFromAppointmentStore(IEnumerable<Appointment> appointments)
+
+        private void ClearAppointmentsFromAppointmentStore(IEnumerable<Appointment> appointments)
         {
-            await Parallel.ForEachAsync(appointments.GroupBy(a => a.Group.Id), (g, token) =>
+            foreach (var appointment in appointments.GroupBy(a => a.Group.Id))
             {
-                if (appointmentStore.TryGetValue(g.Key, out GroupResource group))
+                if (appointmentStore.TryGetValue(appointment.Key, out GroupResource group))
                 {
                     group.Appointments.Clear();
                 }
-                return ValueTask.CompletedTask;
-            });
+            }
         }
 
-        private async ValueTask SyncGroupsInAppointmentStore(IEnumerable groups)
+        private void SyncGroupsInAppointmentStore(IEnumerable groups)
         {
             if (!groups.IsNullOrEmpty())
             {
-                await Task.Run(() =>
+                int order = 0;
+                foreach (GroupResource group in groups)
                 {
-                    int order = 0;
-                    foreach (GroupResource group in groups)
-                    {
-                        group.Order = order++;
-                        appointmentStore.Add(group.Id, group);
-                    }
-                });
+                    group.Order = order++;
+                    appointmentStore.Add(group.Id, group);
+                }
             }
         }
 
