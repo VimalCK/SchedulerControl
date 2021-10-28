@@ -162,7 +162,7 @@ namespace WpfApp1
             LoadTimelineProviders();
         }
 
-        private   void ChangeGroup(object obj)
+        private void ChangeGroup(object obj)
         {
             bool value = false;
             foreach (Appointment item in Appointments.Where(a => (a.Group as CustomGroup).Header == "AAA"))
@@ -170,7 +170,7 @@ namespace WpfApp1
                 item.Group = value ? GroupResources.OfType<CustomGroup>().First(g => g.Header == "AAH") :
                     GroupResources.OfType<CustomGroup>().First(g => g.Header == "AAI");
                 value = !value;
-                  Task.Delay(50);
+                Task.Delay(50);
             }
         }
 
@@ -189,13 +189,13 @@ namespace WpfApp1
             }
         }
 
-        private   void RemoveAppointments(object obj)
+        private void RemoveAppointments(object obj)
         {
             var appointments = Appointments.ToList();
             foreach (var item in Appointments.ToList())
             {
                 Appointments.Remove(item);
-                  Task.Delay(50);
+                Task.Delay(50);
             }
         }
 

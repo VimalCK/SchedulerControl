@@ -30,9 +30,9 @@ namespace Scheduler
         private Size requiredViewPortArea;
         private Size viewPortArea;
         private double scrollBarSpace;
-        private OrderedDictionary<Guid, GroupResource> appointmentStore;
+        private OrderedIndexedDictionary<Guid, GroupResource> appointmentStore;
         private ListBox groupByContainer;
-        //private Func<IAppointment, string> groupValueLambda;
+        //private Func<Appointment, string> groupValueLambda;
         private Grid contentSection;
         private RulerGrid rulerGrid;
         private DateHeader dateHeader;
@@ -148,8 +148,8 @@ namespace Scheduler
         public ScheduleControl()
         {
             DefaultStyleKey = typeof(ScheduleControl);
-            appointmentStore = new();
-            //groupValueLambda = CommonFunctions.GetPropertyValue<IAppointment, string>(nameof(IAppointment.Group));
+            appointmentStore = new(g => g.Order);
+            //groupValueLambda = CommonFunctions.GetPropertyValue<Appointment, string>(nameof(Appointment.Description));
         }
 
         ~ScheduleControl() => UnHandleEvents();
@@ -177,7 +177,7 @@ namespace Scheduler
             if (control.IsLoaded)
             {
                 control.InvalidateChildControlsArea();
-                control.appointmentStore = new();
+                control.appointmentStore = new(g => g.Order);
                 if (e.OldValue is INotifyCollectionChanged oldCollection)
                 {
                     oldCollection.CollectionChanged -= control.GroupByCollectionChanged;
@@ -205,6 +205,7 @@ namespace Scheduler
                 {
                     var groupResource = (GroupResource)e.NewItems[0];
                     appointmentStore.Insert(e.NewStartingIndex, groupResource.Id, groupResource);
+
                     SyncAppointmentsInAppointmentsStore(AppointmentSource.Where(a => a.Group.Id == groupResource.Id));
                     appointmentRenderingCanvas.Render(AppointmentSource.Where(a => a.Group.Order >= e.NewStartingIndex));
                 }
@@ -354,6 +355,7 @@ namespace Scheduler
         {
             Loaded -= ScheduleControlLoaded;
 
+            HandleCollectionChangedEvents();
             PrepareScheduleControl();
             SyncGroupsInAppointmentStore(GroupBy);
             SyncAndRenderAppointments();
@@ -419,10 +421,8 @@ namespace Scheduler
         {
             if (!groups.IsNullOrEmpty())
             {
-                int order = 0;
                 foreach (GroupResource group in groups)
                 {
-                    group.Order = order++;
                     appointmentStore.Add(group.Id, group);
                 }
             }
@@ -446,20 +446,35 @@ namespace Scheduler
             Appointment.GroupResourceChanged += AppointmentGroupResourceChanged;
         }
 
+        private void HandleCollectionChangedEvents()
+        {
+            if (GroupBy is not null)
+            {
+                GroupBy.CollectionChanged += GroupByCollectionChanged;
+            }
+            if (AppointmentSource is not null)
+            {
+                AppointmentSource.CollectionChanged += AppointmentSourceCollectionChanged;
+            }
+            if (TimeLineProviders is not null)
+            {
+                TimeLineProviders.CollectionChanged += TimeLineProvidersCollectionChanged;
+            }
+        }
+
         private void UnHandleEvents()
         {
             SizeChanged -= ScheduleControlSizeChanged;
             schedulerScrollViewer.ScrollChanged -= ScrollViewerScrollChanged;
-            if (AppointmentSource is not null)
-            {
-                AppointmentSource.CollectionChanged -= AppointmentSourceCollectionChanged;
-            }
-
+            Appointment.GroupResourceChanged -= AppointmentGroupResourceChanged;
             if (GroupBy is not null)
             {
                 GroupBy.CollectionChanged -= GroupByCollectionChanged;
             }
-
+            if (AppointmentSource is not null)
+            {
+                AppointmentSource.CollectionChanged -= AppointmentSourceCollectionChanged;
+            }
             if (TimeLineProviders is not null)
             {
                 TimeLineProviders.CollectionChanged -= TimeLineProvidersCollectionChanged;
