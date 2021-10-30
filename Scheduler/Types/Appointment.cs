@@ -22,6 +22,7 @@ namespace Scheduler.Types
         private Visibility visibility = Visibility.Collapsed;
 
         public Visibility Visibility => visibility;
+        public bool IsVisible => visibility == Visibility.Visible;
 
         public Point Located
         {

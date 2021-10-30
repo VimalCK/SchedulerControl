@@ -37,7 +37,7 @@ namespace Scheduler
                 foreach (var appointment in appointments)
                 {
                     if (appointment.StartDateTime.Date >= arg.SchedulerStartDate.Date &&
-                                           appointment.EndDateTime.Date <= arg.SchedulerEndDate.Date)
+                        appointment.EndDateTime.Date <= arg.SchedulerEndDate.Date)
                     {
                         appointment.RenderedHeight = arg.ExtendedMode / 2;
                         appointment.RenderedWidth = (appointment.EndDateTime - appointment.StartDateTime).TotalMinutes * minuteGap;
@@ -107,7 +107,10 @@ namespace Scheduler
 
         private void OnAppointmentTimeChanged(object sender, AppointmentTimeChangedEventArgs e)
         {
-            Render(new[] { (Appointment)sender });
+            if (sender is Appointment appointment && appointment.IsVisible)
+            {
+                Render(new[] { appointment });
+            }
         }
     }
 }

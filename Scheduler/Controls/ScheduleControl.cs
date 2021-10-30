@@ -144,7 +144,7 @@ namespace Scheduler
         public Size ViewPortArea => viewPortArea;
         public Size RequiredViewPortArea => requiredViewPortArea;
         internal int ViewRange => (EndDate.Date - StartDate.Date).Days + 1;
-
+        private IEnumerable<Appointment> VisibleAppointments => AppointmentSource?.Where(a => a.IsVisible);
         public ScheduleControl()
         {
             DefaultStyleKey = typeof(ScheduleControl);
@@ -205,16 +205,18 @@ namespace Scheduler
                 {
                     var groupResource = (GroupResource)e.NewItems[0];
                     appointmentStore.Insert(e.NewStartingIndex, groupResource.Id, groupResource);
-
                     SyncAppointmentsInAppointmentsStore(AppointmentSource.Where(a => a.Group.Id == groupResource.Id));
-                    appointmentRenderingCanvas.Render(AppointmentSource.Where(a => a.Group.Order >= e.NewStartingIndex));
                 }
                 else if (e.Action.Equals(NotifyCollectionChangedAction.Remove))
                 {
                     var groupResource = (GroupResource)e.OldItems[0];
                     groupResource.Appointments.AsParallel().ForAll(appointment => appointment.Hide());
+                    groupResource.Appointments.Clear();
                     appointmentStore.Remove(groupResource.Id);
                 }
+
+                var index = e.Action.Equals(NotifyCollectionChangedAction.Add) ? e.NewStartingIndex : e.OldStartingIndex;
+                appointmentRenderingCanvas.Render(VisibleAppointments);
             }
         }
 
@@ -244,7 +246,7 @@ namespace Scheduler
                 var newItems = (IEnumerable<Appointment>)e.NewItems;
                 ClearAppointmentsFromAppointmentStore((IEnumerable<Appointment>)e.OldItems);
                 SyncAppointmentsInAppointmentsStore(newItems);
-                appointmentRenderingCanvas.Render(newItems);
+                appointmentRenderingCanvas.Render(VisibleAppointments);
             }
         }
 
@@ -259,7 +261,10 @@ namespace Scheduler
             if (appointmentStore.TryGetValue(e.NewValue.Id, out group))
             {
                 group.Appointments.Add(appointment);
-                appointmentRenderingCanvas.MeasureHeight(new[] { appointment });
+                if (appointment.IsVisible)
+                {
+                    appointmentRenderingCanvas.MeasureHeight(new[] { appointment });
+                }
             }
             else
             {
@@ -273,7 +278,7 @@ namespace Scheduler
             if (control.IsLoaded && control.InvalidateChildControlsArea())
             {
                 control.rulerGrid.Render();
-                control.appointmentRenderingCanvas.MeasureHeight(control.AppointmentSource);
+                control.appointmentRenderingCanvas.MeasureHeight(control.VisibleAppointments);
             }
         }
 
@@ -283,7 +288,7 @@ namespace Scheduler
             if (control.IsLoaded)
             {
                 control.InvalidateChildControlsArea();
-                control.appointmentRenderingCanvas.MeasureWidth(control.AppointmentSource);
+                control.appointmentRenderingCanvas.MeasureWidth(control.VisibleAppointments);
             }
         }
 
@@ -301,7 +306,7 @@ namespace Scheduler
 
                 control.InvalidateChildControlsArea();
                 control.dateHeader.ReArrangeHeaders();
-                control.appointmentRenderingCanvas.Render(control.AppointmentSource.ToList());
+                control.appointmentRenderingCanvas.Render(control.VisibleAppointments);
             }
         }
 
@@ -371,7 +376,7 @@ namespace Scheduler
         private void SyncAndRenderAppointments()
         {
             SyncAppointmentsInAppointmentsStore(AppointmentSource);
-            appointmentRenderingCanvas.Render(AppointmentSource);
+            appointmentRenderingCanvas.Render(VisibleAppointments);
         }
         private void PrepareScheduleControl()
         {
@@ -393,6 +398,7 @@ namespace Scheduler
                     if (appointmentStore.TryGetValue(item.Key, out GroupResource group))
                     {
                         group.Appointments.AddRange(item);
+                        item.AsParallel().ForAll(a => a.Show());
                     }
                 }
             }

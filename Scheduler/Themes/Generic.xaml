@@ -21,7 +21,9 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="local:AppointmentItem">
-                    <Border Background="{TemplateBinding Background}">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="Red"
+                            BorderThickness="2">
                         <ContentPresenter Content="{Binding}"
                                           HorizontalAlignment="Center"
                                           VerticalAlignment="Center" />

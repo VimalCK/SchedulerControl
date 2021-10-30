@@ -314,7 +314,8 @@ namespace WpfApp1
 
         private void RemoveGroupResource(object obj)
         {
-            groupResources.RemoveAt(new Random().Next(0, GroupResources.Count - 1));
+            var index = new Random().Next(0, GroupResources.Count - 1);
+            groupResources.RemoveAt(index);
         }
 
         private void LoadClearGroupResources(object value)

@@ -84,7 +84,7 @@ namespace Scheduler.Types
 
         public bool Remove(TKey key)
         {
-            var index = collection.TakeWhile(k => !k.Key.Equals(key)).Count() - 1;
+            var index = collection.Select((item, index) => item.Key.Equals(key) ? index : -1).Max();
             var isRemoved = collection.Remove(key);
             IndexOrderedCollection(index);
             return isRemoved;
