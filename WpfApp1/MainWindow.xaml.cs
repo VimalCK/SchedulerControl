@@ -232,11 +232,6 @@ namespace WpfApp1
             var flightLegs = new List<Appointment>();
             foreach (CustomGroup group in GroupResources)
             {
-                if (group.Header == "SPRAA" || group.Header == "SPRAE")
-                {
-                    continue;
-                }
-
                 var startDate = DateTime.Today;
                 var endDate = DateTime.Today;
                 var noOfFlights = new Random().Next(4, 20);
@@ -306,6 +301,23 @@ namespace WpfApp1
                 if (!GroupResources.Contains(group))
                 {
                     GroupResources.Insert(random.Next(0, GroupResources.Count - 1), group);
+
+                    var startDate = DateTime.Today;
+                    var endDate = DateTime.Today;
+                    var noOfFlights = new Random().Next(4, 6);
+                    var hour = new Random();
+                    for (int i = 0; i <= noOfFlights; i++)
+                    {
+                        startDate = startDate.AddHours(hour.Next(1, 3));
+                        endDate = startDate.AddHours(hour.Next(2, 4));
+                        Appointments.Add(new Appointment(startDate, endDate, group)
+                        {
+                            Description = $"FL-{group.ToString()}-{i + 1} : {startDate.ToString("HH:mm")}-{endDate.ToString("HH:mm")}"
+                        });
+
+                        startDate = endDate;
+                    }
+
                     break;
                 }
 

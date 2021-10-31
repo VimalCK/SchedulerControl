@@ -32,7 +32,6 @@ namespace Scheduler
         private double scrollBarSpace;
         private OrderedIndexedDictionary<Guid, GroupResource> appointmentStore;
         private ListBox groupByContainer;
-        //private Func<Appointment, string> groupValueLambda;
         private Grid contentSection;
         private RulerGrid rulerGrid;
         private DateHeader dateHeader;
@@ -149,7 +148,6 @@ namespace Scheduler
         {
             DefaultStyleKey = typeof(ScheduleControl);
             appointmentStore = new(g => g.Order);
-            //groupValueLambda = CommonFunctions.GetPropertyValue<Appointment, string>(nameof(Appointment.Description));
         }
 
         ~ScheduleControl() => UnHandleEvents();
@@ -187,12 +185,9 @@ namespace Scheduler
                 {
                     newCollection.CollectionChanged += control.GroupByCollectionChanged;
                     control.SyncGroupsInAppointmentStore(e.NewValue as IEnumerable);
-                    control.SyncAndRenderAppointments();
                 }
-                else
-                {
-                    control.AppointmentSource.AsParallel().ForAll(appointment => appointment.Hide());
-                }
+
+                control.SyncAndRenderAppointments();
             }
         }
 
@@ -200,23 +195,26 @@ namespace Scheduler
         {
             if (IsLoaded)
             {
+                int index = 0;
                 InvalidateChildControlsArea();
-                if (e.Action.Equals(NotifyCollectionChangedAction.Add))
+                switch (e.Action)
                 {
-                    var groupResource = (GroupResource)e.NewItems[0];
-                    appointmentStore.Insert(e.NewStartingIndex, groupResource.Id, groupResource);
-                    SyncAppointmentsInAppointmentsStore(AppointmentSource.Where(a => a.Group.Id == groupResource.Id));
-                }
-                else if (e.Action.Equals(NotifyCollectionChangedAction.Remove))
-                {
-                    var groupResource = (GroupResource)e.OldItems[0];
-                    groupResource.Appointments.AsParallel().ForAll(appointment => appointment.Hide());
-                    groupResource.Appointments.Clear();
-                    appointmentStore.Remove(groupResource.Id);
+                    case NotifyCollectionChangedAction.Add:
+                        index = e.NewStartingIndex;
+                        var groupResource = (GroupResource)e.NewItems[0];
+                        appointmentStore.Insert(e.NewStartingIndex, groupResource.Id, groupResource);
+                        SyncAppointmentsInAppointmentsStore(AppointmentSource.Where(a => a.Group.Id == groupResource.Id));
+                        break;
+                    case NotifyCollectionChangedAction.Remove:
+                        index = e.OldStartingIndex;
+                        groupResource = (GroupResource)e.OldItems[0];
+                        groupResource.Appointments.ForEach(a => a.Hide());
+                        groupResource.Appointments.Clear();
+                        appointmentStore.Remove(groupResource.Id);
+                        break;
                 }
 
-                var index = e.Action.Equals(NotifyCollectionChangedAction.Add) ? e.NewStartingIndex : e.OldStartingIndex;
-                appointmentRenderingCanvas.Render(VisibleAppointments);
+                appointmentRenderingCanvas.MeasureHeight(VisibleAppointments.Where(a => a.Group.Order >= index));
             }
         }
 
@@ -227,15 +225,16 @@ namespace Scheduler
             {
                 if (e.OldValue is INotifyCollectionChanged oldAppointments)
                 {
-                    oldAppointments.CollectionChanged -= control.AppointmentSourceCollectionChanged;
                     control.ClearAppointmentsFromAppointmentStore();
+                    oldAppointments.CollectionChanged -= control.AppointmentSourceCollectionChanged;
                 }
 
                 if (e.NewValue is INotifyCollectionChanged newAppointments)
                 {
                     newAppointments.CollectionChanged += control.AppointmentSourceCollectionChanged;
-                    control.SyncAndRenderAppointments();
                 }
+
+                control.SyncAndRenderAppointments();
             }
         }
 
@@ -243,10 +242,18 @@ namespace Scheduler
         {
             if (IsLoaded)
             {
-                var newItems = (IEnumerable<Appointment>)e.NewItems;
-                ClearAppointmentsFromAppointmentStore((IEnumerable<Appointment>)e.OldItems);
-                SyncAppointmentsInAppointmentsStore(newItems);
-                appointmentRenderingCanvas.Render(VisibleAppointments);
+                switch (e.Action)
+                {
+                    case NotifyCollectionChangedAction.Add:
+                        var appointments = new[] { (Appointment)e.NewItems[0] };
+                        SyncAppointmentsInAppointmentsStore(appointments);
+                        appointmentRenderingCanvas.Render(appointments);
+                        break;
+                    case NotifyCollectionChangedAction.Remove:
+                        appointments = new[] { (Appointment)e.OldItems[0] };
+                        ClearAppointmentsFromAppointmentStore(appointments);
+                        break;
+                }
             }
         }
 
@@ -389,16 +396,20 @@ namespace Scheduler
             (GetTemplateChild("PART_HeaderSectionBottomGapMask") as Border).Height = scrollBarSpace;
         }
 
-        private void SyncAppointmentsInAppointmentsStore(IEnumerable<Appointment> newItems)
+        private void SyncAppointmentsInAppointmentsStore(IEnumerable<Appointment> appointments)
         {
-            if (!newItems.IsNullOrEmpty())
+            if (!appointments.IsNullOrEmpty())
             {
-                foreach (var item in newItems.GroupBy(a => a.Group.Id))
+                foreach (var item in appointments.GroupBy(a => a.Group.Id))
                 {
                     if (appointmentStore.TryGetValue(item.Key, out GroupResource group))
                     {
                         group.Appointments.AddRange(item);
                         item.AsParallel().ForAll(a => a.Show());
+                    }
+                    else
+                    {
+                        item.AsParallel().ForAll(a => a.Hide());
                     }
                 }
             }
@@ -418,6 +429,7 @@ namespace Scheduler
             {
                 if (appointmentStore.TryGetValue(appointment.Key, out GroupResource group))
                 {
+                    group.Appointments.ForEach(appointment => appointment.Hide());
                     group.Appointments.Clear();
                 }
             }

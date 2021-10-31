@@ -46,12 +46,6 @@ namespace Scheduler
                             X = (appointment.StartDateTime - arg.SchedulerStartDate.Date).TotalMinutes * minuteGap,
                             Y = arg.ExtendedMode * appointment.Group.Order
                         };
-
-                        appointment.Show();
-                    }
-                    else
-                    {
-                        appointment.Hide();
                     }
                 }
             }
