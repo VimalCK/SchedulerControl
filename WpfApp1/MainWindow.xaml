@@ -31,8 +31,8 @@
         </Grid.RowDefinitions>
 
         <control:ScheduleControl x:Name="sc"
-                                 StartDate="{Binding ElementName=sdt, Path=SelectedDate}"
-                                 EndDate="{Binding ElementName=edt, Path=SelectedDate}"
+                                 StartDate="{Binding ElementName=sdt, Path=SelectedDate, Mode=TwoWay}"
+                                 EndDate="{Binding ElementName=edt, Path=SelectedDate, Mode=TwoWay}"
                                  ExtendedMode="{Binding ExtendedMode}"
                                  TimeLineZoom="{Binding TimeLineZoom}"
                                  TimeLineColor="{Binding TimelineColor, Mode=TwoWay}"
@@ -50,9 +50,9 @@
         <WrapPanel Orientation="Horizontal"
                    Grid.Row="1">
             <DatePicker x:Name="sdt"
-                        SelectedDate="{Binding StartDate}" />
+                        SelectedDate="{Binding StartDate, Mode=TwoWay}" />
             <DatePicker x:Name="edt"
-                        SelectedDate="{Binding EndDate}" />
+                        SelectedDate="{Binding EndDate, Mode=TwoWay}" />
             <Button Content="Timeline Color"
                     Command="{Binding TimeLineColorCommand}" />
             <Button Content="Extended Mode"
@@ -69,16 +69,6 @@
                     Command="{Binding AddTimelineCommand}" />
             <Button Content="Remove TimeLine"
                     Command="{Binding RemoveTimelineCommand}" />
-            <Button Content="Load Appointments"
-                    Command="{Binding LoadAppointmentsCommand}" />
-            <Button Content="Add Appointment"
-                    Command="{Binding AddAppointmentCommand}" />
-            <Button Content="Remove Appointment"
-                    Command="{Binding RemoveAppointmentCommand}" />
-            <Button Content="Change Appointment Time"
-                    Command="{Binding ChangeAppointmentTimeCommand}" />
-            <Button Content="Change Group"
-                    Command="{Binding ChangeGroupCommand}" />
         </WrapPanel>
     </Grid>
 </Window>

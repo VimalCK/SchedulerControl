@@ -50,10 +50,10 @@ namespace Scheduler
             (d, value) => value ?? Brushes.LightGray));
 
         public static readonly DependencyProperty StartDateProperty = DependencyProperty.Register(
-            "StartDate", typeof(DateTime), typeof(ScheduleControl), new PropertyMetadata(DateTime.Now, OnScheduleDateChanged, CoerceScheduleDates));
+            "StartDate", typeof(DateTime), typeof(ScheduleControl), new PropertyMetadata(DateTime.Now, OnScheduleDateChanged));
 
         public static readonly DependencyProperty EndDateProperty = DependencyProperty.Register(
-            "EndDate", typeof(DateTime), typeof(ScheduleControl), new PropertyMetadata(DateTime.Now, OnScheduleDateChanged, CoerceScheduleDates));
+            "EndDate", typeof(DateTime), typeof(ScheduleControl), new PropertyMetadata(DateTime.Now, OnScheduleDateChanged));
 
         public static readonly DependencyProperty TimeLineZoomProperty = DependencyProperty.Register(
             "TimeLineZoom", typeof(TimeLineZoom), typeof(ScheduleControl), new PropertyMetadata(TimeLineZoom.TwentyFour, OnTimeLineZoomChanged,
@@ -140,9 +140,22 @@ namespace Scheduler
             set => SetValue(TimeLineProvidersProperty, value);
         }
 
+        internal int ViewRange
+        {
+            get
+            {
+                var viewRange = (EndDate.Date - StartDate.Date).Days + 1;
+                if (viewRange <= 0 || viewRange > 100)
+                {
+                    throw new Exception("Start and End dates are not in expected range.");
+                }
+
+                return viewRange;
+            }
+        }
         public Size ViewPortArea => viewPortArea;
         public Size RequiredViewPortArea => requiredViewPortArea;
-        internal int ViewRange => (EndDate.Date - StartDate.Date).Days + 1;
+
         private IEnumerable<Appointment> VisibleAppointments => AppointmentSource?.Where(a => a.IsVisible);
         public ScheduleControl()
         {
@@ -304,13 +317,6 @@ namespace Scheduler
             var control = (ScheduleControl)d;
             if (control.IsLoaded)
             {
-                if (control.ViewRange <= 0)
-                {
-                    d.CoerceValue(StartDateProperty);
-                    d.CoerceValue(EndDateProperty);
-                    return;
-                }
-
                 control.InvalidateChildControlsArea();
                 control.dateHeader.ReArrangeHeaders();
                 control.appointmentRenderingCanvas.Render(control.VisibleAppointments);
@@ -330,8 +336,9 @@ namespace Scheduler
                 if (e.NewValue is INotifyCollectionChanged newCollection)
                 {
                     newCollection.CollectionChanged += control.TimeLineProvidersCollectionChanged;
-                    control.timerulerPanel.Render();
                 }
+
+                control.timerulerPanel.Render();
             }
         }
 
@@ -371,13 +378,6 @@ namespace Scheduler
             PrepareScheduleControl();
             SyncGroupsInAppointmentStore(GroupBy);
             SyncAndRenderAppointments();
-        }
-
-        private static object CoerceScheduleDates(DependencyObject d, object baseValue)
-        {
-            var control = (ScheduleControl)d;
-            var date = (DateTime)baseValue;
-            return date.Equals(default(DateTime)) || control.EndDate < control.StartDate ? control.StartDate : date;
         }
 
         private void SyncAndRenderAppointments()

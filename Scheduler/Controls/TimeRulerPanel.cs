@@ -38,25 +38,22 @@ namespace Scheduler
 
         public void Render()
         {
-            if (RenderRequired())
+            if (!parent.TimeLineProviders.IsNullOrEmpty() && RenderRequired() && parent.ViewPortArea.Width > 0)
             {
-                if (parent.ViewPortArea.Width > 0)
+                var drawingContext = backingStore.Open();
+                var minuteGap = (parent.ViewPortArea.Width / (int)parent.TimeLineZoom) / 60;
+                var currentTimePosition = (DateTime.Now - parent.StartDate).TotalMinutes * minuteGap;
+                foreach (var ruler in parent.TimeLineProviders)
                 {
-                    var drawingContext = backingStore.Open();
-                    var minuteGap = (parent.ViewPortArea.Width / (int)parent.TimeLineZoom) / 60;
-                    var currentTimePosition = (DateTime.Now - parent.StartDate).TotalMinutes * minuteGap;
-                    foreach (var ruler in parent.TimeLineProviders)
+                    var xAxis = currentTimePosition + (ruler.Time.TotalMinutes * minuteGap);
+                    if (xAxis > 0 && xAxis <= ActualWidth)
                     {
-                        var xAxis = currentTimePosition + (ruler.Time.TotalMinutes * minuteGap);
-                        if (xAxis > 0 && xAxis <= ActualWidth)
-                        {
-                            var pen = new Pen(ruler.Color, ruler.Thickness);
-                            drawingContext.DrawLine(pen, new Point(xAxis, 0), new Point(xAxis, ActualHeight));
-                        }
+                        var pen = new Pen(ruler.Color, ruler.Thickness);
+                        drawingContext.DrawLine(pen, new Point(xAxis, 0), new Point(xAxis, ActualHeight));
                     }
-
-                    drawingContext.Close();
                 }
+
+                drawingContext.Close();
             }
         }
 

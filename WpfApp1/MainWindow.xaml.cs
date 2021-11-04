@@ -52,11 +52,6 @@ namespace WpfApp1
         public ICommand RemoveGroupResourceCommand { get; set; }
         public ICommand AddTimelineCommand { get; set; }
         public ICommand RemoveTimelineCommand { get; set; }
-        public ICommand LoadAppointmentsCommand { get; set; }
-        public ICommand AddAppointmentCommand { get; set; }
-        public ICommand RemoveAppointmentCommand { get; set; }
-        public ICommand ChangeAppointmentTimeCommand { get; set; }
-        public ICommand ChangeGroupCommand { get; set; }
 
         public ObservableCollection<Appointment> Appointments
         {
@@ -153,76 +148,10 @@ namespace WpfApp1
             RemoveGroupResourceCommand = new RelayCommand(RemoveGroupResource);
             AddTimelineCommand = new RelayCommand(AddTimeline);
             RemoveTimelineCommand = new RelayCommand(RemoveTimeline);
-            LoadAppointmentsCommand = new RelayCommand(LoadAppointments);
-            AddAppointmentCommand = new RelayCommand(AddAppointments);
-            RemoveAppointmentCommand = new RelayCommand(RemoveAppointments);
-            ChangeAppointmentTimeCommand = new RelayCommand(ChangeAppointmentTime);
-            ChangeGroupCommand = new RelayCommand(ChangeGroup);
             LoadClearGroupResources(null);
             LoadTimelineProviders();
         }
 
-        private void ChangeGroup(object obj)
-        {
-            bool value = false;
-            foreach (Appointment item in Appointments.Where(a => (a.Group as CustomGroup).Header == "AAA"))
-            {
-                item.Group = value ? GroupResources.OfType<CustomGroup>().First(g => g.Header == "AAH") :
-                    GroupResources.OfType<CustomGroup>().First(g => g.Header == "AAI");
-                value = !value;
-                Task.Delay(50);
-            }
-        }
-
-        private void ChangeAppointmentTime(object obj)
-        {
-            foreach (var item in Appointments.ToList())
-            {
-                if ((item.EndDateTime - item.StartDateTime).Hours > 3)
-                {
-                    item.EndDateTime = item.EndDateTime.AddHours(-2);
-                }
-                if ((item.EndDateTime - item.StartDateTime).Hours < 3)
-                {
-                    item.EndDateTime = item.EndDateTime.AddHours(3);
-                }
-            }
-        }
-
-        private void RemoveAppointments(object obj)
-        {
-            var appointments = Appointments.ToList();
-            foreach (var item in Appointments.ToList())
-            {
-                Appointments.Remove(item);
-                Task.Delay(50);
-            }
-        }
-
-        private void AddAppointments(object obj)
-        {
-            int index = 0;
-            foreach (var group in GroupResources)
-            {
-                var startDate = DateTime.Today.AddDays(7);
-                var endDate = DateTime.Today.AddDays(7);
-                var noOfFlights = new Random().Next(4, 6);
-                var hour = new Random();
-                for (int i = 0; i <= noOfFlights; i++)
-                {
-                    startDate = startDate.AddHours(hour.Next(1, 3));
-                    endDate = startDate.AddHours(hour.Next(2, 4));
-                    Appointments.Add(new Appointment(startDate, endDate, group)
-                    {
-                        Description = $"FL-{group.ToString()}-{i + 1} : {startDate.ToString("HH:mm")}-{endDate.ToString("HH:mm")}"
-                    });
-
-                    startDate = endDate;
-                }
-
-                index++;
-            }
-        }
 
         private void LoadAppointments(object value)
         {
