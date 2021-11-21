@@ -25,8 +25,8 @@ namespace Scheduler
         protected override void OnInitialized(EventArgs e)
         {
             base.OnInitialized(e);
-            templatedParent = (ScheduleControl)TemplatedParent;
-            templatedParent.ScrollChanged += ScrollViewerScrollChanged;
+            //templatedParent = (ScheduleControl)TemplatedParent;
+            //templatedParent.ScrollChanged += ScrollViewerScrollChanged;
         }
 
         internal void ReArrangeHeaders()

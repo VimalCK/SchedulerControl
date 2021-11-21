@@ -16,13 +16,14 @@ namespace Scheduler
     [TemplatePart(Name = "PART_ContentSection", Type = typeof(Grid))]
     [TemplatePart(Name = "PART_RulerGrid", Type = typeof(RulerGrid))]
     [TemplatePart(Name = "PART_ScrollViewer", Type = typeof(ScrollViewer))]
-    [TemplatePart(Name = "PART_DateHeader", Type = typeof(DateHeader))]
-    [TemplatePart(Name = "PART_TimeRulerPanel", Type = typeof(TimeRulerPanel))]
-    [TemplatePart(Name = "PART_TimeLineHeader", Type = typeof(TimeLineHeader))]
-    [TemplatePart(Name = "PART_GroupContainer", Type = typeof(ListBox))]
-    [TemplatePart(Name = "PART_HeaderSection", Type = typeof(Grid))]
-    [TemplatePart(Name = "PART_AppointmentRenderingCanvas", Type = typeof(AppointmentRenderingCanvas))]
-    [TemplatePart(Name = "PART_AppointmentContainer", Type = typeof(ListBox))]
+    //[TemplatePart(Name = "PART_DateHeader", Type = typeof(DateHeader))]
+    //[TemplatePart(Name = "PART_TimeRulerPanel", Type = typeof(TimeRulerPanel))]
+    //[TemplatePart(Name = "PART_TimeLineHeader", Type = typeof(TimeLineHeader))]
+    //[TemplatePart(Name = "PART_GroupContainer", Type = typeof(ListBox))]
+    //[TemplatePart(Name = "PART_HeaderSection", Type = typeof(Grid))]
+    //[TemplatePart(Name = "PART_AppointmentRenderingCanvas", Type = typeof(AppointmentRenderingCanvas))]
+    //[TemplatePart(Name = "PART_AppointmentContainer", Type = typeof(ListBox))]
+    [TemplatePart(Name = "PART_DaysViewCollection", Type = typeof(DaysViewCollection))]
     public class ScheduleControl : Control
     {
         public event ScrollChangedEventHandler ScrollChanged;
@@ -34,7 +35,7 @@ namespace Scheduler
         private ListBox groupByContainer;
         private Grid contentSection;
         private RulerGrid rulerGrid;
-        private DateHeader dateHeader;
+        //private DateHeader dateHeader;
         private TimeRulerPanel timerulerPanel;
         private TimeLineHeader timeLineHeader;
         private ScrollViewer schedulerScrollViewer;
@@ -42,6 +43,8 @@ namespace Scheduler
         private Grid headerSection;
         private AppointmentRenderingCanvas appointmentRenderingCanvas;
         private ListBox appointmentContainer;
+
+        private DaysViewCollection daysViewCollection;
 
 
 
@@ -172,12 +175,14 @@ namespace Scheduler
             contentSection = GetTemplateChild("PART_ContentSection") as Grid;
             rulerGrid = GetTemplateChild("PART_RulerGrid") as RulerGrid;
             schedulerScrollViewer = GetTemplateChild("PART_ScrollViewer") as ScrollViewer;
-            dateHeader = GetTemplateChild("PART_DateHeader") as DateHeader;
+            //dateHeader = GetTemplateChild("PART_DateHeader") as DateHeader;
             timerulerPanel = GetTemplateChild("PART_TimeRulerPanel") as TimeRulerPanel;
             timeLineHeader = GetTemplateChild("PART_TimeLineHeader") as TimeLineHeader;
             groupByContainer = GetTemplateChild("PART_GroupContainer") as ListBox;
             headerSection = GetTemplateChild("PART_HeaderSection") as Grid;
             appointmentContainer = GetTemplateChild("PART_AppointmentContainer") as ListBox;
+
+            daysViewCollection = GetTemplateChild("PART_DaysViewCollection") as DaysViewCollection;
 
             HandleEvents();
         }
@@ -318,8 +323,8 @@ namespace Scheduler
             if (control.IsLoaded)
             {
                 control.InvalidateChildControlsArea();
-                control.dateHeader.ReArrangeHeaders();
-                control.appointmentRenderingCanvas.Render(control.VisibleAppointments);
+                control.daysViewCollection.CreateDaysView();
+                //control.appointmentRenderingCanvas.Render(control.VisibleAppointments);
             }
         }
 
@@ -383,17 +388,17 @@ namespace Scheduler
         private void SyncAndRenderAppointments()
         {
             SyncAppointmentsInAppointmentsStore(AppointmentSource);
-            appointmentRenderingCanvas.Render(VisibleAppointments);
+            //appointmentRenderingCanvas.Render(VisibleAppointments);
         }
         private void PrepareScheduleControl()
         {
             GetScrollbarSize();
             FindAppointmentRenderingCanvas();
             InvalidateChildControlsArea();
-            dateHeader.ReArrangeHeaders();
+            daysViewCollection.CreateDaysView();
 
-            (GetTemplateChild("PART_HeaderSectionRightGapMask") as Border).Width = scrollBarSpace;
-            (GetTemplateChild("PART_HeaderSectionBottomGapMask") as Border).Height = scrollBarSpace;
+            //(GetTemplateChild("PART_HeaderSectionRightGapMask") as Border).Width = scrollBarSpace;
+            //(GetTemplateChild("PART_HeaderSectionBottomGapMask") as Border).Height = scrollBarSpace;
         }
 
         private void SyncAppointmentsInAppointmentsStore(IEnumerable<Appointment> appointments)
@@ -503,13 +508,13 @@ namespace Scheduler
         {
             CalculateViewPortSize();
             CalculateRequiredAreaSize();
-            if (contentSection.RenderSize != requiredViewPortArea)
-            {
-                contentSection.Width = requiredViewPortArea.Width;
-                headerSection.Width = requiredViewPortArea.Width;
-                contentSection.Height = requiredViewPortArea.Height;
-                return true;
-            }
+            //if (contentSection.RenderSize != requiredViewPortArea)
+            //{
+            //    contentSection.Width = requiredViewPortArea.Width;
+            //    headerSection.Width = requiredViewPortArea.Width;
+            //    contentSection.Height = requiredViewPortArea.Height;
+            //    return true;
+            //}
 
             return false;
         }

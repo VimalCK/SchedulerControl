@@ -22,8 +22,8 @@ namespace Scheduler
         protected override void OnInitialized(EventArgs e)
         {
             base.OnInitialized(e);
-            parent = (ScheduleControl)TemplatedParent;
-            parent.ScrollChanged += ParentScrollChanged;
+            //parent = (ScheduleControl)TemplatedParent;
+            //parent.ScrollChanged += ParentScrollChanged;
         }
 
         private void ParentScrollChanged(object sender, System.Windows.Controls.ScrollChangedEventArgs e)

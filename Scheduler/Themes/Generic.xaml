@@ -1,6 +1,10 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:Scheduler">
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/Scheduler;component/Themes/DayView.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
     <Style TargetType="local:AppointmentItem">
         <Setter Property="SnapsToDevicePixels"
                 Value="True" />
@@ -159,6 +163,43 @@
         </Setter>
     </Style>
 
+    <Style TargetType="{x:Type local:DaysViewCollection}">
+        <Setter Property="UseLayoutRounding"
+                Value="True" />
+        <Setter Property="ScrollViewer.CanContentScroll"
+                Value="False" />
+        <Setter Property="ItemsPanel">
+            <Setter.Value>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style TargetType="{x:Type local:DayView}">
+        <Setter Property="UseLayoutRounding"
+                Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:DayView">
+                    <Grid Width="1000">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="25" />
+                            <RowDefinition Height="25" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <local:ContentTransformLabel x:Name="PART_DateHeader"
+                                                     Content="{Binding}" />
+                        <local:TimeLineHeader x:Name="PART_TimeLineHeader"
+                                              Grid.Row="1" />
+                        <local:RulerGrid x:Name="PART_RulerGrid"
+                                         Grid.Row="2" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style TargetType="{x:Type local:ScheduleControl}">
         <Setter Property="SnapsToDevicePixels"
                 Value="True" />
@@ -186,10 +227,11 @@
                                                        AncestorType=local:ScheduleControl}, 
                                                        Path=TimeLineColor}" />
 
-                        <Grid x:Name="PART_HeaderSection"
+                        <!--<Grid x:Name="PART_HeaderSection"
                               Grid.Column="1"
                               HorizontalAlignment="Left"
-                              VerticalAlignment="Stretch">
+                              VerticalAlignment="Stretch"
+                              Visibility="Hidden">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*" />
                                 <RowDefinition Height="*" />
@@ -197,9 +239,9 @@
                             <local:DateHeader x:Name="PART_DateHeader" />
                             <local:TimeLineHeader x:Name="PART_TimeLineHeader"
                                                   Grid.Row="1" />
-                        </Grid>
+                        </Grid>-->
 
-                        <Border x:Name="PART_GroupHeaderTopGapMask"
+                        <!--<Border x:Name="PART_GroupHeaderTopGapMask"
                                 BorderBrush="{TemplateBinding TimeLineColor}"
                                 BorderThickness="0,0,1,.5" />
 
@@ -216,23 +258,23 @@
                                 BorderThickness="0,1,0,0"
                                 Background="White"
                                 Grid.Row="2"
-                                VerticalAlignment="Bottom" />
+                                VerticalAlignment="Bottom" />-->
 
                         <ScrollViewer x:Name="PART_ScrollViewer"
-                                      HorizontalScrollBarVisibility="Visible"
-                                      VerticalScrollBarVisibility="Visible"
                                       Grid.Column="1"
-                                      Grid.Row="1"
+                                      Grid.Row="0"
                                       Grid.RowSpan="2">
-                            <Grid x:Name="PART_ContentSection"
-                                  Style="{StaticResource ScheduleGridStyle}">
-                                <local:RulerGrid x:Name="PART_RulerGrid" />
-                                <local:AppointmentContainer x:Name="PART_AppointmentContainer"
-                                                            ItemsSource="{Binding RelativeSource={RelativeSource 
+                            <local:DaysViewCollection x:Name="PART_DaysViewCollection" />
+                            <!--<Grid x:Name="PART_ContentSection"
+                                      Visibility="Hidden"
+                                      Style="{StaticResource ScheduleGridStyle}">
+                                    <local:RulerGrid x:Name="PART_RulerGrid" />
+                                    <local:AppointmentContainer x:Name="PART_AppointmentContainer"
+                                                                ItemsSource="{Binding RelativeSource={RelativeSource 
                                                                                   Mode=TemplatedParent}, 
                                                                                   Path=AppointmentSource}" />
-                                <local:TimeRulerPanel x:Name="PART_TimeRulerPanel" />
-                            </Grid>
+                                    <local:TimeRulerPanel x:Name="PART_TimeRulerPanel" />
+                                </Grid>-->
                         </ScrollViewer>
                     </Grid>
                 </ControlTemplate>
