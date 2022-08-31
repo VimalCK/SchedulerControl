@@ -124,8 +124,8 @@ namespace Scheduler
             }
 
             drawingContext.PushTransform(new TranslateTransform());
-            drawingContext.DrawText(new FormattedText(Content ?? string.Empty, Helper.CultureInfo, FlowDirection.LeftToRight,
-                 Helper.Typeface, 10, Brushes.Gray, Helper.GetPixelsPerDpi(this)), new Point(0, ActualHeight / 3));
+            drawingContext.DrawText(new FormattedText(Content ?? string.Empty, UIExtensions.CultureInfo, FlowDirection.LeftToRight,
+                 UIExtensions.Typeface, 10, Brushes.Gray, UIExtensions.GetPixelsPerDpi(this)), new Point(0, ActualHeight / 3));
 
             drawingContext.Pop();
             drawingContext.Close();

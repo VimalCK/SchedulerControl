@@ -1,22 +1,21 @@
-﻿using System;
+﻿using Scheduler.Common;
+using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Media;
-using System.Linq;
+using static Scheduler.Common.Values;
 
 namespace Scheduler
 {
-    internal sealed class DateHeader : Grid
+    internal sealed class DateHeader : FrameworkElement
     {
+        private DrawingGroup backingStore;
         private ScheduleControl templatedParent;
-        private TranslateTransform transform;
 
         public DateHeader()
         {
             DefaultStyleKey = typeof(DateHeader);
-            transform = new();
-            RenderTransform = transform;
+            backingStore = new DrawingGroup();
             Loaded += DateHeaderLoaded;
         }
 
@@ -29,81 +28,52 @@ namespace Scheduler
             templatedParent.ScrollChanged += ScrollViewerScrollChanged;
         }
 
-        internal void ReArrangeHeaders()
+        internal void Render() => this.InvalidateVisual();
+        protected override void OnRender(DrawingContext drawingContext)
         {
-            int range = templatedParent.ViewRange;
-            int existingCount = Children.Count;
-            int requiredItems = range - existingCount;
-            if (requiredItems >= 0)
+            if (templatedParent is null || ActualWidth == Zero)
             {
-                ContentTransformLabel label;
-                for (int index = 0; index < range; index++)
-                {
-                    if (index < existingCount)
-                    {
-                        label = (ContentTransformLabel)Children[index];
-                    }
-                    else
-                    {
-                        ColumnDefinitions.Add(new() { Width = new GridLength(1, GridUnitType.Star) });
-                        label = new();
-                        Children.Add(label);
-                        Grid.SetColumn(label, index);
-                    }
-
-                    label.Content = $" {templatedParent.StartDate.AddDays(index):dd-MM-yyyy}";
-                }
-            }
-            else if (requiredItems < 0)
-            {
-                requiredItems = Math.Abs(requiredItems);
-                ColumnDefinitions.RemoveRange(templatedParent.ViewRange, requiredItems);
-                Children.RemoveRange(templatedParent.ViewRange, requiredItems);
-                for (int index = 0; index < Children.Count; index++)
-                {
-                    var label = (ContentTransformLabel)Children[index];
-                    label.Content = $" {templatedParent.StartDate.AddDays(index):dd-MM-yyyy}";
-                }
-            }
-        }
-
-        private void DateHeaderLoaded(object sender, RoutedEventArgs e) => Loaded -= DateHeaderLoaded;
-
-        private void ScrollViewerScrollChanged(object sender, ScrollChangedEventArgs e)
-        {
-            var width = templatedParent.RequiredViewPortArea.Width / templatedParent.ViewRange;
-            var currentIndex = (short)(e.HorizontalOffset / width);
-            var change = (width + e.HorizontalOffset) - (width * (currentIndex + 1));
-            var previousIndex = (short)((e.HorizontalOffset - e.HorizontalChange) / width);
-            transform.X = -e.HorizontalOffset;
-            if (change.Equals(0))
-            {
-                DefaultHorizontalOffset();
                 return;
             }
 
-            var label = (ContentTransformLabel)Children[currentIndex];
-            label.HorizontalContentOffset = change;
-            if (!previousIndex.Equals(currentIndex))
-            {
-                DefaultHorizontalOffset();
-            }
+            drawingContext.DrawBorder(this, templatedParent.TimeLineColor, BorderThickness);
+            drawingContext.DrawDrawing(backingStore);
 
-            void DefaultHorizontalOffset()
-            {
-                if (previousIndex > Children.Count - 1)
-                {
-                    previousIndex = --currentIndex;
-                }
-
-               ((ContentTransformLabel)Children[previousIndex]).HorizontalContentOffset = 0;
-            }
+            RenderContent(templatedParent.HorizontalOffset);
         }
 
-        private bool RestrictTransition(ScrollChangedEventArgs e, double offsetChange) =>
-            e.HorizontalOffset.Equals(0) || offsetChange.Equals(0) || offsetChange > templatedParent.RequiredViewPortArea.Width/templatedParent.ViewRange;
+        private void RenderContent(double horizontalOffset = default)
+        {
+            var averageHeight = ActualHeight / 3;
+            var dayOffset = (int)(horizontalOffset / templatedParent.TestSize.Width);
+            var requiredHeaderWidth = ((dayOffset + 1) * templatedParent.TestSize.Width) - horizontalOffset;
+            var startPoint = new Point(requiredHeaderWidth, Zero);
+            var endPoint = new Point(requiredHeaderWidth, ActualHeight);
+            var header = templatedParent.StartDate.AddDays(dayOffset + 1).ToString(ShortDateFormat);
+            var drawingContext = backingStore.Open();
 
+            drawingContext.DrawLine(new Pen(templatedParent.TimeLineColor, HeaderLineThickness), startPoint, endPoint);
+            drawingContext.DrawText(this, header, endPoint.X + DateHeaderOffset, averageHeight);
+
+            if (templatedParent.TimeLineZoom.Equals(TimeLineZoom.FortyEight))
+            {
+                var nearAdjacentHeaderWidth = requiredHeaderWidth + templatedParent.TestSize.Width;
+                startPoint = new Point(nearAdjacentHeaderWidth, Zero);
+                endPoint = new Point(nearAdjacentHeaderWidth, ActualHeight);
+                header = templatedParent.StartDate.AddDays(dayOffset + 2).ToString(ShortDateFormat);
+                drawingContext.DrawLine(new Pen(templatedParent.TimeLineColor, HeaderLineThickness), startPoint, endPoint);
+                drawingContext.DrawText(this, header, endPoint.X + DateHeaderOffset, averageHeight);
+            }
+
+            header = templatedParent.StartDate.AddDays(dayOffset).ToString(ShortDateFormat);
+            drawingContext.PushClip(requiredHeaderWidth, ActualHeight);
+            drawingContext.DrawText(this, header, DateHeaderOffset, averageHeight);
+            drawingContext.Pop();
+            drawingContext.Close();
+        }
 
         private void RemoveHandlers() => templatedParent.ScrollChanged -= ScrollViewerScrollChanged;
+        private void DateHeaderLoaded(object sender, RoutedEventArgs e) => Loaded -= DateHeaderLoaded;
+        private void ScrollViewerScrollChanged(object sender, ScrollChangedEventArgs e) => RenderContent(e.HorizontalOffset);
     }
 }

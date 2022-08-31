@@ -18,18 +18,18 @@ namespace Scheduler.Types
         private GroupResource group;
         private double renderedHeight;
         private double renderedWidth;
-        private Point located;
+        private Point location;
         private Visibility visibility = Visibility.Collapsed;
 
         public Visibility Visibility => visibility;
         public bool IsVisible => visibility == Visibility.Visible;
 
-        public Point Located
+        public Point Location
         {
-            get { return located; }
+            get { return location; }
             internal set
             {
-                located = value;
+                location = value;
                 OnPropertyChanged();
             }
         }
@@ -138,5 +138,7 @@ namespace Scheduler.Types
 
         private void OnAppointmentDateChanged(DateTime oldValue, DateTime newValue) =>
             AppointmentTimeChanged?.Invoke(this, new AppointmentTimeChangedEventArgs(oldValue, newValue));
+
+        private void InvalidateLocation() { }
     }
 }

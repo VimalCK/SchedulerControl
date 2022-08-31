@@ -8,6 +8,9 @@ namespace Scheduler
     public readonly struct TimeRuler
     {
         private readonly TimeSpan times;
+
+        public TimeRuler() { }
+
         public Brush Color { get; init; }
         public double Thickness { get; init; } = 1.5;
 

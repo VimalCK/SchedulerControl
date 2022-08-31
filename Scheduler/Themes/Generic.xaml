@@ -107,8 +107,6 @@
     <Style TargetType="{x:Type local:DateHeader}">
         <Setter Property="SnapsToDevicePixels"
                 Value="True" />
-        <Setter Property="SnapsToDevicePixels"
-                Value="True" />
         <Setter Property="ClipToBounds"
                 Value="True" />
     </Style>

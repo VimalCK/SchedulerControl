@@ -41,7 +41,7 @@ namespace Scheduler
                     {
                         appointment.RenderedHeight = arg.ExtendedMode / 2;
                         appointment.RenderedWidth = (appointment.EndDateTime - appointment.StartDateTime).TotalMinutes * minuteGap;
-                        appointment.Located = new Point
+                        appointment.Location = new Point
                         {
                             X = (appointment.StartDateTime - arg.SchedulerStartDate.Date).TotalMinutes * minuteGap,
                             Y = arg.ExtendedMode * appointment.Group.Order
@@ -65,7 +65,7 @@ namespace Scheduler
                 foreach (var appointment in appointments)
                 {
                     appointment.RenderedWidth = (appointment.EndDateTime - appointment.StartDateTime).TotalMinutes * minuteGap;
-                    appointment.Located = new Point
+                    appointment.Location = new Point
                     {
                         X = (appointment.StartDateTime - arg.SchedulerStartDate.Date).TotalMinutes * minuteGap,
                         Y = arg.ExtendedMode * appointment.Group.Order
@@ -88,7 +88,7 @@ namespace Scheduler
                 foreach (var appointment in appointments)
                 {
                     appointment.RenderedHeight = arg.ExtendedMode / 2;
-                    appointment.Located = new Point
+                    appointment.Location = new Point
                     {
                         X = (appointment.StartDateTime - arg.SchedulerStartDate.Date).TotalMinutes * minuteGap,
                         Y = arg.ExtendedMode * appointment.Group.Order

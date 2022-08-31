@@ -1,20 +1,23 @@
-﻿using System;
+﻿using Scheduler.Common;
+using System;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using static Scheduler.UIExtensions;
+using static Scheduler.Common.Values;
 
 namespace Scheduler
 {
-    internal sealed class TimeLineHeader : RulerBase
+    internal sealed class TimeLineHeader : FrameworkElement
     {
         private ScheduleControl parent;
-        private TranslateTransform transform = new();
+        //private TranslateTransform transform = new();
         private DrawingGroup backingStore = new();
         public TimeLineHeader()
         {
             DefaultStyleKey = typeof(TimeLineHeader);
-            this.RenderTransform = transform;
+            //this.RenderTransform = transform;
         }
 
         ~TimeLineHeader() => parent.ScrollChanged -= ParentScrollChanged;
@@ -28,58 +31,52 @@ namespace Scheduler
 
         private void ParentScrollChanged(object sender, System.Windows.Controls.ScrollChangedEventArgs e)
         {
-            if (e.HorizontalChange != 0)
+            if (e.HorizontalChange != Zero)
             {
-                transform.X -= e.HorizontalChange;
+                //transform.X -= e.HorizontalChange;
             }
         }
 
         protected override void OnRender(DrawingContext drawingContext)
         {
-            Render();
+            if (parent is null || ActualWidth == Zero)
+            {
+                return;
+            }
+
+            drawingContext.DrawBorder(this, parent.TimeLineColor, BorderThickness);
             drawingContext.DrawDrawing(backingStore);
+
+            RenderContent();
+
         }
 
-        protected internal override void Render()
+        private void RenderContent()
         {
-            if (TemplatedParent is ScheduleControl control && control.ActualWidth != 0)
+            var headerText = Zero;
+            var averageHeight = ActualHeight / 3;
+            var lineStartPoint = new Point();
+            var lineEndPoint = new Point(0, ActualHeight);
+            var timeLineGap = parent.TestSize.Width / 24;
+            var clipWidth = Math.Max(0, timeLineGap - 3);
+            var drawingContext = backingStore.Open();
+
+            for (int timeColumn = 0; timeColumn < 24; timeColumn++)
             {
-                VerticalLines = 24 * control.ViewRange;
+                var formattedTime = TimeSpan.FromHours(headerText++).ToString(TimeFormat);
 
-                if (VerticalLines > 0)
-                {
-                    var drawingContext = backingStore.Open();
-                    Point clippingPoint = new();
-                    Point renderPoint = new(0, ActualHeight / 3);
-                    var headerText = 0;
-
-                    HorizontalLines = 1;
-                    HorizontalGap = ActualHeight;
-                    RulerColor = control.TimeLineColor;
-                    VerticalGap = control.ViewPortArea.Width / (int)control.TimeLineZoom;
-                    var clipWidth = VerticalGap <= 3 ? 0 : VerticalGap - 3;
-                    base.OnRender(drawingContext);
-
-                    for (int i = 0; i < VerticalLines; i++)
-                    {
-                        var formattedTime = new FormattedText($" {TimeSpan.FromHours(headerText).ToString(@"hh\:mm")}", Helper.CultureInfo,
-                                FlowDirection.LeftToRight, Helper.Typeface, 10D, Brushes.Gray, Helper.GetPixelsPerDpi(this));
-
-                        drawingContext.PushClip(new RectangleGeometry(new Rect(clippingPoint, new Size
-                        {
-                            Width = clipWidth,
-                            Height = ActualHeight
-                        })));
-
-                        drawingContext.DrawText(formattedTime, renderPoint);
-                        drawingContext.Pop();
-                        clippingPoint.X = renderPoint.X += VerticalGap;
-                        headerText = headerText >= 23 ? 0 : headerText + 1;
-                    }
-
-                    drawingContext.Close();
-                }
+                drawingContext.PushClip(clipWidth, ActualHeight);
+                drawingContext.DrawText(this, formattedTime, lineStartPoint.X + TimeHeaderOffset, averageHeight);
+                drawingContext.DrawLine(new Pen(parent.TimeLineColor, NarrowThickness), lineStartPoint, lineEndPoint);
+                drawingContext.Pop();
+                lineStartPoint.X += timeLineGap;
+                lineEndPoint.X = lineStartPoint.X;
+                clipWidth += timeLineGap;
             }
+               
+            drawingContext.DrawLine(new Pen(parent.TimeLineColor, HeaderLineThickness), lineStartPoint, lineEndPoint);
+
+            drawingContext.Close();
         }
     }
 }

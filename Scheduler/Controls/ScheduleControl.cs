@@ -145,7 +145,7 @@ namespace Scheduler
             get
             {
                 var viewRange = (EndDate.Date - StartDate.Date).Days + 1;
-                if (viewRange <= 0 || viewRange > 100)
+                if (viewRange is (<= 0 or > 100))
                 {
                     throw new Exception("Start and End dates are not in expected range.");
                 }
@@ -153,6 +153,8 @@ namespace Scheduler
                 return viewRange;
             }
         }
+
+        public double HorizontalOffset => schedulerScrollViewer.HorizontalOffset;
         public Size ViewPortArea => viewPortArea;
         public Size RequiredViewPortArea => requiredViewPortArea;
 
@@ -318,7 +320,7 @@ namespace Scheduler
             if (control.IsLoaded)
             {
                 control.InvalidateChildControlsArea();
-                control.dateHeader.ReArrangeHeaders();
+                //control.dateHeader.ReArrangeHeaders();
                 control.appointmentRenderingCanvas.Render(control.VisibleAppointments);
             }
         }
@@ -350,7 +352,8 @@ namespace Scheduler
             if (control.IsLoaded)
             {
                 control.rulerGrid.Render();
-                control.timeLineHeader.Render();
+                //control.timeLineHeader.Render();
+                control.dateHeader.Render();
             }
         }
         private void ScrollViewerScrollChanged(object sender, ScrollChangedEventArgs e)
@@ -390,7 +393,6 @@ namespace Scheduler
             GetScrollbarSize();
             FindAppointmentRenderingCanvas();
             InvalidateChildControlsArea();
-            dateHeader.ReArrangeHeaders();
 
             (GetTemplateChild("PART_HeaderSectionRightGapMask") as Border).Width = scrollBarSpace;
             (GetTemplateChild("PART_HeaderSectionBottomGapMask") as Border).Height = scrollBarSpace;
@@ -506,8 +508,8 @@ namespace Scheduler
             if (contentSection.RenderSize != requiredViewPortArea)
             {
                 contentSection.Width = requiredViewPortArea.Width;
-                headerSection.Width = requiredViewPortArea.Width;
                 contentSection.Height = requiredViewPortArea.Height;
+                headerSection.Width = viewPortArea.Width;
                 return true;
             }
 
@@ -530,7 +532,12 @@ namespace Scheduler
                 TimeLineZoom.TwentyFour => viewPortArea.Width,
                 TimeLineZoom.FortyEight => viewPortArea.Width / 2,
                 _ => throw new NotImplementedException(),
-            }) * ViewRange;
+            });
+
+            TestSize = requiredViewPortArea;
+            requiredViewPortArea.Width = requiredViewPortArea.Width * ViewRange;
         }
+
+        public Size TestSize { get; set; }
     }
 }

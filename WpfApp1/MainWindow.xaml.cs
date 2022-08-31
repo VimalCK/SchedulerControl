@@ -13,15 +13,6 @@ using System.Windows.Media;
 
 namespace WpfApp1
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    /// 
-    public class Test
-    {
-
-    }
-
     public partial class MainWindow : Window
     {
         public MainWindow()
@@ -289,7 +280,7 @@ namespace WpfApp1
                 }
 
                 GroupResources = new ObservableCollection<GroupResource>(list);
-                LoadAppointments(value);
+               // LoadAppointments(value);
             }
             else
             {
