@@ -49,23 +49,26 @@ namespace Scheduler
             var requiredHeaderWidth = ((dayOffset + 1) * templatedParent.TestSize.Width) - horizontalOffset;
             var startPoint = new Point(requiredHeaderWidth, Zero);
             var endPoint = new Point(requiredHeaderWidth, ActualHeight);
-            var header = templatedParent.StartDate.AddDays(dayOffset + 1).ToString(ShortDateFormat);
+            var header = templatedParent.StartDate.AddDays(dayOffset).ToString(ShortDateFormat);
             var drawingContext = backingStore.Open();
-
-            drawingContext.DrawLine(new Pen(templatedParent.TimeLineColor, HeaderLineThickness), startPoint, endPoint);
-            drawingContext.DrawText(this, header, endPoint.X + DateHeaderOffset, averageHeight);
 
             if (templatedParent.TimeLineZoom.Equals(TimeLineZoom.FortyEight))
             {
+                var adjacentHeader = templatedParent.StartDate.AddDays(++dayOffset).ToString(ShortDateFormat);
+                drawingContext.DrawLine(new Pen(templatedParent.TimeLineColor, HeaderLineThickness), startPoint, endPoint);
+                drawingContext.DrawText(this, adjacentHeader, endPoint.X + DateHeaderOffset, averageHeight);
+            }
+
+            if (horizontalOffset is not Zero)
+            {
+                var nearAdjacentHeader = templatedParent.StartDate.AddDays(++dayOffset).ToString(ShortDateFormat);
                 var nearAdjacentHeaderWidth = requiredHeaderWidth + templatedParent.TestSize.Width;
                 startPoint = new Point(nearAdjacentHeaderWidth, Zero);
                 endPoint = new Point(nearAdjacentHeaderWidth, ActualHeight);
-                header = templatedParent.StartDate.AddDays(dayOffset + 2).ToString(ShortDateFormat);
                 drawingContext.DrawLine(new Pen(templatedParent.TimeLineColor, HeaderLineThickness), startPoint, endPoint);
-                drawingContext.DrawText(this, header, endPoint.X + DateHeaderOffset, averageHeight);
+                drawingContext.DrawText(this, nearAdjacentHeader, endPoint.X + DateHeaderOffset, averageHeight);
             }
 
-            header = templatedParent.StartDate.AddDays(dayOffset).ToString(ShortDateFormat);
             drawingContext.PushClip(requiredHeaderWidth, ActualHeight);
             drawingContext.DrawText(this, header, DateHeaderOffset, averageHeight);
             drawingContext.Pop();

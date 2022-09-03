@@ -33,8 +33,10 @@ namespace Scheduler
         {
             if (e.HorizontalChange != Zero)
             {
-                //transform.X -= e.HorizontalChange;
+                return; //transform.X -= e.HorizontalChange;
             }
+
+            RenderContent(e.HorizontalChange);
         }
 
         protected override void OnRender(DrawingContext drawingContext)
@@ -51,15 +53,30 @@ namespace Scheduler
 
         }
 
-        private void RenderContent()
+        private void RenderContent(double offset = 0)
+        {
+            var lineStartPoint = new Point();
+            var lineEndPoint = new Point(0, ActualHeight);
+            var drawingContext = backingStore.Open();
+
+            DrawTimeline(drawingContext, ref lineStartPoint, ref lineEndPoint);
+            drawingContext.DrawLine(new Pen(parent.TimeLineColor, HeaderLineThickness), lineStartPoint, lineEndPoint);
+
+            if (parent.TimeLineZoom.Equals(TimeLineZoom.FortyEight))
+            {
+                DrawTimeline(drawingContext, ref lineStartPoint, ref lineEndPoint);
+                drawingContext.DrawLine(new Pen(parent.TimeLineColor, HeaderLineThickness), lineStartPoint, lineEndPoint);
+            }
+
+            drawingContext.Close();
+        }
+
+        private void DrawTimeline(DrawingContext drawingContext, ref Point lineStartPoint, ref Point lineEndPoint)
         {
             var headerText = Zero;
             var averageHeight = ActualHeight / 3;
-            var lineStartPoint = new Point();
-            var lineEndPoint = new Point(0, ActualHeight);
             var timeLineGap = parent.TestSize.Width / 24;
-            var clipWidth = Math.Max(0, timeLineGap - 3);
-            var drawingContext = backingStore.Open();
+            var clipWidth = Math.Max(0, lineStartPoint.X + timeLineGap - 3);
 
             for (int timeColumn = 0; timeColumn < 24; timeColumn++)
             {
@@ -73,10 +90,6 @@ namespace Scheduler
                 lineEndPoint.X = lineStartPoint.X;
                 clipWidth += timeLineGap;
             }
-               
-            drawingContext.DrawLine(new Pen(parent.TimeLineColor, HeaderLineThickness), lineStartPoint, lineEndPoint);
-
-            drawingContext.Close();
         }
     }
 }
