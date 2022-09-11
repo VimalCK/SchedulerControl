@@ -47,55 +47,37 @@ namespace Scheduler
 
         private void RenderContent(double horizontalOffset = default)
         {
-            var difference = horizontalOffset % parent.TestSize.Width;
+            var numberOfHeaders = 1;
+            var difference = default(double);
             var numberOfHeadersScrolled = (int)(horizontalOffset / parent.TestSize.Width);
-            var numberOfHeaders = parent.TimeLineZoom.Equals(TimeLineZoom.FortyEight) ? 2 : 1;
-            difference = horizontalOffset.Equals(Zero) ? parent.TestSize.Width : parent.ViewPortArea.Width - difference;
+            if (parent.TimeLineZoom.Equals(TimeLineZoom.FortyEight))
+            {
+                numberOfHeaders = 2;
+                difference = parent.TestSize.Width;
+            }
+
             if (horizontalOffset is not Zero)
             {
                 numberOfHeaders++;
+                difference = parent.ViewPortArea.Width - (horizontalOffset % parent.TestSize.Width);
             }
 
             var startPoint = new Point(difference, 0);
             var endPoint = new Point(difference, ActualHeight);
             var drawingContext = backingStore.Open();
 
-
             for (int day = numberOfHeaders; day > Zero;)
             {
                 var header = parent.StartDate.AddDays(numberOfHeadersScrolled + --day).ToString(ShortDateFormat);
                 drawingContext.DrawLine(new Pen(parent.TimeLineColor, HeaderLineThickness), startPoint, endPoint);
                 drawingContext.DrawText(this, header, endPoint.X + DateHeaderOffset, averageHeight);
-                startPoint.X -= parent.TestSize.Width;
+                drawingContext.PushClip(Math.Max(0, startPoint.X), ActualHeight);
+                startPoint.X = Math.Max(0, startPoint.X - parent.TestSize.Width);
                 endPoint.X = startPoint.X;
             }
 
+            drawingContext.Pop();
             drawingContext.Close();
-            //var dayOffset = (int)(horizontalOffset / templatedParent.TestSize.Width);
-            //var requiredHeaderWidth = ((dayOffset + 1) * templatedParent.TestSize.Width) - horizontalOffset;
-            //var startPoint = new Point(requiredHeaderWidth, Zero);
-            //var endPoint = new Point(requiredHeaderWidth, ActualHeight);
-            //var header = templatedParent.StartDate.AddDays(dayOffset + 1).ToString(ShortDateFormat);
-            //var drawingContext = backingStore.Open();
-
-            //drawingContext.DrawLine(new Pen(templatedParent.TimeLineColor, HeaderLineThickness), startPoint, endPoint);
-            //drawingContext.DrawText(this, header, endPoint.X + DateHeaderOffset, averageHeight);
-
-            //if (templatedParent.TimeLineZoom.Equals(TimeLineZoom.FortyEight))
-            //{
-            //    var nearAdjacentHeaderWidth = requiredHeaderWidth + templatedParent.TestSize.Width;
-            //    startPoint = new Point(nearAdjacentHeaderWidth, Zero);
-            //    endPoint = new Point(nearAdjacentHeaderWidth, ActualHeight);
-            //    header = templatedParent.StartDate.AddDays(dayOffset + 2).ToString(ShortDateFormat);
-            //    drawingContext.DrawLine(new Pen(templatedParent.TimeLineColor, HeaderLineThickness), startPoint, endPoint);
-            //    drawingContext.DrawText(this, header, endPoint.X + DateHeaderOffset, averageHeight);
-            //}
-
-            //header = templatedParent.StartDate.AddDays(dayOffset).ToString(ShortDateFormat);
-            //drawingContext.PushClip(requiredHeaderWidth, ActualHeight);
-            //drawingContext.DrawText(this, header, DateHeaderOffset, averageHeight);
-            //drawingContext.Pop();
-            //drawingContext.Close();
         }
 
         private void RemoveHandlers() => parent.ScrollChanged -= ScrollViewerScrollChanged;
