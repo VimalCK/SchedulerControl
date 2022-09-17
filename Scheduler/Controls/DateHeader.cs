@@ -1,5 +1,6 @@
 ﻿using Scheduler.Common;
 using System;
+using System.Diagnostics;
 using System.Security.Cryptography.Xml;
 using System.Windows;
 using System.Windows.Controls;
@@ -30,7 +31,6 @@ namespace Scheduler
             parent.ScrollChanged += ScrollViewerScrollChanged;
         }
 
-        internal void Render() => this.InvalidateVisual();
         protected override void OnRender(DrawingContext drawingContext)
         {
             if (parent is null || ActualWidth == Zero)
@@ -45,21 +45,31 @@ namespace Scheduler
             RenderContent(parent.HorizontalOffset);
         }
 
+        internal void Render() => this.InvalidateVisual();
+
         private void RenderContent(double horizontalOffset = default)
         {
             var numberOfHeaders = 1;
             var difference = default(double);
+            var timelineZoomWidth = parent.TestSize.Width;
             var numberOfHeadersScrolled = (int)(horizontalOffset / parent.TestSize.Width);
             if (parent.TimeLineZoom.Equals(TimeLineZoom.FortyEight))
             {
                 numberOfHeaders = 2;
                 difference = parent.TestSize.Width;
+                timelineZoomWidth = parent.ViewPortArea.Width;
             }
 
             if (horizontalOffset is not Zero)
             {
                 numberOfHeaders++;
-                difference = parent.ViewPortArea.Width - (horizontalOffset % parent.TestSize.Width);
+                difference = timelineZoomWidth - (horizontalOffset % parent.TestSize.Width);
+                Debug.WriteLine(horizontalOffset - (parent.TestSize.Width * numberOfHeadersScrolled));
+                //parent.TimeLineZoom.Equals(TimeLineZoom.Twelve) && horizontalOffset - (parent.ViewPortArea.Width * numberOfHeadersScrolled) <= parent.ViewPortArea.Width
+                if (difference >= parent.ViewPortArea.Width)
+                {
+                    return;
+                }
             }
 
             var startPoint = new Point(difference, 0);
