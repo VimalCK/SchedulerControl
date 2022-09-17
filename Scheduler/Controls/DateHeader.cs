@@ -65,14 +65,13 @@ namespace Scheduler
                 numberOfHeaders++;
                 difference = timelineZoomWidth - (horizontalOffset % parent.TestSize.Width);
                 Debug.WriteLine(horizontalOffset - (parent.TestSize.Width * numberOfHeadersScrolled));
-                //parent.TimeLineZoom.Equals(TimeLineZoom.Twelve) && horizontalOffset - (parent.ViewPortArea.Width * numberOfHeadersScrolled) <= parent.ViewPortArea.Width
-                if (difference >= parent.ViewPortArea.Width)
+                if (difference > timelineZoomWidth)
                 {
                     return;
                 }
             }
 
-            var startPoint = new Point(difference, 0);
+            var startPoint = new Point(difference, Zero);
             var endPoint = new Point(difference, ActualHeight);
             var drawingContext = backingStore.Open();
 
