@@ -1,40 +1,45 @@
 ﻿using System;
 using System.Windows.Media;
+using static Scheduler.Common.Values;
 
 namespace Scheduler
 {
     internal sealed class RulerGrid : RulerBase
     {
-        private DrawingGroup backingStore = new();
+        private ScheduleControl parent;
+        private readonly DrawingGroup backingStore = new();
 
         public RulerGrid() => DefaultStyleKey = typeof(RulerGrid);
 
+        protected override void OnInitialized(EventArgs e)
+        {
+            base.OnInitialized(e);
+            parent = TemplatedParent as ScheduleControl;
+        }
         protected override void OnRender(DrawingContext drawingContext)
         {
-            if (TemplatedParent is ScheduleControl control && control.ActualWidth > 0)
+            if (parent is null || ActualWidth.Equals(Zero))
             {
-                Render();
-                drawingContext.DrawDrawing(backingStore);
+                return;
             }
+
+            Render();
+            drawingContext.DrawDrawing(backingStore);
         }
 
         protected internal override void Render()
         {
-            if (TemplatedParent is ScheduleControl control && control.ActualWidth > 0)
+            VerticalLines = 24 * parent.ViewRange;
+            if (VerticalLines > 0)
             {
-                VerticalLines = 24 * control.ViewRange;
-                if (VerticalLines > 0)
-                {
-                    var drawingContext = backingStore.Open();
-                    HorizontalGap = (int)control.ExtendedMode;
-                    HorizontalLines = (int)Math.Round(control.RequiredViewPortArea.Height / HorizontalGap);
-                    VerticalGap = control.ViewPortArea.Width / (int)control.TimeLineZoom;
-                    RulerColor = control.TimeLineColor;
-                    base.OnRender(drawingContext);
-                    drawingContext.Close();
-                }
+                var drawingContext = backingStore.Open();
+                HorizontalGap = (int)parent.ExtendedMode;
+                HorizontalLines = (int)Math.Round(parent.RequiredViewPortArea.Height / HorizontalGap);
+                VerticalGap = parent.ViewPortArea.Width / (int)parent.TimeLineZoom;
+                RulerColor = parent.TimeLineColor;
+                base.OnRender(drawingContext);
+                drawingContext.Close();
             }
-
         }
     }
 }

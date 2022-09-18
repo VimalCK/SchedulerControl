@@ -9,7 +9,7 @@ namespace Scheduler
     internal sealed class TimeLineHeader : FrameworkElement
     {
         private ScheduleControl parent;
-        private DrawingGroup backingStore = new();
+        private readonly DrawingGroup backingStore = new();
 
         public TimeLineHeader() => DefaultStyleKey = typeof(TimeLineHeader);
 

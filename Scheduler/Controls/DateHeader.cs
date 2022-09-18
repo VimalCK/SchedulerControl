@@ -12,8 +12,8 @@ namespace Scheduler
     internal sealed class DateHeader : FrameworkElement
     {
         private double averageHeight;
-        private DrawingGroup backingStore;
         private ScheduleControl parent;
+        private readonly DrawingGroup backingStore;
 
         public DateHeader()
         {

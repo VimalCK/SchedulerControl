@@ -393,9 +393,6 @@ namespace Scheduler
             GetScrollbarSize();
             FindAppointmentRenderingCanvas();
             InvalidateChildControlsArea();
-
-            (GetTemplateChild("PART_HeaderSectionRightGapMask") as Border).Width = scrollBarSpace;
-            (GetTemplateChild("PART_HeaderSectionBottomGapMask") as Border).Height = scrollBarSpace;
         }
 
         private void SyncAppointmentsInAppointmentsStore(IEnumerable<Appointment> appointments)
