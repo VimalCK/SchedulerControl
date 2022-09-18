@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Media;
 using Scheduler.Common;
@@ -9,8 +8,6 @@ namespace Scheduler
 {
     internal sealed class TimeLineHeader : FrameworkElement
     {
-        private double widthOfHour;
-        private double averageHeight;
         private ScheduleControl parent;
         private DrawingGroup backingStore = new();
 
@@ -25,14 +22,6 @@ namespace Scheduler
             parent.ScrollChanged += ParentScrollChanged;
         }
 
-        private void ParentScrollChanged(object sender, System.Windows.Controls.ScrollChangedEventArgs e)
-        {
-            if (e.HorizontalChange is not Zero)
-            {
-                RenderContent(e.HorizontalOffset);
-            }
-        }
-
         protected override void OnRender(DrawingContext drawingContext)
         {
             if (parent is null || ActualWidth is Zero)
@@ -40,53 +29,42 @@ namespace Scheduler
                 return;
             }
 
-            widthOfHour = parent.TestSize.Width / 24;
-            averageHeight = ActualHeight / 3;
             drawingContext.DrawBorder(this, parent.TimeLineColor, BorderThickness);
             drawingContext.DrawDrawing(backingStore);
 
             RenderContent();
         }
 
-        private void RenderContent(double horizontalOffset = 0)
+        internal void RenderContent(double horizontalOffset = 0)
         {
-            var hoursScrolled = horizontalOffset / widthOfHour;
-            var remainingWidthToScroll = (((int)hoursScrolled + 1) * widthOfHour) - horizontalOffset;
-            var lineStartPoint = new Point(remainingWidthToScroll, 0);
-            var lineEndPoint = new Point(remainingWidthToScroll, ActualHeight);
-            var drawingContext = backingStore.Open();
+            var averageHeight = this.ActualHeight / 3;
+            var timelineGapWidth = parent.TestSize.Width / 24;
+            var coulmnScrolled = (int)(horizontalOffset / timelineGapWidth);
+            var difference = horizontalOffset - (timelineGapWidth * coulmnScrolled);
+            var startLinePoint = new Point(timelineGapWidth - difference, 0);
+            var endLinePoint = new Point(startLinePoint.X, ActualHeight);
+            var clipwidth = Math.Max(0, timelineGapWidth - difference - TimeHeaderOffset);
 
-            DrawTimeline(drawingContext, ref lineStartPoint, ref lineEndPoint, (int)hoursScrolled);
-            drawingContext.DrawLine(new Pen(parent.TimeLineColor, HeaderLineThickness), lineStartPoint, lineEndPoint);
-
-            if (parent.TimeLineZoom.Equals(TimeLineZoom.FortyEight))
+            using var drawingContext = backingStore.Open();
+            while (startLinePoint.X - timelineGapWidth < parent.ViewPortArea.Width)
             {
-                lineStartPoint.X += widthOfHour;
-                lineEndPoint.X += widthOfHour;
-                DrawTimeline(drawingContext, ref lineStartPoint, ref lineEndPoint);
-                drawingContext.DrawLine(new Pen(parent.TimeLineColor, HeaderLineThickness), lineStartPoint, lineEndPoint);
+                var header = TimeSpan.FromHours(coulmnScrolled++);
+                var timelineColor = header.Hours.Equals(TwentyThree) ? HeaderLineThickness : NarrowThickness;
+                drawingContext.DrawLine(new Pen(parent.TimeLineColor, timelineColor), startLinePoint, endLinePoint);
+                drawingContext.PushClip(clipwidth, ActualHeight);
+                drawingContext.DrawText(this, header.ToString(TimeFormat), startLinePoint.X - timelineGapWidth + TimeHeaderOffset, averageHeight);
+                startLinePoint.X += timelineGapWidth;
+                endLinePoint.X = startLinePoint.X;
+                clipwidth += timelineGapWidth;
+                drawingContext.Pop();
             }
-
-            drawingContext.Close();
         }
 
-        private void DrawTimeline(DrawingContext drawingContext,
-            ref Point lineStartPoint,
-            ref Point lineEndPoint,
-            int startFrom = default)
+        private void ParentScrollChanged(object sender, System.Windows.Controls.ScrollChangedEventArgs e)
         {
-            //var clipWidth = Math.Max(0, lineStartPoint.X + timeLineGap - 3);
-            for (int timeColumn = startFrom; timeColumn < 23; timeColumn++)
+            if (e.HorizontalChange is not Zero)
             {
-                var formattedTime = TimeSpan.FromHours(timeColumn).ToString(TimeFormat);
-
-                //drawingContext.PushClip(clipWidth, ActualHeight);
-                // drawingContext.DrawText(this, formattedTime, lineStartPoint.X + TimeHeaderOffset, averageHeight);
-                drawingContext.DrawLine(new Pen(parent.TimeLineColor, NarrowThickness), lineStartPoint, lineEndPoint);
-                //drawingContext.Pop();
-                lineStartPoint.X += widthOfHour;
-                lineEndPoint.X = lineStartPoint.X;
-                //clipWidth += timeLineGap;
+                RenderContent(e.HorizontalOffset);
             }
         }
     }

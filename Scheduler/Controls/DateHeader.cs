@@ -64,7 +64,6 @@ namespace Scheduler
             {
                 numberOfHeaders++;
                 difference = timelineZoomWidth - (horizontalOffset % parent.TestSize.Width);
-                Debug.WriteLine(horizontalOffset - (parent.TestSize.Width * numberOfHeadersScrolled));
                 if (difference > timelineZoomWidth)
                 {
                     return;
@@ -73,8 +72,8 @@ namespace Scheduler
 
             var startPoint = new Point(difference, Zero);
             var endPoint = new Point(difference, ActualHeight);
-            var drawingContext = backingStore.Open();
-
+           
+            using var drawingContext = backingStore.Open();
             for (int day = numberOfHeaders; day > Zero;)
             {
                 var header = parent.StartDate.AddDays(numberOfHeadersScrolled + --day).ToString(ShortDateFormat);
@@ -86,7 +85,6 @@ namespace Scheduler
             }
 
             drawingContext.Pop();
-            drawingContext.Close();
         }
 
         private void RemoveHandlers() => parent.ScrollChanged -= ScrollViewerScrollChanged;
