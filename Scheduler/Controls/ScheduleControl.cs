@@ -299,7 +299,6 @@ namespace Scheduler
             var control = (ScheduleControl)d;
             if (control.IsLoaded && control.InvalidateChildControlsArea())
             {
-                control.rulerGrid.Render();
                 control.appointmentRenderingCanvas.MeasureHeight(control.VisibleAppointments);
             }
         }
@@ -351,7 +350,7 @@ namespace Scheduler
             var control = (ScheduleControl)d;
             if (control.IsLoaded)
             {
-                control.rulerGrid.Render();
+                //control.rulerGrid.Render();
                 //control.timeLineHeader.Render();
                 control.dateHeader.Render();
             }

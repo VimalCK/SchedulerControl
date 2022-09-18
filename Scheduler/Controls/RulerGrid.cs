@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Windows;
 using System.Windows.Media;
 using static Scheduler.Common.Values;
 
 namespace Scheduler
 {
-    internal sealed class RulerGrid : RulerBase
+    internal sealed class RulerGrid : FrameworkElement
     {
         private ScheduleControl parent;
         private readonly DrawingGroup backingStore = new();
@@ -27,18 +28,34 @@ namespace Scheduler
             drawingContext.DrawDrawing(backingStore);
         }
 
-        protected internal override void Render()
+        internal void Render()
         {
-            VerticalLines = 24 * parent.ViewRange;
-            if (VerticalLines > 0)
+            var gap = (double)parent.ExtendedMode;
+            var startPoint = new Point(0, gap);
+            var endPoint = new Point(ActualWidth, gap);
+            var pen = new Pen(parent.TimeLineColor, .5);
+            var numberOfLinesRequired = parent.ViewPortArea.Width / (int)parent.ExtendedMode;
+
+            using var drawingContext = backingStore.Open();
+            while (numberOfLinesRequired > 0)
             {
-                var drawingContext = backingStore.Open();
-                HorizontalGap = (int)parent.ExtendedMode;
-                HorizontalLines = (int)Math.Round(parent.RequiredViewPortArea.Height / HorizontalGap);
-                VerticalGap = parent.ViewPortArea.Width / (int)parent.TimeLineZoom;
-                RulerColor = parent.TimeLineColor;
-                base.OnRender(drawingContext);
-                drawingContext.Close();
+                drawingContext.DrawLine(pen, startPoint, endPoint);
+                startPoint.Y += gap;
+                endPoint.Y = startPoint.Y;
+                numberOfLinesRequired--;
+            }
+
+            gap = parent.TestSize.Width / 24;
+            startPoint = new Point(gap, 0);
+            endPoint = new Point(gap, ActualHeight);
+            numberOfLinesRequired = parent.ViewPortArea.Width / gap;
+
+            while (numberOfLinesRequired > 0)
+            {
+                drawingContext.DrawLine(pen, startPoint, endPoint);
+                startPoint.X += gap;
+                endPoint.X = startPoint.X;
+                numberOfLinesRequired--;
             }
         }
     }
