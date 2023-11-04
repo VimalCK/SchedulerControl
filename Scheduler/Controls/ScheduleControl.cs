@@ -350,8 +350,8 @@ namespace Scheduler
             var control = (ScheduleControl)d;
             if (control.IsLoaded)
             {
-                //control.rulerGrid.Render();
-                //control.timeLineHeader.Render();
+                control.rulerGrid.Render();
+                control.timeLineHeader.Render();
                 control.dateHeader.Render();
             }
         }

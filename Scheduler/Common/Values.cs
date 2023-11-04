@@ -11,8 +11,7 @@ namespace Scheduler.Common
         public const double DateHeaderOffset = 5;
         public const double TimeHeaderOffset = 2;
         public const double BorderThickness = 1;
-        public const double HeaderLineThickness = 1.5;
-        public const double NarrowThickness = .5;
+        public const double HeaderLineThickness = 1;
 
         public const int Zero = 0;
         public const int TwentyThree = 23;

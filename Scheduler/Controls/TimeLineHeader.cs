@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Windows;
-using System.Windows.Media;
 using Scheduler.Common;
+using System.Windows.Media;
 using static Scheduler.Common.Values;
 
 namespace Scheduler
 {
     internal sealed class TimeLineHeader : FrameworkElement
     {
-        private ScheduleControl parent;
         private readonly DrawingGroup backingStore = new();
+        private ScheduleControl parent;
 
         public TimeLineHeader() => DefaultStyleKey = typeof(TimeLineHeader);
 
@@ -29,11 +29,13 @@ namespace Scheduler
                 return;
             }
 
-            drawingContext.DrawBorder(this, parent.TimeLineColor, BorderThickness);
+            drawingContext.DrawBorder(this, parent.TimeLineColor, new Thickness(BorderThickness));
             drawingContext.DrawDrawing(backingStore);
 
             RenderContent();
         }
+
+        internal void Render() => this.InvalidateVisual();
 
         internal void RenderContent(double horizontalOffset = 0)
         {
@@ -49,8 +51,7 @@ namespace Scheduler
             while (startLinePoint.X - timelineGapWidth < parent.ViewPortArea.Width)
             {
                 var header = TimeSpan.FromHours(coulmnScrolled++);
-                var timelineColor = header.Hours.Equals(TwentyThree) ? HeaderLineThickness : NarrowThickness;
-                drawingContext.DrawLine(new Pen(parent.TimeLineColor, timelineColor), startLinePoint, endLinePoint);
+                drawingContext.DrawLine(new Pen(parent.TimeLineColor, HeaderLineThickness), startLinePoint, endLinePoint);
                 drawingContext.PushClip(clipwidth, ActualHeight);
                 drawingContext.DrawText(this, header.ToString(TimeFormat), startLinePoint.X - timelineGapWidth + TimeHeaderOffset, averageHeight);
                 startLinePoint.X += timelineGapWidth;

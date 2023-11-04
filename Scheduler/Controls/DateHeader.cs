@@ -1,19 +1,17 @@
-﻿using Scheduler.Common;
-using System;
-using System.Diagnostics;
-using System.Security.Cryptography.Xml;
+﻿using System;
 using System.Windows;
-using System.Windows.Controls;
+using Scheduler.Common;
 using System.Windows.Media;
+using System.Windows.Controls;
 using static Scheduler.Common.Values;
 
 namespace Scheduler
 {
     internal sealed class DateHeader : FrameworkElement
     {
+        private readonly DrawingGroup backingStore;
         private double averageHeight;
         private ScheduleControl parent;
-        private readonly DrawingGroup backingStore;
 
         public DateHeader()
         {
@@ -39,7 +37,7 @@ namespace Scheduler
             }
 
             averageHeight = ActualHeight / 3;
-            drawingContext.DrawBorder(this, parent.TimeLineColor, BorderThickness);
+            drawingContext.DrawBorder(this, parent.TimeLineColor, new Thickness(BorderThickness) { Bottom = 0 });
             drawingContext.DrawDrawing(backingStore);
 
             RenderContent(parent.HorizontalOffset);
@@ -72,7 +70,7 @@ namespace Scheduler
 
             var startPoint = new Point(difference, Zero);
             var endPoint = new Point(difference, ActualHeight);
-           
+
             using var drawingContext = backingStore.Open();
             for (int day = numberOfHeaders; day > Zero;)
             {
@@ -88,7 +86,15 @@ namespace Scheduler
         }
 
         private void RemoveHandlers() => parent.ScrollChanged -= ScrollViewerScrollChanged;
+
         private void DateHeaderLoaded(object sender, RoutedEventArgs e) => Loaded -= DateHeaderLoaded;
-        private void ScrollViewerScrollChanged(object sender, ScrollChangedEventArgs e) => RenderContent(e.HorizontalOffset);
+
+        private void ScrollViewerScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            if (e.HorizontalChange is not Zero)
+            {
+                RenderContent(e.HorizontalOffset);
+            }
+        }
     }
 }

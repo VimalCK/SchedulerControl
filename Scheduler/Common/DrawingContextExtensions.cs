@@ -7,13 +7,12 @@ namespace Scheduler.Common
 {
     public static class DrawingContextExtensions
     {
-        public static void DrawBorder(this DrawingContext drawingContext, FrameworkElement visual, Brush brush, double thickness = .5)
+        public static void DrawBorder(this DrawingContext drawingContext, FrameworkElement visual, Brush brush, Thickness thickness)
         {
-            var pen = new Pen(brush, thickness);
-            drawingContext.DrawLine(pen, new Point(), new Point(visual.ActualWidth, Zero));
-            drawingContext.DrawLine(pen, new Point(), new Point(Zero, visual.ActualHeight));
-            drawingContext.DrawLine(pen, new Point(visual.ActualWidth, Zero), new Point(visual.ActualWidth, visual.ActualHeight));
-            drawingContext.DrawLine(pen, new Point(Zero, visual.ActualHeight), new Point(visual.ActualWidth, visual.ActualHeight));
+            drawingContext.DrawLine(new Pen(brush, thickness.Left), new Point(), new Point(Zero, visual.ActualHeight));
+            drawingContext.DrawLine(new Pen(brush, thickness.Top), new Point(), new Point(visual.ActualWidth, Zero));
+            drawingContext.DrawLine(new Pen(brush, thickness.Right), new Point(visual.ActualWidth, Zero), new Point(visual.ActualWidth, visual.ActualHeight));
+            drawingContext.DrawLine(new Pen(brush, thickness.Bottom), new Point(Zero, visual.ActualHeight), new Point(visual.ActualWidth, visual.ActualHeight));
         }
 
         public static void DrawText(this DrawingContext drawingContext, Visual visual, string text, double x, double y)
