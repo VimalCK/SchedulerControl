@@ -2,7 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:Scheduler">
     <Style TargetType="local:AppointmentItem">
-        <Setter Property="SnapsToDevicePixels"
+        <Setter Property="UseLayoutRounding"
                 Value="True" />
         <Setter Property="Background"
                 Value="Green" />
@@ -35,7 +35,7 @@
 
     <Style x:Key="GroupHeaderStyle"
            TargetType="ListBox">
-        <Setter Property="SnapsToDevicePixels"
+        <Setter Property="UseLayoutRounding"
                 Value="True" />
         <Setter Property="Margin"
                 Value="0,-1,0,0" />
@@ -74,8 +74,8 @@
                     </Setter>
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding RelativeSource={RelativeSource 
-                            AncestorType=local:ScheduleControl},
-                            Path=GroupHeaderContentTemplate}"
+                                                       AncestorType=local:ScheduleControl},
+                                                       Path=GroupHeaderContentTemplate}"
                                      Value="{x:Null}">
                             <Setter Property="ContentTemplate">
                                 <Setter.Value>
@@ -96,7 +96,7 @@
 
     <Style x:Key="ScheduleGridStyle"
            TargetType="Grid">
-        <Setter Property="SnapsToDevicePixels"
+        <Setter Property="UseLayoutRounding"
                 Value="True" />
         <Setter Property="VerticalAlignment"
                 Value="Top" />
@@ -105,14 +105,14 @@
     </Style>
 
     <Style TargetType="{x:Type local:DateHeader}">
-        <Setter Property="SnapsToDevicePixels"
+        <Setter Property="UseLayoutRounding"
                 Value="True" />
         <Setter Property="ClipToBounds"
                 Value="True" />
     </Style>
 
     <Style TargetType="{x:Type local:ContentTransformLabel}">
-        <Setter Property="SnapsToDevicePixels"
+        <Setter Property="UseLayoutRounding"
                 Value="True" />
         <Setter Property="BorderThickness"
                 Value="1" />
@@ -125,7 +125,7 @@
     </Style>
 
     <Style TargetType="{x:Type local:TimeLineHeader}">
-        <Setter Property="SnapsToDevicePixels"
+        <Setter Property="UseLayoutRounding"
                 Value="True" />
         <Setter Property="ClipToBounds"
                 Value="True" />
@@ -134,17 +134,12 @@
     <Style TargetType="{x:Type local:RulerGrid}">
         <Setter Property="SnapsToDevicePixels"
                 Value="True" />
-    </Style>
-
-    <Style TargetType="{x:Type local:TimeRulerPanel}">
-        <Setter Property="SnapsToDevicePixels"
+        <Setter Property="UseLayoutRounding"
                 Value="True" />
-        <Setter Property="IsHitTestVisible"
-                Value="False" />
     </Style>
 
     <Style TargetType="{x:Type local:AppointmentContainer}">
-        <Setter Property="SnapsToDevicePixels"
+        <Setter Property="UseLayoutRounding"
                 Value="True" />
         <Setter Property="Background"
                 Value="Transparent" />
@@ -212,7 +207,6 @@
                                                             ItemsSource="{Binding RelativeSource={RelativeSource 
                                                                                   Mode=TemplatedParent}, 
                                                                                   Path=AppointmentSource}" />
-                                <local:TimeRulerPanel x:Name="PART_TimeRulerPanel" />
                             </Grid>
                         </ScrollViewer>
                     </Grid>

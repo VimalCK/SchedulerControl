@@ -5,6 +5,9 @@ using System.Windows.Media;
 
 namespace Scheduler
 {
+    /// <summary>
+    /// Represent Ruler line
+    /// </summary>
     public readonly struct TimeRuler
     {
         private readonly TimeSpan times;

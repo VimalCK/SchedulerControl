@@ -17,7 +17,6 @@ namespace Scheduler
     [TemplatePart(Name = "PART_RulerGrid", Type = typeof(RulerGrid))]
     [TemplatePart(Name = "PART_ScrollViewer", Type = typeof(ScrollViewer))]
     [TemplatePart(Name = "PART_DateHeader", Type = typeof(DateHeader))]
-    [TemplatePart(Name = "PART_TimeRulerPanel", Type = typeof(TimeRulerPanel))]
     [TemplatePart(Name = "PART_TimeLineHeader", Type = typeof(TimeLineHeader))]
     [TemplatePart(Name = "PART_GroupContainer", Type = typeof(ListBox))]
     [TemplatePart(Name = "PART_HeaderSection", Type = typeof(Grid))]
@@ -35,15 +34,12 @@ namespace Scheduler
         private Grid contentSection;
         private RulerGrid rulerGrid;
         private DateHeader dateHeader;
-        private TimeRulerPanel timerulerPanel;
         private TimeLineHeader timeLineHeader;
         private ScrollViewer schedulerScrollViewer;
         private ScrollViewer groupContainerScrollViewer;
         private Grid headerSection;
         private AppointmentRenderingCanvas appointmentRenderingCanvas;
         private ListBox appointmentContainer;
-
-
 
         public static readonly DependencyProperty TimeLineColorProperty = DependencyProperty.Register(
             "TimeLineColor", typeof(Brush), typeof(ScheduleControl), new FrameworkPropertyMetadata(OnTimeLineColorChanged,
@@ -157,8 +153,8 @@ namespace Scheduler
         public double HorizontalOffset => schedulerScrollViewer.HorizontalOffset;
         public Size ViewPortArea => viewPortArea;
         public Size RequiredViewPortArea => requiredViewPortArea;
-
         private IEnumerable<Appointment> VisibleAppointments => AppointmentSource?.Where(a => a.IsVisible);
+        
         public ScheduleControl()
         {
             DefaultStyleKey = typeof(ScheduleControl);
@@ -175,7 +171,6 @@ namespace Scheduler
             rulerGrid = GetTemplateChild("PART_RulerGrid") as RulerGrid;
             schedulerScrollViewer = GetTemplateChild("PART_ScrollViewer") as ScrollViewer;
             dateHeader = GetTemplateChild("PART_DateHeader") as DateHeader;
-            timerulerPanel = GetTemplateChild("PART_TimeRulerPanel") as TimeRulerPanel;
             timeLineHeader = GetTemplateChild("PART_TimeLineHeader") as TimeLineHeader;
             groupByContainer = GetTemplateChild("PART_GroupContainer") as ListBox;
             headerSection = GetTemplateChild("PART_HeaderSection") as Grid;
@@ -299,17 +294,18 @@ namespace Scheduler
             var control = (ScheduleControl)d;
             if (control.IsLoaded && control.InvalidateChildControlsArea())
             {
-                control.appointmentRenderingCanvas.MeasureHeight(control.VisibleAppointments);
+                //control.appointmentRenderingCanvas.MeasureHeight(control.VisibleAppointments);
             }
         }
 
         private static void OnTimeLineZoomChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ScheduleControl)d;
-            if (control.IsLoaded)
+            if (control.IsLoaded && control.InvalidateChildControlsArea())
             {
-                control.InvalidateChildControlsArea();
-                control.appointmentRenderingCanvas.MeasureWidth(control.VisibleAppointments);
+                control.dateHeader.Render();
+                control.timeLineHeader.Render();
+               // control.appointmentRenderingCanvas.MeasureWidth(control.VisibleAppointments);
             }
         }
 
@@ -339,11 +335,11 @@ namespace Scheduler
                     newCollection.CollectionChanged += control.TimeLineProvidersCollectionChanged;
                 }
 
-                control.timerulerPanel.Render();
+                control.rulerGrid.Render();
             }
         }
 
-        private void TimeLineProvidersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) => timerulerPanel?.Render();
+        private void TimeLineProvidersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) => rulerGrid.Render();
 
         private static void OnTimeLineColorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {

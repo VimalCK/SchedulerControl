@@ -7,6 +7,9 @@ using static Scheduler.Common.Values;
 
 namespace Scheduler
 {
+    /// <summary>
+    /// DateHeader is responsible to draw dates on top of the schedule control. 
+    /// </summary>
     internal sealed class DateHeader : FrameworkElement
     {
         private readonly DrawingGroup backingStore;
@@ -45,6 +48,11 @@ namespace Scheduler
 
         internal void Render() => this.InvalidateVisual();
 
+        /// <summary>
+        /// Rendering the Number of dates to show. DateHeader draws first date on the left most side 
+        /// and adjust remining content based on scrolling position
+        /// </summary>
+        /// <param name="horizontalOffset"></param>
         private void RenderContent(double horizontalOffset = default)
         {
             var numberOfHeaders = 1;
@@ -83,12 +91,18 @@ namespace Scheduler
             }
 
             drawingContext.Pop();
+            drawingContext.Close();
         }
 
         private void RemoveHandlers() => parent.ScrollChanged -= ScrollViewerScrollChanged;
 
         private void DateHeaderLoaded(object sender, RoutedEventArgs e) => Loaded -= DateHeaderLoaded;
 
+        /// <summary>
+        /// Redraw the control while schedule control is scrolled
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ScrollViewerScrollChanged(object sender, ScrollChangedEventArgs e)
         {
             if (e.HorizontalChange is not Zero)
